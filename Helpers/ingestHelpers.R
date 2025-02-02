@@ -1,0 +1,342 @@
+library(readxl)
+library(R6)
+
+
+dbElement <- R6Class("dbElement", 
+                     
+                     public <- list(
+                       row=NULL,
+                       col=NULL,
+                       type=NULL,
+                       val=NULL,
+                       dbTable=NULL,
+                       dbField=NULL,
+                       getInfo = function()
+                       {
+                         
+                       },
+                       initialize = function(row = NA, col=NA, type=NA, val=NA, dbTable=NA, dbField=NA ) {
+                         self$row <- row
+                         self$col <- col
+                         self$type <- type
+                         self$val <- val
+                         self$dbTable <- dbTable
+                         self$dbField <- dbField
+                       }
+                     )
+)
+
+
+get_IngestHelpers <- function()
+{
+  H <- list()
+  
+  
+  tnames <- c('HORIZONS', 'COLOURS', 'MOTTLES', 'COARSE_FRAGS', 'STRUCTURES', 'SEGREGATIONS', 'STRENGTHS', 'CUTANS', 'PANS', 'ROOTS', 'PHS')
+  tfids  <- c('h_no', 'col_no', 'mott_no', 'cf_no', 'str_no', 'seg_no', 'strg_no', 'cutan_no', 'pan_no', 'root_no', 'ph_no')
+  tkeys <- data.frame(tableName=tnames, fid=tfids)
+  
+  H$ImportKeys <- tkeys
+
+      H$getExcelFormInfo <- function(fname=NULL){
+        
+        dbFlds <<- as.data.frame(suppressMessages(read_excel(fname, sheet = 'DBInfo', col_names = F)))
+        
+        odf<- data.frame()
+        iflds <- c('S#', 'H#', 'K#')
+        for (i in 1:nrow(dbFlds)) {
+          for (j in 1:ncol(dbFlds)) {
+            v <- dbFlds[i,j]
+            
+            if(!is.na(v)){
+              s <- str_sub(v, 1,2)
+              if(s %in% iflds){
+                bits <- str_split(v, '#')
+                rdf <- data.frame(row=i, col=j, formRegion=bits[[1]][1], tableName=bits[[1]][2], dbFld=bits[[1]][3], recNum=bits[[1]][4], recSubNum=bits[[1]][5], required=bits[[1]][6])
+                odf <- rbind(odf, rdf)
+              }
+            }
+          }
+        }
+        return(odf)
+      }
+
+
+      H$makeSQLFromForm <- function(sheet, formRegion, tableName){
+        
+        recs <- excelInfo[excelInfo$formRegion==formRegion & excelInfo$tableName==tableName,]
+        keys <- excelInfo[excelInfo$formRegion=='K',]
+        tabLev <- tableLevels[tableLevels$Table==tableName, ]$Level
+        
+       
+        
+        if(tabLev==1){
+          keyRows <- keys[c(1:3),]
+        }else if(tabLev==2){
+          keyRows <- keys[c(1:4),]
+        }
+        
+        recs <- rbind(keyRows, recs)
+        
+        elements <- vector(mode='list', length = nrow(recs))
+        
+        for (i in 1:nrow(recs)) {
+          formRec <- recs[i,]
+          e <- OS$IngestHelpers$makeDBElement(formRec=formRec, dataSheet = sheet)
+          elements[[i]] <- e
+        }
+        
+        #### Hack to get obs date from Site date
+        if(str_to_upper(tableName)=='OBSERVATIONS'){
+          ObsDate=sheet[9,2]
+          de <- dbElement$new(row=8, col=2, type='TEXT', val = ObsDate, dbTable = tableName, dbField = 'o_date_desc')
+          elements[[nrow(recs)+1]] <- de
+        }
+        
+        
+        elements <- elements[!unlist(lapply(elements,is.null))]
+        
+        if(length(elements) > 0){
+          sql <- OS$IngestHelpers$makeSQL(tableName, elements)
+          return(sql)
+        }else{
+          return(NULL)
+        }
+      }
+      
+      
+      H$makeHorizonsSQLFromForm <- function(sheet, formRegion, tableName, horizonNum, subrecNum){
+        
+        recs <- excelInfo[excelInfo$formRegion==formRegion & excelInfo$tableName==tableName & excelInfo$recNum==horizonNum & excelInfo$recSubNum==subrecNum,]
+        keys <- excelInfo[excelInfo$formRegion=='K',]
+        tabLev <- tableLevels[tableLevels$Table==tableName, ]$Level
+        
+        
+        
+        if(tabLev==1){
+          keyRows <- keys[c(1:3),]
+        }else if(tabLev==2){
+          keyRows <- keys[c(1:4),]
+        }else if(tabLev==3){
+          keyRows <- keys[c(1:4),]
+          fn <- OS$IngestHelpers$ImportKeys[OS$IngestHelpers$ImportKeys$tableName==tableName,]$fid
+          keyRows[nrow(keyRows)+1,] <- c(row=-1, col=0, formRegion='H',tableName=tableName, dbFld=fn, recNum=horizonNum, recSubNum=subrecNum, required='')
+        }else if(tabLev==4){
+          keyRows <- keys[c(1:4),]
+          fn1 <- OS$IngestHelpers$ImportKeys[OS$IngestHelpers$ImportKeys$tableName=='HORIZONS',]$fid
+          keyRows[nrow(keyRows)+1,] <- c(row=-1, col=0, formRegion='H',tableName='HORIZONS', dbFld=fn1, recNum=horizonNum, recSubNum=subrecNum, required='')
+          fn2 <- OS$IngestHelpers$ImportKeys[OS$IngestHelpers$ImportKeys$tableName==tableName,]$fid
+          keyRows[nrow(keyRows)+1,] <- c(row=-2, col=0, formRegion='H',tableName=tableName, dbFld=fn2, recNum=horizonNum, recSubNum=subrecNum, required='')
+        }
+        
+        recs <- rbind(keyRows, recs)
+        
+        elements <- vector(mode='list', length = nrow(recs))
+        
+        for (i in 1:nrow(recs)) {
+          formRec <- recs[i,]
+          e <- OS$IngestHelpers$makeDBElement(formRec=formRec, dataSheet = sheet)
+          elements[[i]] <- e
+        }
+        
+        elements <- elements[!unlist(lapply(elements,is.null))]
+        if(length(elements) > nrow(keyRows)){
+        #if(length(elements) > 0){
+          sql <- OS$IngestHelpers$makeSQL(tableName, elements)
+          return(sql)
+        }else{
+          return(NULL)
+        }
+      }
+      
+      
+      
+      
+      
+      H$makeDBElement <- function(formRec=NA, dataSheet){
+        
+        row <- as.numeric(formRec$row)
+        col <- as.numeric(formRec$col)
+        if(row== -1){
+          val=formRec$recNum
+        }else if(row== -2){
+          val=formRec$recSubNum
+        }else{
+          val <- dataSheet[row, col]
+        }
+        
+        
+        if(!is.na(val)){
+      
+            Table <- formRec$tableName
+            dbFld<- formRec$dbFld
+          
+            type <- dbInfo[str_to_lower(dbInfo$Table) == str_to_lower(Table) & 
+                             str_to_lower(dbInfo$Field) == str_to_lower(dbFld),]$Type
+            if(str_detect(formRec$dbFld, 'depth')){
+              val <- as.numeric(val)/100
+            }
+            de <- dbElement$new(row=row, col=col, type=type, val = val, dbTable = Table, dbField = dbFld)
+            
+          return(de)
+        }else{
+            return(NULL)
+        }
+      }
+      
+      
+      
+      
+      H$makeSQL <- function(tableName, elements, hNum=NULL, subhNum=NULL ){
+        
+        sqlFlds <- elements
+        
+        tf = paste0("INSERT into ", tableName, " ( ")
+        tv = " VALUES ("
+        
+        for (k in 1:length(sqlFlds)) {
+
+          e <- sqlFlds[[k]]
+          f <- e$dbField
+          v <- e$val
+          
+            tf <- paste0(tf, " ",  f, ",")
+            type <- e$type
+              
+              if(type=='TEXT'){
+              tv <- paste0(tv, " '", v, "',")
+            }else{
+              tv <- paste0(tv, " ", v, ",")
+            }
+        }
+        
+        if(!is.null(hNum)){
+          
+        }
+        
+        ### Some hacks to match DB schema rules
+        if(str_to_upper(tableName)=='SITES'){
+          tf <- paste0(tf, " s_trans_date")
+          tv <- paste0(tv, " '10000101'")
+        }
+        
+        
+        tv <- trimws(tv, whitespace = ",")
+        tf <- trimws(tf, whitespace = ",")
+        
+        sql <- paste0(tf, ') ', tv, ')')
+      }
+      
+      
+      
+      
+      H$checkXLFileFormat <- function(fname, templateType){
+        
+        ol <- list()
+        
+        ext <- tools::file_ext(fname)
+        
+        if(ext!='xlsx'){
+          ol$OK<-F
+          ol$Message <-paste0('<P>You need to upload an MS Excel spreadsheet with a specific data enrty template.</P>
+                               <P>You can download the required template from the link below.</P>')
+          return(ol)
+        }
+        
+        s <- suppressMessages( readxl::read_xlsx (fname))
+        sheets <- excel_sheets(fname)
+        
+        
+        if(templateType=='Site Data Sheet'){
+              idxs <- na.omit(match(c('Template', "TemplateOriginal","About", "Filled Example", "Codes", "DBInfo", "DBTableLevels" ), sheets))
+              if(length(idxs) != 7){
+                ol$OK<-F
+                ol$Message <-paste0('<P>It looks like the file you have uploaded is not the required MS Excel Site Data Sheet template.</P>
+                                     <P>You can download the required template from the link below.</P>')
+                return(ol)
+              }
+              if(length(sheets) == 7){
+                ol$OK<-F
+                ol$Message <-paste0('<P>The data entry template does not contain any sites to ingest.</P>')
+                return(ol)
+              }
+              siteSheets <- sheets[-idxs]
+              ps <- siteSheets[1]
+              dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = ps, col_names = F)))
+              
+              agencyCode=dataSheet[5,2]
+              projCode=dataSheet[6,2]
+              
+              ol$OK<-T
+              ol$Message <-paste0('<p><b>Upload Info</b></p>',
+                                   '<p><b>Agency Code : </b>', agencyCode, '</p>',
+                                   '<p><b>Project Code : </b>', projCode, '</p>',
+                                   '<p><b>No. Sites : </b>', length(siteSheets), '</p>'
+                                  )
+              return(ol)
+        }else if (templateType=='Flat Excel Format'){
+        
+          idxs <- na.omit(match(c('agencies', "projects","officers", "sites", "horizons"), sheets))
+          if(length(idxs) != 5){
+            ol$OK<-F
+            ol$Message <-paste0('<P>It looks like the file you have uploaded is not the required Flat Excel Format Data Entry template.</P>
+                                     <P>You can download the required template from the link below.</P>')
+            return(ol)
+          }
+          dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = 'sites', col_names = T)))
+          agencyCode=dataSheet[1,1]
+          projCode=dataSheet[1,2]
+          
+          ol$OK<-T
+          ol$Message <-paste0('<p><b>Upload Info</b></p>',
+                              '<p><b>Agency Code : </b>', agencyCode, '</p>',
+                              '<p><b>Project Code : </b>', projCode, '</p>',
+                              '<p><b>No. Sites : </b>', nrow(dataSheet), '</p>'
+          )
+          return(ol)
+          
+        }else{
+          ol$OK<-F
+          ol$Message <-paste0('<P>It looks like the file you have uploaded is not a recognised data entry template.</P>
+                                     <P>You can download the required template from the link below.</P>')
+          return(ol)
+        }
+      }
+      
+      
+      
+      
+      
+      H$makeRecordINSERT <- function(table, rec){
+        p1 <- paste0('INSERT into ', table, ' (')
+        p2 <- paste0(' VALUES (')
+        
+        fnames <- colnames(rec)
+        for (i in 1:length(fnames)) {
+          
+          f <- fnames[i]
+          v <- rec[i]
+          if(f != 'samp_barcode'){
+              if(!is.na(v)){
+                p1 <- paste0(p1, ' "', f, '",' )
+                tp <- dbInfo[dbInfo$Table==table & dbInfo$Field==f, ]$Type
+                if(tp=='TEXT'){
+                  p2 <- paste0(p2, " '", v, "',")
+                }else{
+                  p2 <- paste0(p2, " ", v, ",")
+                }
+              }
+          }
+        }
+        
+        p1 <- trimws(p1, whitespace = ",")
+        p2 <- trimws(p2, whitespace = ",")
+        
+        sql <- paste0(p1, ') ', p2, ')')
+
+        return(sql)
+      }
+
+return(H)
+}
+

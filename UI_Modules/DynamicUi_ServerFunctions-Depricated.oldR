@@ -1,0 +1,75 @@
+################################################################# #
+#####       Author : Ross Searle                              ###
+#####       Date :  Wed Jan 22 07:58:38 2025                  ###
+#####       Purpose : Functions to control the dynamic UI     ###
+#####       Comments :                                        ###
+################################################################# #
+
+
+
+get_DynamicUi_ServerFunctions <- function()
+{
+  u <- list()
+#### Show or Hide Tabs depending on the user role #####
+  
+  # u$ShowHideTabs <- function(config, token){
+  #   
+  #   role <- ''
+  #   
+  #   print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV')
+  #   
+  #   if(config=='NSMP'){
+  #     
+  #       db <- OS$DB$Config$getCon('NatSoilStageRO')
+  #       Natcon <- db$Connection
+  #       recs <- OS$DB$Helpers$doQuery(Natcon, paste0("select * from project.PROPOSED_SITES where ps_token = '", token,"'"))
+  #       
+  #       if(nrow(recs) == 0 ){
+  #         role='Viewer'
+  #       } else if(nrow(recs) > 0  ){
+  #         role='DataEntry'
+  #       }
+  #       
+  #   }else{
+  #     role='Administrator'
+  #   }
+  #       
+  #       if(role == 'Viewer'){
+  #         hideTab(inputId = "MainTabsetPanel", target = "Sites Data Ingestion")
+  #       }else if(role == 'DataEntry'){
+  #         # Show all tabs 
+  #       }else if(role  == 'Administrator' ){
+  #         # Show all tabs 
+  #       }else{
+  #         hideTab(inputId = "MainTabsetPanel", target = "Sites Data Ingestion")
+  #       }
+  #   
+  # }
+  
+  
+  
+  
+  # u$ShowHideAdminTab <- function(config, adminkey){
+  #   
+  #   if(is.null(adminkey)){
+  #     hideTab(inputId = "MainTabsetPanel", target = "Admin")
+  #   }else{
+  #     if(adminkey==OS$AppConfigs$ShowAdminKey){
+  #       showTab(inputId = "MainTabsetPanel", target = "Admin")     
+  #     }else{
+  #       hideTab(inputId = "MainTabsetPanel", target = "Admin")
+  #     }
+  #   }
+  # }
+  # 
+  # u$ShowHideIngestionTokenTextbox <- function(config, token){
+  #   html=''
+  #   if(config == 'NSMP'){
+  #     html <- textInput('wgtTokenText', label = 'User token', value = token)
+  #   }
+  #   return(html)
+  # }
+  
+return(u) 
+}
+
