@@ -12,7 +12,7 @@
 
 #### Source the files with the requisite functions #####
 
-files.sources = list.files(c('./System', './Helpers', './UI_Modules', './Server'), full.names = T, pattern = '.R')
+files.sources = list.files(c('./System', './Helpers', './UI_Modules', './Server', './Secrets'), full.names = T, pattern = '.R')
 
 idx <- which(files.sources=='./System/ObjectStore.R')
 files.sources = files.sources[-idx]

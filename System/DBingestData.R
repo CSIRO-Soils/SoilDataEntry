@@ -45,7 +45,8 @@ get_IngestFunctions <- function()
           appcon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$AppDB)$Connection
           cds <- OS$DB$Helpers$doQuery(appcon, 'Select * from NatSoil_UnifiedCodes')
           
-          tableLevels <<- as.data.frame(suppressMessages( read_excel(fname, sheet = 'DBTableLevels', col_names = T)))
+          #tableLevels <<- as.data.frame(suppressMessages( read_excel(fname, sheet = 'DBTableLevels', col_names = T)))
+          tableLevels <<- openxlsx::readWorkbook(xlsxFile = fname, sheet = 'DBTableLevels')
           idxs <- which(tableLevels$Table %in% tablesInSheet)
           tableLevelsInSheet <- tableLevels[idxs,]
           
@@ -55,7 +56,8 @@ get_IngestFunctions <- function()
          dbInfo <<- OS$DB$Helpers$doQuery(appcon, 'select * from NatSoil_DBInfo')
 
         ps <- siteSheets[1]
-        dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = ps, col_names = F)))
+        #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = ps, col_names = F)))
+        dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = ps)
         
         #####  Do project insertion  #####
         r <- excelInfo[excelInfo$dbFld == 'agency_code',]
@@ -84,9 +86,10 @@ get_IngestFunctions <- function()
             
             print(paste0('Ingesting ', s))
             sn <- siteSheets[s]
-            dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
+           # dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
+            dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sn)
             
-            
+     
            
             
             ######  Check if site already exists and if it does delete it from the DB  #####
@@ -182,7 +185,8 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
     
     ##### Do agency insertion  ######
     
-    sagency <- as.data.frame(suppressMessages( read_excel(fname, sheet = ps, col_names = T)))
+    #sagency <- as.data.frame(suppressMessages( read_excel(fname, sheet = ps, col_names = T)))
+    sagency <- openxlsx::readWorkbook(xlsxFile = fname, sheet = ps)
     agencyCode <- sagency$AGENCY_CODE[1]
     pdf <- doQuery(con, paste0("select * from agencies where AGENCY_CODE ='",agencyCode , "'"))
     if(nrow(pdf)==0){
@@ -195,7 +199,8 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
     
     #####  Do project insertion  ##### 
     
-    sproj<- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[2], col_names = T)))
+    #sproj<- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[2], col_names = T)))
+    sproj <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[2])
     projCode <- sproj$proj_code[1]
     pdf <- doQuery(con, paste0("select * from projects where proj_code='",projCode, "'"))
     if(nrow(pdf)==0){
@@ -207,7 +212,8 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
     
     #####  Do oficers insertion  ##### 
     
-    sOff<- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[3], col_names = T)))
+    #sOff<- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[3], col_names = T)))
+    sOff<- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[3])
     for (j in 1:nrow(sOff)){
       
       rec<- sOff[j,]
@@ -237,7 +243,8 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
       tid <- match(str_to_upper(tbl), str_to_upper(sheets))
       
       if(!is.na(tid)){
-        d <- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[tid], col_names = T)))
+       # d <- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[tid], col_names = T)))
+        d <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[tid])
         
         if(nrow(d)>1){
           print(paste0('Inserting data into ', tbl))
@@ -262,8 +269,12 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
     ot <- paste0('<H3>Finished loading data</H3><BR>')
     ot <- paste0(ot, '<p>Database Name : ', con$Name , '</p>')
     ot <- paste0(ot, '<p>Agency Code : ', agencyCode, '</p><p>Project Code : ', projCode, '</p>')
-    hs <- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[6], col_names = T)))
-    ss <- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[4], col_names = T)))
+    #hs <- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[6], col_names = T)))
+    #ss <- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[4], col_names = T)))
+    
+    hs <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[6])
+    ss <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[4])
+    
     ot <- paste0(ot, '<p>Number of Sites : ', nrow(ss), '</p><p>Number of Horizons : ', nrow(hs), '</p>')
     
     if(nrow(bbox)==0){

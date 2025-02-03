@@ -22,7 +22,8 @@ get_DataValidationFunctions <- function(){
   dv$ValidateSites <- function(fname, config, token){
     
     
-    sheets <- excel_sheets(fname)
+    wb <- openxlsx::loadWorkbook(file.path(fname) )
+    sheets <- names(wb)
     
     withProgress(message = paste0('Validating soil data ....'), value = 0,  max=length(sheets)*2, {
     incProgress(1, detail = paste("Reading data ..."))
@@ -38,7 +39,8 @@ get_DataValidationFunctions <- function(){
     appcon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$AppDB)$Connection
     cds <<- OS$DB$Helpers$doQuery(appcon, 'Select * from NatSoil_UnifiedCodes')
     
-    tableLevels <- as.data.frame(suppressMessages( read_excel(fname, sheet = 'DBTableLevels', col_names = T)))
+    #tableLevels <- as.data.frame(suppressMessages( read_excel(fname, sheet = 'DBTableLevels', col_names = T)))
+    tableLevels <- openxlsx::readWorkbook(xlsxFile = fname, sheet = 'DBTableLevels')
     idxs <- which(tableLevels$Table %in% tablesInSheet)
     tableLevelsInSheet <- tableLevels[idxs,]
     
@@ -58,8 +60,6 @@ get_DataValidationFunctions <- function(){
     
     #############################   Check site names validity  ####
     
-    odf <- data.frame()
-    
     itCnt=0
     
     odf <- data.frame()
@@ -67,11 +67,12 @@ get_DataValidationFunctions <- function(){
     usedSiteList <<- list()
     for (s in 1:length(siteSheets)) {
       itCnt <- itCnt + 1
-      incProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
+     # incProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
       
       print(paste0('Validating ', s))
-      sn <- siteSheets[s]
-      dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
+      sn <- sheets[s]
+      #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
+      dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn)
       
       r <- excelInfo[excelInfo$dbFld == 's_id',]
       val=dataSheet[r$row,r$col]
@@ -106,12 +107,12 @@ get_DataValidationFunctions <- function(){
       itCnt <- itCnt + 1
       print(paste0('Validating ', s))
       sn <- siteSheets[s]
-      dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
+      #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
+      dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn)
       
       if(SheetHasData(dataSheet, excelInfo)){
         
         for (j in 1:nrow(tableLevelsInSheet)) {
-         
           tab <- tableLevelsInSheet[j,]$Table
           flds <- excelInfo[excelInfo$tableName==tab,]
           
@@ -134,7 +135,7 @@ get_DataValidationFunctions <- function(){
         
       }
       
-      incProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
+    #  incProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
     }
     
     #oedf <- odf[odf$Result=='Error',]
@@ -197,9 +198,9 @@ get_DataValidationFunctions <- function(){
      return(odf)
    }
    
-   if(!is.na(val)){
-      odf <- validateCode(val, r, odf)
-   }
+   # if(!is.na(val)){
+   #    odf <- validateCode(val, r, odf, sn)
+   # }
    
    if(config=='NSMP'){
      odf <- checkNSMPSpecificRules(val, r, odf, sn)
@@ -213,7 +214,7 @@ get_DataValidationFunctions <- function(){
  
  checkIfRequired <- function(row, col, dataSheet, val, r, odf, sn){
    
-   if(!is.na(r$required)){
+   if(!is.na(r$required) & r$required != ''){
        if(r$formRegion != 'H'){
          if(is.na(val) & str_to_upper(r$required)=='REQUIRED'){ return(T)}
        }else{
@@ -245,6 +246,8 @@ get_DataValidationFunctions <- function(){
        odf <- message(val, r, odf, sn, type='Error', msg='The longitude is not within Australia')
      }
    }
+   
+   return(odf)
  }
  
  
@@ -338,7 +341,7 @@ get_DataValidationFunctions <- function(){
    return(odf)
  }
  
-  validateCode <- function(val, r, odf){
+  validateCode <- function(val, r, odf, sn){
     cvs <- cds[cds$field_name ==str_to_upper(r$dbFld ),]
     if(nrow(cvs)>0){
       

@@ -8,7 +8,7 @@
 
 # Sys.setenv(JAVA_HOME = "C:/Program Files/OpenLogic/jdk-22.0.2.9-hotspot")
 # setwd('C:/Program Files/OpenLogic/jdk-22.0.2.9-hotspot/bin')
-library(XLConnect)
+#library(XLConnect)
 
 
 # fname = 'C:/Temp/Data Entry Template - NSMP.xlsx'
@@ -31,8 +31,8 @@ get_DataEntryFunctions <- function()
         tof <-  paste0(tmpD, '/', str_replace(b, '.xlsx', paste0('_', token, '.xlsx')))
         if(file.exists(tof)){unlink(tof)}
 
-         wb <- loadWorkbook(file.path(fname) )
-        setStyleAction(wb, XLC$"STYLE_ACTION.DATA_FORMAT_ONLY")
+         wb <- openxlsx::loadWorkbook(file.path(fname) )
+        #setStyleAction(wb, XLC$"STYLE_ACTION.DATA_FORMAT_ONLY")
 
         con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
         df <- OS$DB$Helpers$doQuery(con, paste0("select * from project.PROPOSED_SITES where ps_token='", token, "'"))
@@ -41,10 +41,10 @@ get_DataEntryFunctions <- function()
           rec <- df[i, ]
           s <- rec$s_id
           print(paste0('Generating worksheet ', s))
-          cloneSheet(wb, sheet = "Template", name = s)
-          XLConnect::writeWorksheet(wb, sheet=s, data=s, startRow = 7, startCol = 2, header = F)
+          openxlsx::cloneWorksheet(wb, sheetName = s, clonedSheet = "Template")
+          openxlsx::writeData(wb, sheet=s, x=s, startRow = 7, startCol = 2)
         }
-        saveWorkbook(wb, file = tof)
+        openxlsx::saveWorkbook(wb, file = tof, overwrite = T)
         return(tof)
       }
 

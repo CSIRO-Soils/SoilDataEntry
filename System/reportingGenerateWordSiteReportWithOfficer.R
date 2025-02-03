@@ -1,7 +1,7 @@
 
 
-bold_face <- shortcuts$fp_bold(font.size = 10)
-bold_face12 <- shortcuts$fp_bold(font.size = 12)
+bold_face <- officer::shortcuts$fp_bold(font.size = 10)
+bold_face12 <- officer::shortcuts$fp_bold(font.size = 12)
 
 
 printableSiteReport <- function(con, RV, templatePath, outputPath, ProfPlotPath=NULL){

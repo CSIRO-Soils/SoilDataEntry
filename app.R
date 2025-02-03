@@ -48,11 +48,11 @@ machineName <- as.character(Sys.info()['nodename'])
 
 if(machineName=='ROHAN-SL'){
   #### Hack for env var not being set properly
-  cwd <- getwd()
-  Sys.setenv(JAVA_HOME = "C:/Program Files/OpenLogic/jdk-22.0.2.9-hotspot")
-  setwd('C:/Program Files/OpenLogic/jdk-22.0.2.9-hotspot/bin')
-  library(XLConnect)
-  setwd(cwd)
+  # cwd <- getwd()
+  # Sys.setenv(JAVA_HOME = "C:/Program Files/OpenLogic/jdk-22.0.2.9-hotspot")
+  # setwd('C:/Program Files/OpenLogic/jdk-22.0.2.9-hotspot/bin')
+  # library(XLConnect)
+  # setwd(cwd)
   
   develMode <<- T
   

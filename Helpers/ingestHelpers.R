@@ -40,7 +40,8 @@ get_IngestHelpers <- function()
 
       H$getExcelFormInfo <- function(fname=NULL){
         
-        dbFlds <<- as.data.frame(suppressMessages(read_excel(fname, sheet = 'DBInfo', col_names = F)))
+        #dbFlds <<- as.data.frame(suppressMessages(read_excel(fname, sheet = 'DBInfo', col_names = F)))
+        dbFlds <- openxlsx::readWorkbook(xlsxFile = fname, sheet='DBInfo', skipEmptyRows=F, skipEmptyCols = F)
         
         odf<- data.frame()
         iflds <- c('S#', 'H#', 'K#')
@@ -58,6 +59,10 @@ get_IngestHelpers <- function()
             }
           }
         }
+        
+        
+        idxs <- which(odf$required=='')
+        odf$required[idxs] <- NA
         return(odf)
       }
 
@@ -243,8 +248,12 @@ get_IngestHelpers <- function()
           return(ol)
         }
         
-        s <- suppressMessages( readxl::read_xlsx (fname))
-        sheets <- excel_sheets(fname)
+       # s <- suppressMessages( readxl::read_xlsx (fname))
+       # sheets <- excel_sheets(fname)
+        
+        wb <- openxlsx::loadWorkbook (xlsxFile = fname)
+        sheets <- names(wb)
+
         
         
         if(templateType=='Site Data Sheet'){
@@ -262,7 +271,8 @@ get_IngestHelpers <- function()
               }
               siteSheets <- sheets[-idxs]
               ps <- siteSheets[1]
-              dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = ps, col_names = F)))
+              dataSheet <- openxlsx::readWorkbook(xlsxFile = fname)
+
               
               agencyCode=dataSheet[5,2]
               projCode=dataSheet[6,2]
@@ -283,7 +293,8 @@ get_IngestHelpers <- function()
                                      <P>You can download the required template from the link below.</P>')
             return(ol)
           }
-          dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = 'sites', col_names = T)))
+          #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = 'sites', col_names = T)))
+          dataSheet <- openxlsx::readWorkbook(xlsxFile = fname)
           agencyCode=dataSheet[1,1]
           projCode=dataSheet[1,2]
           
