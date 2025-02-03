@@ -14,7 +14,7 @@
 ####. App Instantiation  ######
 ##### .##########################  ####
 
-
+# http://127.0.0.1:3902/?config=NSMP&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 
 #  ?config=NSMP&token=Burnie&adminkey=123
 #  ?config=PacificSoilsP&token=Burnie&adminkey=123
