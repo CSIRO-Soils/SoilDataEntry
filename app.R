@@ -14,11 +14,10 @@
 ####. App Instantiation  ######
 ##### .##########################  ####
 
-# http://127.0.0.1:3902/?config=NSMP&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 
+# http://127.0.0.1:3902/?config=NSMP&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 #  ?config=NSMP&token=Burnie&adminkey=123
 #  ?config=PacificSoilsP&token=Burnie&adminkey=123
-
 #  ?config=NSMP&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 #  ?config=PacificSoils&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 
@@ -35,13 +34,13 @@ library(leaflet)
 library(leaflet.extras)
 library(leafem)
 library(RColorBrewer)
-library(shinyscreenshot)
 library(officer)
 library(flextable)
 library(jsonlite)
 library(reactable)
 library(shinyBS)
 library(lubridate)
+library(stringr)
 
 
 machineName <- as.character(Sys.info()['nodename'])
@@ -58,17 +57,23 @@ if(machineName=='ROHAN-SL'){
   
 }else{
   develMode <<- F
- # Sys.setenv(ODBCSYSINI = "/apps/msodbcsql/17.7.2.1/etc/")
+  #Sys.setenv(ODBCSYSINI = "/apps/msodbcsql/17.7.2.1/etc/")
+
 }
+
+if(machineName=='petrichor-i1'){
+  print('petrichor-i1')
+  #Sys.setenv(ODBCSYSINI = "/apps/msodbcsql/17.7.2.1/etc/")
+  }
 
 
 
 #setwd('C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/NationalSoilMonitoring/NSMData')
 
-source('./System/ObjectStore.R')
+source('System/ObjectStore.R')
 
 
-source("./Helpers/busyHelper.R")
+source("Helpers/busyHelper.R")
 #source("./Helpers/ingestHelpers.R")
 
 ####. ####
@@ -154,8 +159,6 @@ server <- function(input, output,session) {
  
   #### ^  Connect to the App NatSoil DB  #### 
   observe({
-    
-    
     
       req(RV$DBName, RV$Keys$ProjectCode)
       con <- OS$DB$Config$getCon(RV$DBName, fname=RV$Keys$ProjectCode)
