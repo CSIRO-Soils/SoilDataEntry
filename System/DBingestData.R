@@ -9,9 +9,9 @@
 
 
 
-library(DBI)
-library(readxl)
-library(stringr)
+# library(DBI)
+# library(readxl)
+# library(stringr)
 
 
 get_IngestFunctions <- function()
@@ -31,7 +31,8 @@ get_IngestFunctions <- function()
         ingestCon <- con$Connection
         
         fname=XLFile
-        sheets <- excel_sheets(fname)
+        wb <- openxlsx::loadWorkbook(file.path(fname) )
+        sheets <- names(wb)
 
           idxs <- match(OS$Validation$Constants$Sheetnames, sheets)
           siteSheets <- sheets[-idxs]
@@ -57,7 +58,7 @@ get_IngestFunctions <- function()
 
         ps <- siteSheets[1]
         #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = ps, col_names = F)))
-        dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = ps)
+        dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = ps, skipEmptyRows = F, skipEmptyCols = F)
         
         #####  Do project insertion  #####
         r <- excelInfo[excelInfo$dbFld == 'agency_code',]
@@ -186,7 +187,7 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
     ##### Do agency insertion  ######
     
     #sagency <- as.data.frame(suppressMessages( read_excel(fname, sheet = ps, col_names = T)))
-    sagency <- openxlsx::readWorkbook(xlsxFile = fname, sheet = ps)
+    sagency <- openxlsx::readWorkbook(xlsxFile = fname, sheet = ps, skipEmptyRows = F, skipEmptyCols = F)
     agencyCode <- sagency$AGENCY_CODE[1]
     pdf <- doQuery(con, paste0("select * from agencies where AGENCY_CODE ='",agencyCode , "'"))
     if(nrow(pdf)==0){
@@ -200,7 +201,7 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
     #####  Do project insertion  ##### 
     
     #sproj<- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[2], col_names = T)))
-    sproj <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[2])
+    sproj <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[2], skipEmptyRows = F, skipEmptyCols = F)
     projCode <- sproj$proj_code[1]
     pdf <- doQuery(con, paste0("select * from projects where proj_code='",projCode, "'"))
     if(nrow(pdf)==0){
@@ -244,7 +245,7 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
       
       if(!is.na(tid)){
        # d <- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[tid], col_names = T)))
-        d <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[tid])
+        d <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[tid], skipEmptyRows = F, skipEmptyCols = F)
         
         if(nrow(d)>1){
           print(paste0('Inserting data into ', tbl))
@@ -272,8 +273,8 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
     #hs <- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[6], col_names = T)))
     #ss <- as.data.frame(suppressMessages( read_excel(fname, sheet = sheets[4], col_names = T)))
     
-    hs <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[6])
-    ss <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[4])
+    hs <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[6], skipEmptyRows = F, skipEmptyCols = F)
+    ss <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sheets[4], skipEmptyRows = F, skipEmptyCols = F)
     
     ot <- paste0(ot, '<p>Number of Sites : ', nrow(ss), '</p><p>Number of Horizons : ', nrow(hs), '</p>')
     

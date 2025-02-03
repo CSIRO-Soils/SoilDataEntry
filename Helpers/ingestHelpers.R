@@ -1,4 +1,4 @@
-library(readxl)
+
 library(R6)
 
 
@@ -271,7 +271,7 @@ get_IngestHelpers <- function()
               }
               siteSheets <- sheets[-idxs]
               ps <- siteSheets[1]
-              dataSheet <- openxlsx::readWorkbook(xlsxFile = fname)
+              dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, skipEmptyRows = F, skipEmptyCols = F)
 
               
               agencyCode=dataSheet[5,2]
@@ -294,7 +294,7 @@ get_IngestHelpers <- function()
             return(ol)
           }
           #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = 'sites', col_names = T)))
-          dataSheet <- openxlsx::readWorkbook(xlsxFile = fname)
+          dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, skipEmptyRows = F, skipEmptyCols = F)
           agencyCode=dataSheet[1,1]
           projCode=dataSheet[1,2]
           

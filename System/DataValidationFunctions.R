@@ -42,7 +42,7 @@ get_DataValidationFunctions <- function(){
     cds <<- OS$DB$Helpers$doQuery(appcon, 'Select * from NatSoil_UnifiedCodes')
     
     #tableLevels <- as.data.frame(suppressMessages( read_excel(fname, sheet = 'DBTableLevels', col_names = T)))
-    tableLevels <- openxlsx::readWorkbook(xlsxFile = fname, sheet = 'DBTableLevels')
+    tableLevels <- openxlsx::readWorkbook(xlsxFile = fname, sheet = 'DBTableLevels', skipEmptyRows = F, skipEmptyCols = F)
     idxs <- which(tableLevels$Table %in% tablesInSheet)
     tableLevelsInSheet <- tableLevels[idxs,]
     
