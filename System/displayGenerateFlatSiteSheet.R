@@ -40,7 +40,7 @@ get_FlatSheetFunctions <- function()
           idxs <- which(is.na(outMat))
           outMat[idxs] <- ''
           
-          cns <- outMat[4,]
+          cns <- outMat[3,]
           outMat <- outMat[5:nrow(outMat),]
           c1 <- str_replace_all(cns, ' ', '_')
           c2 <- str_replace_all(c1, '[(]', '')
