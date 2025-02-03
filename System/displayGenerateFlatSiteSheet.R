@@ -54,7 +54,7 @@ get_FlatSheetFunctions <- function()
       generateBlankTemplate <- function(fname){
         
         #tp <<- as.data.frame(suppressMessages(read_excel(fname, sheet = 'DBInfo', col_names = F)))
-        tp <<- openxlsx::readWorkbook(xlsxFile = fname, sheet = 'DBInfo')
+        tp <<- openxlsx::readWorkbook(xlsxFile = fname, sheet = 'DBInfo', skipEmptyRows = F, skipEmptyCols = F)
         
         outMat <- matrix(nrow = nrow(tp), ncol=ncol(tp))
         
