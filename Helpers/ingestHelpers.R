@@ -93,7 +93,7 @@ get_IngestHelpers <- function()
         
         #### Hack to get obs date from Site date
         if(str_to_upper(tableName)=='OBSERVATIONS'){
-          ObsDate=sheet[9,2]
+          ObsDate=sheet[8,2]
           de <- dbElement$new(row=8, col=2, type='TEXT', val = ObsDate, dbTable = tableName, dbField = 'o_date_desc')
           elements[[nrow(recs)+1]] <- de
         }
@@ -215,9 +215,9 @@ get_IngestHelpers <- function()
             }
         }
         
-        if(!is.null(hNum)){
-          
-        }
+        # if(!is.null(hNum)){
+        #   
+        # }
         
         ### Some hacks to match DB schema rules
         if(str_to_upper(tableName)=='SITES'){

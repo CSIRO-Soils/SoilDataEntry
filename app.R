@@ -58,7 +58,7 @@ if(machineName=='ROHAN-SL'){
   
 }else{
   develMode <<- F
-  Sys.setenv(ODBCSYSINI = "/apps/msodbcsql/17.7.2.1/etc/")
+ # Sys.setenv(ODBCSYSINI = "/apps/msodbcsql/17.7.2.1/etc/")
 }
 
 
