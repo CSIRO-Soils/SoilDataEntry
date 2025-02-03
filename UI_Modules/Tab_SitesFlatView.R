@@ -14,7 +14,8 @@ Tab_SitesFlatView <- function() {
              sidebarPanel(width = 2,
                           selectInput('vwgtSiteIDFlatView', label = 'Site No.', choices = c('N2056')),
                           selectInput('vwgtObsIDFlatView', label = 'Obs No.', choices = c('1'), selected = '1'),
-               withBusyIndicatorUI(actionButton('vwgtViewSiteButtonFlatView', 'View Site Data',  class = "btn-success")),
+              # withBusyIndicatorUI(actionButton('vwgtViewSiteButtonFlatView', 'View Site Data',  class = "btn-success")),
+              actionButton('vwgtViewSiteButtonFlatView', 'View Site Data',  class = "btn-success"),
                
                
              

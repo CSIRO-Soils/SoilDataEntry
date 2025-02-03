@@ -658,11 +658,12 @@ FROM   dbo.SITES INNER JOIN
   observeEvent(input$vwgtViewSiteButtonFlatView, {
     
     req(RV$DBCon, input$vwgtSiteIDFlatView)
-    withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
+    #withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
+    
     xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
     df <- OS$Reporting$FlatSheet$makeFlatSiteDescriptionSheetfromDB(con=RV$DBCon$Connection, fname=xlPathName, agency='994', proj='NSMP', sid=input$vwgtSiteIDFlatView, oid=1)
     RV$FlatViewSiteDF <- df
-    })
+   # })
     
   })
   
