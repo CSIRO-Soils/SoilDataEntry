@@ -6,7 +6,9 @@
 #fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/NationalSoilMonitoring/NSMData/www/Configs/NSMP/Errors - Entry Template - NSMP.xlsx'
 #fname <- 'C:/Projects/SiteDataEntryTool/NoErrors - PacificSoils.xlsx'
 
-#setwd('C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/NationalSoilMonitoring/NSMData')
+
+#fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry/www/Configs/NSMP/No Errors -  Entry Template - NSMP.xlsx'
+#setwd('C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry')
 
 get_DataValidationFunctions <- function(){
   
@@ -70,9 +72,9 @@ get_DataValidationFunctions <- function(){
      # incProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
       
       print(paste0('Validating ', s))
-      sn <- sheets[s]
-      #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
-      dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn)
+      sn <- siteSheets[s]
+      #dataSheet <- as.data.frame(suppressMessages( readxl::read_excel(fname, sheet = sn, col_names = F)))
+      dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn, skipEmptyRows = F, skipEmptyCols = F)
       
       r <- excelInfo[excelInfo$dbFld == 's_id',]
       val=dataSheet[r$row,r$col]
@@ -108,7 +110,8 @@ get_DataValidationFunctions <- function(){
       print(paste0('Validating ', s))
       sn <- siteSheets[s]
       #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
-      dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn)
+      dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn, skipEmptyRows = F, skipEmptyCols = F)
+      
       
       if(SheetHasData(dataSheet, excelInfo)){
         
