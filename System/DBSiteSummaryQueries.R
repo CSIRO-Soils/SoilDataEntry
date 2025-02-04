@@ -76,6 +76,40 @@ FROM   dbo.SITES AS nsmp INNER JOIN
     
   }
   
+  ss$getHorizonInfo <- function(con, agencyCode, projectCode){  
+    
+    sql <- paste0("SELECT SITES.agency_code, SITES.proj_code, SITES.s_id, OBSERVATIONS.o_date_desc, OBSERVATIONS.o_desc_by, OBSERVATIONS.o_latitude_GDA94, OBSERVATIONS.o_longitude_GDA94, OBSERVATIONS.o_type, SITES.s_slope, 
+             SITES.s_morph_type, SITES.s_elem_type, SITES.s_patt_type, OBSERVATIONS.o_asc_ord, OBSERVATIONS.o_asc_subord, OBSERVATIONS.o_asc_gg, OBSERVATIONS.o_asc_subg, OBSERVATIONS.o_notes, SITES.s_notes, 
+             HORIZONS.h_no, HORIZONS.h_upper_depth, HORIZONS.h_lower_depth, HORIZONS.h_desig_master, HORIZONS.h_texture, HORIZONS.h_texture_qual, COLOURS.col_hue_val_chrom, HORIZONS.h_bound_distinct, HORIZONS.h_bound_shape, 
+             CRACKS.crack_width, COARSE_FRAGS.cf_abun, COARSE_FRAGS.cf_size, COARSE_FRAGS.cf_shape, COARSE_FRAGS.cf_lith, MOTTLES.mott_abun, MOTTLES.mott_type, MOTTLES.mott_size, MOTTLES.mott_contrast, 
+             SEGREGATIONS.seg_abun, SEGREGATIONS.seg_nature, SEGREGATIONS.seg_form, SEGREGATIONS.seg_size, CUTANS.cutan_type, CUTANS.cutan_abun, CUTANS.cutan_distinct, PANS.pan_cementation, PANS.pan_type, 
+             PANS.pan_continuity, PANS.pan_structure, ROOTS.root_abun, ROOTS.root_size, STRENGTHS.strg_class, HORIZONS.h_ec, HORIZONS.h_salinity_depth, HORIZONS.h_dispersion
+FROM   SITES INNER JOIN
+             OBSERVATIONS ON SITES.agency_code = OBSERVATIONS.agency_code AND SITES.proj_code = OBSERVATIONS.proj_code AND SITES.s_id = OBSERVATIONS.s_id INNER JOIN
+             HORIZONS ON OBSERVATIONS.agency_code = HORIZONS.agency_code AND OBSERVATIONS.proj_code = HORIZONS.proj_code AND OBSERVATIONS.s_id = HORIZONS.s_id AND OBSERVATIONS.o_id = HORIZONS.o_id LEFT OUTER JOIN
+             STRUCTURES ON HORIZONS.agency_code = STRUCTURES.agency_code AND HORIZONS.proj_code = STRUCTURES.proj_code AND HORIZONS.s_id = STRUCTURES.s_id AND HORIZONS.o_id = STRUCTURES.o_id AND 
+             HORIZONS.h_no = STRUCTURES.h_no LEFT OUTER JOIN
+             CRACKS ON HORIZONS.agency_code = CRACKS.agency_code AND HORIZONS.proj_code = CRACKS.proj_code AND HORIZONS.s_id = CRACKS.s_id AND HORIZONS.o_id = CRACKS.o_id AND 
+             HORIZONS.h_no = CRACKS.h_no LEFT OUTER JOIN
+             COARSE_FRAGS ON HORIZONS.agency_code = COARSE_FRAGS.agency_code AND HORIZONS.proj_code = COARSE_FRAGS.proj_code AND HORIZONS.s_id = COARSE_FRAGS.s_id AND HORIZONS.o_id = COARSE_FRAGS.o_id AND 
+             HORIZONS.h_no = COARSE_FRAGS.h_no LEFT OUTER JOIN
+             PANS ON HORIZONS.agency_code = PANS.agency_code AND HORIZONS.proj_code = PANS.proj_code AND HORIZONS.s_id = PANS.s_id AND HORIZONS.o_id = PANS.o_id AND HORIZONS.h_no = PANS.h_no LEFT OUTER JOIN
+             STRENGTHS ON HORIZONS.agency_code = STRENGTHS.agency_code AND HORIZONS.proj_code = STRENGTHS.proj_code AND HORIZONS.s_id = STRENGTHS.s_id AND HORIZONS.o_id = STRENGTHS.o_id AND 
+             HORIZONS.h_no = STRENGTHS.h_no LEFT OUTER JOIN
+             COLOURS ON HORIZONS.agency_code = COLOURS.agency_code AND HORIZONS.proj_code = COLOURS.proj_code AND HORIZONS.s_id = COLOURS.s_id AND HORIZONS.o_id = COLOURS.o_id AND 
+             HORIZONS.h_no = COLOURS.h_no LEFT OUTER JOIN
+             ROOTS ON HORIZONS.agency_code = ROOTS.agency_code AND HORIZONS.proj_code = ROOTS.proj_code AND HORIZONS.s_id = ROOTS.s_id AND HORIZONS.o_id = ROOTS.o_id AND HORIZONS.h_no = ROOTS.h_no LEFT OUTER JOIN
+             MOTTLES ON HORIZONS.agency_code = MOTTLES.agency_code AND HORIZONS.proj_code = MOTTLES.proj_code AND HORIZONS.s_id = MOTTLES.s_id AND HORIZONS.o_id = MOTTLES.o_id AND 
+             HORIZONS.h_no = MOTTLES.h_no LEFT OUTER JOIN
+             CUTANS ON HORIZONS.agency_code = CUTANS.agency_code AND HORIZONS.proj_code = CUTANS.proj_code AND HORIZONS.s_id = CUTANS.s_id AND HORIZONS.o_id = CUTANS.o_id AND 
+             HORIZONS.h_no = CUTANS.h_no LEFT OUTER JOIN
+             SEGREGATIONS ON HORIZONS.agency_code = SEGREGATIONS.agency_code AND HORIZONS.proj_code = SEGREGATIONS.proj_code AND HORIZONS.s_id = SEGREGATIONS.s_id AND HORIZONS.o_id = SEGREGATIONS.o_id AND 
+             HORIZONS.h_no = SEGREGATIONS.h_no")
+    
+    hors <- OS$DB$Helpers$doQuery(con, sql)
+    return(hors)
+  }
+  
  
   
   ss$getNSMPPotentialSites <- function(con, keys){
