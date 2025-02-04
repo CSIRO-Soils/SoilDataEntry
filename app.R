@@ -17,7 +17,7 @@
 
 # http://127.0.0.1:3902/?config=NSMP&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 #  ?config=NSMP&token=Burnie&adminkey=123
-#  ?config=PacificSoilsP&token=Burnie&adminkey=123
+#  ?config=PacificSoils&agencycode=994&projectcode=PACSOILS
 #  ?config=NSMP&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 #  ?config=PacificSoils&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 
@@ -113,6 +113,7 @@ server <- function(input, output,session) {
   RV$DBCon <- NULL
   RV$RequiredParams <- NULL
   RV$SiteSummaryInfo <- NULL
+  RV$AvailableSitesIDs <- NULL
   
   observe({
      cd <-reactiveValuesToList(session$clientData)
@@ -123,8 +124,6 @@ server <- function(input, output,session) {
   output$appUI <- renderUI({
 
     query <- parseQueryString(session$clientData$url_search)
-    
-    print(query$config)
     
     if (!is.null(query$config)) {
       RV$ConfigName <- query$config
@@ -145,6 +144,8 @@ server <- function(input, output,session) {
         RV$Keys$AdminKey <- 'None'
       }
     }
+    
+   
 
     if(!is.null(RV$ConfigName) & !is.null(RV$Keys$AgencyCode)  & !is.null(RV$Keys$ProjectCode)) 
     {
@@ -157,6 +158,11 @@ server <- function(input, output,session) {
     html
   })
   
+  
+  observe({
+    req(RV$ConfigName, RV$Keys)
+    OS$Logging$logSession(configName = RV$ConfigName, keys = RV$Keys)
+  })
  
   #### ^  Connect to the App NatSoil DB  #### 
   observe({
@@ -166,7 +172,7 @@ server <- function(input, output,session) {
       print('Connecting to DB')
       RV$DBCon <- con
      
-      updateTabsetPanel(session, "MainTabsetPanel", selected = "Sites Summary"    )
+  #    updateTabsetPanel(session, "MainTabsetPanel", selected = "Sites Summary"    )
   })
 
   
@@ -178,7 +184,6 @@ server <- function(input, output,session) {
       DBpath <- paste0(OS$DB$Config$Constants$portableDBDirectory, '/',RV$Keys$ProjectCode , '.db')
       
       if(file.exists(DBpath)){
-        print(paste0(DBpath,"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"))
         shinyjs::show('wgtDownloadPortableDB')
       }
   })
@@ -213,30 +218,17 @@ server <- function(input, output,session) {
 
     
   #### ^  Get the list of available sites  #####
-  observeEvent(RV$DBCon, {
-    
-    req(RV$Keys$AgencyCode)
-
-    if(RV$Keys$ProjectCode=='NSMP'){
-      
-      # c1 <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
-      # c2 <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
-      # df <- OS$DB$Helpers$doQuery(a1, paste0('select * from project.PROPOSED_SITES'))
-      # df2 <- OS$DB$Helpers$doQuery(a2, paste0('select * from sites'))
-      #choices <- merge(df2, df, by=c('agency_code', 'proj_code', 's_id'), all.x=T)[, c(3)]
-      
-      sql <- "SELECT nat.[s_id] FROM [NatSoil].[project].[PROPOSED_SITES] nat JOIN [NSMP_Holding].[dbo].[SITES] nsmp
-      ON nat.[agency_code] = nsmp.[agency_code] AND nat.[proj_code] = nsmp.[proj_code] AND nat.[s_id] = nsmp.[s_id]"
-
-    }else{
-      sql <- paste0("select s_id from sites where agency_code='", RV$Keys$AgencyCode, "' and proj_code='", RV$Keys$ProjectCode, "'")
-    }
-   
-    sites <- OS$DB$Helpers$doQuery(RV$DBCon$Connection, sql)
+  observe({
+    req(RV$DBCon, RV$Keys)
+    print(RV$DBCon)
+    sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
     RV$AvailableSitesIDs <- sites
-    updateSelectInput(inputId = "vwgtSiteID", choices = sites)
-    updateSelectInput(inputId = "vwgtSiteIDFlatView", choices = sites)
   }) 
+  
+  observe({
+    updateSelectInput(inputId = "vwgtSiteID", choices = RV$AvailableSitesIDs)
+    updateSelectInput(inputId = "vwgtSiteIDFlatView", choices = RV$AvailableSitesIDs)
+  })
   
   
   ####. ####
@@ -375,7 +367,6 @@ server <- function(input, output,session) {
         ProfPlotPath <- NULL
       }
       printableSiteReport(con=RV$DBCon$Connection, RV <- RV$SiteDesc, templatePath = './Outputs/siteReportTemplate.docx', outputPath=of, ProfPlotPath=ProfPlotPath)
-      print('Finished generating the report 2')
       file.copy(of, file)
     }
   )
@@ -484,7 +475,6 @@ server <- function(input, output,session) {
             t=NULL
           }
           
-          print(RV$ConfigName)
           outcome <- OS$Validation$ValidateSites(fname=RV$XLfile, config=RV$ConfigName, token=t)
           RV$ValidationOutcomes <- outcome
 
@@ -599,12 +589,7 @@ server <- function(input, output,session) {
   
   observeEvent(input$UI_IngestMap_marker_click, { 
     p <- input$UI_IngestMap_marker_click  # typo was on this line
-    print(p$id[1])
-
-
     data <- RV$ValidationOutcomes$validationResultsTable
-   # print(head(data))
-    
    idxs <- which(data$Site == as.character(p$id[1]))
    filtered <- data[idxs,]
     updateReactable("wgtValidationResultsTable", data = filtered)

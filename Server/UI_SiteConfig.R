@@ -9,12 +9,7 @@
 
 setupUIBasedOnConfigs <- function(config, url){
 
-
-
-      
       if(!is.null(config)){
-        
-        
         
         html <-  tabsetPanel( type = "tabs", id='MainTabsetPanel',
                               Tab_DataIngestion_UI(),
@@ -53,7 +48,24 @@ setupHeaderBasedOnConfigs <- function(reqParams, configName, font, imageHeader, 
                        background-image: url(./Configs/CSIRO/HeaderSoil.png)" > &nbsp;&nbsp; <img src="./images/csiro.png", height=100px > ', 'CSIRO Soil Data Entry Tool' , '</span>') 
           }
         return(t)
-    }
+}
+
+
+
+getListOfAvailableSites <- function(con, keys){
+  
+  if(keys$ProjectCode=='NSMP'){
+    
+    sql <- paste0("SELECT nat.[s_id] FROM [NatSoil].[project].[PROPOSED_SITES] nat JOIN [NSMP_Holding].[dbo].[SITES] nsmp
+            ON nat.[agency_code] = nsmp.[agency_code] AND nat.[proj_code] = nsmp.[proj_code] AND nat.[s_id] = nsmp.[s_id]
+            where nat.agency_code='", keys$AgencyCode, "' and nat.proj_code='", keys$ProjectCode, "'")
+  }else{
+    sql <- paste0("select s_id from sites where agency_code='", keys$AgencyCode, "' and proj_code='", keys$ProjectCode, "'")
+  }
+  
+  sites <- OS$DB$Helpers$doQuery(con, sql)
+  return(sites)
+}
     
   
 

@@ -1,8 +1,6 @@
 
 
 getProjectDescriptionHTML <- function(p){
-  print("P")
-  print(p)
   
   ### Insert url for reference 
   s <- p$proj_biblio_ref
@@ -10,7 +8,6 @@ getProjectDescriptionHTML <- function(p){
   if(!is.na(loc[1,1])){
     url <- url <- str_sub(s, loc[1,1], nchar(s))
     lhtml <- paste0('<a href="', url, '", target="_blank" ><b> Show Document </b></a>')
-    print(lhtml)
   }else{
     lhtml <- ''
   }

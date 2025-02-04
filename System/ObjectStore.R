@@ -35,6 +35,7 @@ OS$UI$DynamicUI <- get_DynamicUi_ServerFunctions()
 OS$DB$IngestSiteData <- get_IngestFunctions()
 OS$Validation <- get_DataValidationFunctions()
 OS$Reporting$FlatSheet <- get_FlatSheetFunctions()
+OS$Logging <- get_LoggingFunctions()
 
 
 

@@ -82,7 +82,6 @@ saveSoilProfileDiagram <- function(sid, p, outpath){
   profWidth = 2
   
   pngPath <- outpath
-  print(pngPath)
   png(pngPath, units='in', width=5, height=15, res=300)
   
   

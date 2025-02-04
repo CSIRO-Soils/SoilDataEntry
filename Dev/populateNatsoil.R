@@ -49,7 +49,6 @@ makeCodeTableFromIndividualTables <- function(){
     for (i in 1:length(tbls)) {
       
        t <- tbls[i]
-       print(t)
         
        df <- OS$DB$Helpers$doQuery(a2, paste0('select * from codes.', t))
        if(nrow(df) > 0){
@@ -65,7 +64,6 @@ makeCodeTableFromIndividualTables <- function(){
     for (i in 1:length(tbls)) {
       
       t <- tbls[i]
-      print(t)
       
       df <- OS$DB$Helpers$doQuery(a2, paste0('select * from codes.', t))
       if(nrow(df) > 0){

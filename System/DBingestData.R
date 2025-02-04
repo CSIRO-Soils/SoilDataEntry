@@ -171,16 +171,9 @@ ig$ingestFlatExcelFile <- function(conInfo, XLFile){
     
     print('Ingesting data from the Excel Flat File format')
     fname <- XLFile
-    
     dbInfo <<- read.csv(dbInfoPath)
-  
-    print(fname)
     s <- suppressMessages( readxl::read_xlsx (fname))
     sheets <- excel_sheets(fname)
-    
-    
-   # dbi <- read.csv('C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataIngestR/DataBase/DBInfo.csv')
-    
     ps <- sheets[1]
     
     

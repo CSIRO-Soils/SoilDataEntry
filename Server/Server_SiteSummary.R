@@ -31,11 +31,11 @@ getSiteSummaryInfo <- function(con, keys, configName=''){
   ol <- list()
   
   if(configName=='NSMP'){
-    sdf <- OS$DB$SiteSummaryQueries$getSitesInfo_NSMP(con$Connection, configName=configName, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode, token=keys$Token)
+    sdf <- OS$DB$SiteSummaryQueries$getSitesInfo_NSMP(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode, token=keys$Token)
     pps <- OS$DB$SiteSummaryQueries$getNSMPPotentialSites(con$Connection, keys)
-    hors <- OS$DB$SiteSummaryQueries$getHorizonInfo_NSMP(con$Connection, configName=configName, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode, token=keys$Token)
+    hors <- OS$DB$SiteSummaryQueries$getHorizonInfo_NSMP(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode, token=keys$Token)
     }else{
-    sdf <- OS$DB$SiteSummaryQueries$GetSitesInfo(con$Connection, configName=configName, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
+    sdf <- OS$DB$SiteSummaryQueries$GetSitesInfo(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
   }
  
  
@@ -71,16 +71,39 @@ renderSiteSummary <- function(si){
  descBy <- paste0(unique(si$DataTable$o_desc_by), collapse = '; ')
  ASC <-  paste0(unique(si$DataTable$o_asc_ord), collapse = '; ')
  
-  ot <- '<h3>Site Summary</h3>'
+ 
+ c1W <- '120px'
+ c2W <- '150px'
+ c3W <- '20px'
+ c4W <- '120px'
+ c5W <- '150px'
+ 
+  ot <- '<h2 style="color:blue">Site Summary</h2>'
   ot <- paste0(ot, 
-               '<p><b>Number of sites : </b>', si$NumberOfSites, '</p>',
-               '<p><b>Date range : </b>', mindate, ' to ', maxdate, '</p>',
-               '<p><b>Described By : </b>', descBy, '</p>',
-               '<p><b>Longitude range : </b>', minX, ' to ', maxX, '</p>',
-               '<p><b>Latitude range : </b>', minY, ' to ', maxY, '</p>',
-               '<p><b>Element Types : </b>', elemTypes, '</p>',
-               '<p><b>Pattern Types : </b>', patTypes, '</p>',
-               '<p><b>ASCs : </b>', ASC, '</p>'
+               '<table style="width:1500px;  border-spacing: 100px;" >
+            <tr><td style="width:', c1W, '"><b>Number of sites : </b></td>
+                <td align ="left", style="width:', c2W, '">', si$NumberOfSites, '</td>
+                <td style="width:', c3W, '"></td>',
+               '<td style="width:', c4W, '"><b>Date range : </b></td>
+               <td align ="left, style="width:', c5W, '" ">', mindate, ' to ', maxdate, '</td>
+            </tr>
+               
+                <tr><td style="width:', c1W, '"><b>Longitude range : </b></td>
+                <td align ="left", style="width:', c2W, '">', minX, ' to ', maxX,  '</td>
+                <td style="width:', c3W, '"></td>',
+               '<td style="width:', c4W, '"><b>Latitude range : </b></td>
+               <td align ="left, style="width:', c5W, '" ">', minY, ' to ', maxY, '</td>
+            </tr></table>',
+               
+               
+                '<p><b>Described By : </b>', descBy, '</p>',
+               # '<p><b>Longitude range : </b>', minX, ' to ', maxX, '</p>',
+               # '<p><b>Latitude range : </b>', minY, ' to ', maxY, '</p>',
+                '<p><b>Element Types : </b>', elemTypes, '</p>',
+                '<p><b>Pattern Types : </b>', patTypes, '</p>',
+                '<p><b>ASCs : </b>', ASC, '</p>'
+               
+               
                
                
                
@@ -109,7 +132,6 @@ renderSiteSummaryMap<- function(si){
   sfdf <- st_as_sf( df, coords = c("o_longitude_GDA94", "o_latitude_GDA94"), crs = 4326)
   b <- st_bbox(sfdf)
   
-  print(head(sfdf))
   if(nrow(df) == 1){
     
     b$xmin <-  b$xmin - 0.01

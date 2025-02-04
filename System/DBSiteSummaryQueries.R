@@ -12,21 +12,21 @@ get_SiteSummaryQueries <- function()
 {
   ss <- list()
   
-  ss$getSitesInfo_NSMP <- function(con, configName, agencyCode, projectCode, siteID, obsID, token){
+  ss$getSitesInfo_NSMP <- function(con, agencyCode, projectCode, token){
     
     sql <- paste0("SELECT natProp.ps_token, nsmp.agency_code, nsmp.proj_code, nsmp.s_id, nsmp.s_slope, nsmp.s_morph_type, nsmp.s_elem_type, nsmp.s_patt_type, nsmp.s_notes, nsmp.s_date_desc, natProp.team_code, natProp.lu_code, natProp.sample_barcode_start, natProp.ps_soil_class, 
-                    natProp.ps_soil_land_use, dbo.OBSERVATIONS.o_type, dbo.OBSERVATIONS.o_desc_by, dbo.OBSERVATIONS.o_latitude_GDA94, dbo.OBSERVATIONS.o_longitude_GDA94, dbo.OBSERVATIONS.o_asc_ord, dbo.OBSERVATIONS.o_asc_subord, dbo.OBSERVATIONS.o_asc_gg, 
-                    dbo.OBSERVATIONS.o_asc_subg, dbo.OBSERVATIONS.o_notes, dbo.OBSERVATIONS.o_date_desc
-                    FROM   dbo.SITES AS nsmp INNER JOIN
+                    natProp.ps_soil_land_use, OBSERVATIONS.o_type, OBSERVATIONS.o_desc_by, OBSERVATIONS.o_latitude_GDA94, OBSERVATIONS.o_longitude_GDA94, OBSERVATIONS.o_asc_ord, OBSERVATIONS.o_asc_subord, OBSERVATIONS.o_asc_gg, 
+                    OBSERVATIONS.o_asc_subg, OBSERVATIONS.o_notes, OBSERVATIONS.o_date_desc
+                    FROM   SITES AS nsmp INNER JOIN
                     NatSoil.project.PROPOSED_SITES AS natProp ON nsmp.agency_code = natProp.agency_code AND nsmp.proj_code = natProp.proj_code AND nsmp.s_id = natProp.s_id INNER JOIN
-                    dbo.OBSERVATIONS ON nsmp.agency_code = dbo.OBSERVATIONS.agency_code AND nsmp.proj_code = dbo.OBSERVATIONS.proj_code AND nsmp.s_id = dbo.OBSERVATIONS.s_id
+                    OBSERVATIONS ON nsmp.agency_code = OBSERVATIONS.agency_code AND nsmp.proj_code = OBSERVATIONS.proj_code AND nsmp.s_id = OBSERVATIONS.s_id
                     WHERE ( OBSERVATIONS.agency_code = '", agencyCode,"') AND ( OBSERVATIONS.proj_code = '",projectCode,"') and natProp.ps_token = '", token, "'") 
                         
     sites <- OS$DB$Helpers$doQuery(con, sql)
     return(sites)
   }
   
-  ss$getHorizonInfo_NSMP <- function(con, configName, agencyCode, projectCode, siteID, obsID, token){  
+  ss$getHorizonInfo_NSMP <- function(con, agencyCode, projectCode, token){  
     
     sql <-paste0("SELECT nsmp.agency_code, nsmp.proj_code, nsmp.s_id, dbo.OBSERVATIONS.o_date_desc, dbo.OBSERVATIONS.o_desc_by, dbo.OBSERVATIONS.o_latitude_GDA94, dbo.OBSERVATIONS.o_longitude_GDA94, dbo.OBSERVATIONS.o_type, nsmp.s_slope, nsmp.s_morph_type, 
              nsmp.s_elem_type, nsmp.s_patt_type, natProp.lu_code, natProp.ps_soil_land_use, natProp.ps_soil_class, dbo.OBSERVATIONS.o_asc_ord, dbo.OBSERVATIONS.o_asc_subord, dbo.OBSERVATIONS.o_asc_gg, dbo.OBSERVATIONS.o_asc_subg, natProp.team_code, 
@@ -60,16 +60,15 @@ FROM   dbo.SITES AS nsmp INNER JOIN
                 WHERE ( OBSERVATIONS.agency_code = '", agencyCode,"') AND ( OBSERVATIONS.proj_code = '",projectCode,"') and natProp.ps_token = '", token, "'") 
     
     hors <- OS$DB$Helpers$doQuery(con, sql)
-    print(hors)
     return(hors)
   }
   
   
-  ss$GetSitesInfo <- function(){
-    sql <- paste0("SELECT nsmp.agency_code, nsmp.proj_code, nsmp.s_id, nsmp.s_slope, nsmp.s_morph_type, nsmp.s_elem_type, nsmp.s_patt_type, nsmp.s_notes, nsmp.s_date_desc, dbo.OBSERVATIONS.o_type, dbo.OBSERVATIONS.o_desc_by, dbo.OBSERVATIONS.o_latitude_GDA94, 
-                  dbo.OBSERVATIONS.o_longitude_GDA94, dbo.OBSERVATIONS.o_asc_ord, dbo.OBSERVATIONS.o_asc_subord, dbo.OBSERVATIONS.o_asc_gg, dbo.OBSERVATIONS.o_asc_subg, dbo.OBSERVATIONS.o_notes, dbo.OBSERVATIONS.o_date_desc
-                  FROM   dbo.SITES AS nsmp INNER JOIN
-                  dbo.OBSERVATIONS ON nsmp.agency_code = dbo.OBSERVATIONS.agency_code AND nsmp.proj_code = dbo.OBSERVATIONS.proj_code AND nsmp.s_id = dbo.OBSERVATIONS.s_id 
+  ss$GetSitesInfo <- function(con, agencyCode, projectCode){
+    sql <- paste0("SELECT nsmp.agency_code, nsmp.proj_code, nsmp.s_id, nsmp.s_slope, nsmp.s_morph_type, nsmp.s_elem_type, nsmp.s_patt_type, nsmp.s_notes, nsmp.s_date_desc, OBSERVATIONS.o_type, OBSERVATIONS.o_desc_by, OBSERVATIONS.o_latitude_GDA94, 
+                  OBSERVATIONS.o_longitude_GDA94, OBSERVATIONS.o_asc_ord, OBSERVATIONS.o_asc_subord, OBSERVATIONS.o_asc_gg, OBSERVATIONS.o_asc_subg, OBSERVATIONS.o_notes, OBSERVATIONS.o_date_desc
+                  FROM   SITES AS nsmp INNER JOIN
+                  OBSERVATIONS ON nsmp.agency_code = OBSERVATIONS.agency_code AND nsmp.proj_code = OBSERVATIONS.proj_code AND nsmp.s_id = OBSERVATIONS.s_id 
                   WHERE ( OBSERVATIONS.agency_code = '",agencyCode,"') AND ( OBSERVATIONS.proj_code = '",projectCode,"')")
     
     sites <- OS$DB$Helpers$doQuery(con, sql)
