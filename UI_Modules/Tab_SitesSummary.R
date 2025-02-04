@@ -10,6 +10,15 @@ Tab_SitesSummary <- function() {
   
   tabPanel("Sites Summary",  icon = icon("toolbox", tags$style()),
            
-           reactableOutput("wgtSiteDataSummaryTable")  
            
-  )}
+           fluidRow(
+             column(6, htmlOutput('wgtSitesSummaryInfo')),
+             column(6, HTML('<BR>'), leafletOutput("UI_SiteSummaryMap", width = 350, height = 250),HTML('<BR>')
+             ),
+           ),
+           fluidRow(
+           reactableOutput("wgtSiteDataSummaryTable")  
+           )
+  )
+           
+}

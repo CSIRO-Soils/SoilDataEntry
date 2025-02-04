@@ -27,6 +27,7 @@ OS$DB$Config <- get_DBConfig()
 OS$DB$Helpers <- get_DBHelpers()
 OS$DB$Logins <- get_DBLogins()
 OS$DB$NatSoilQueries <- get_NatSoilQueries()
+OS$DB$SiteSummaryQueries <- get_SiteSummaryQueries()
 OS$DB$Tools <- get_makeSQLiteNatSoilDB()
 OS$DataEntry <- get_DataEntryFunctions()
 OS$IngestHelpers <- get_IngestHelpers()
@@ -34,6 +35,7 @@ OS$UI$DynamicUI <- get_DynamicUi_ServerFunctions()
 OS$DB$IngestSiteData <- get_IngestFunctions()
 OS$Validation <- get_DataValidationFunctions()
 OS$Reporting$FlatSheet <- get_FlatSheetFunctions()
+
 
 
 str(OS, max.level = 1)

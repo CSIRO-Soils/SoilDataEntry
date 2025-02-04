@@ -18,5 +18,8 @@ get_AppConfigs <- function()
   
   c$AppDBPath = './DBs/SoilDataEntryAppConfigs.sqlite'
   
+  c$AppAdmin = "Ross Searle"
+  c$AppAdminEmail = "ross.searle@csiro.au"
+  
   return(c)
 }

@@ -112,6 +112,7 @@ server <- function(input, output,session) {
   RV <- reactiveValues()
   RV$DBCon <- NULL
   RV$RequiredParams <- NULL
+  RV$SiteSummaryInfo <- NULL
   
   observe({
      cd <-reactiveValuesToList(session$clientData)
@@ -165,7 +166,7 @@ server <- function(input, output,session) {
       print('Connecting to DB')
       RV$DBCon <- con
      
-      #updateTabsetPanel(session, "MainTabsetPanel", selected = "Flat View"    )
+      updateTabsetPanel(session, "MainTabsetPanel", selected = "Sites Summary"    )
   })
 
   
@@ -622,31 +623,8 @@ server <- function(input, output,session) {
   })
   
   
-  output$wgtSiteDataSummaryTable <- renderReactable({
-
-    req(RV$DBCon)
-
-    sql <- "SELECT dbo.SITES.agency_code, dbo.SITES.s_id, dbo.SITES.proj_code, dbo.SITES.s_type, dbo.SITES.s_morph_type, dbo.SITES.s_elem_type, dbo.SITES.s_patt_type, dbo.SITES.s_date_desc, dbo.OBSERVATIONS.o_type, dbo.OBSERVATIONS.o_desc_by,
-             dbo.OBSERVATIONS.o_latitude_GDA94, dbo.OBSERVATIONS.o_longitude_GDA94, dbo.OBSERVATIONS.o_nature, dbo.OBSERVATIONS.o_aspect, dbo.OBSERVATIONS.o_drainage, dbo.OBSERVATIONS.o_asc_ord, dbo.OBSERVATIONS.o_asc_subord,
-             dbo.OBSERVATIONS.o_asc_gg, dbo.OBSERVATIONS.o_id
-FROM   dbo.SITES INNER JOIN
-             dbo.OBSERVATIONS ON dbo.SITES.agency_code = dbo.OBSERVATIONS.agency_code AND dbo.SITES.proj_code = dbo.OBSERVATIONS.proj_code AND dbo.SITES.s_id = dbo.OBSERVATIONS.s_id"
 
 
-    con <-  OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
-
-    df <- OS$DB$Helpers$doQuery(con, sql)
-
-    data <- unique(df[, c("s_id", "o_id")])
-
-    reactable(data, details = function(index) {
-      plant_data <- df[df$s_id == data$s_id[index], ]
-      htmltools::div(style = "padding: 1rem",
-                     reactable(plant_data, outlined = TRUE)
-      )
-    })
-
-  })
   
   
 
@@ -658,12 +636,12 @@ FROM   dbo.SITES INNER JOIN
   observeEvent(input$vwgtViewSiteButtonFlatView, {
     
     req(RV$DBCon, input$vwgtSiteIDFlatView)
-    #withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
+    withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
     
     xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
     df <- OS$Reporting$FlatSheet$makeFlatSiteDescriptionSheetfromDB(con=RV$DBCon$Connection, fname=xlPathName, agency='994', proj='NSMP', sid=input$vwgtSiteIDFlatView, oid=1)
     RV$FlatViewSiteDF <- df
-   # })
+    })
     
   })
   
@@ -673,6 +651,38 @@ FROM   dbo.SITES INNER JOIN
    req(RV$FlatViewSiteDF)
    formatFlatSheet (RV$FlatViewSiteDF)
   })
+  
+  
+  
+  
+  
+  ####.####
+  ####. ***** Sites Summary ****** ####
+  
+  observe({
+    req(RV$Keys, RV$DBCon, RV$ConfigName)
+    RV$SiteSummaryInfo <-  getSiteSummaryInfo(con=RV$DBCon, keys=RV$Keys, RV$ConfigName)
+  })
+  
+  ### ^ Render Sites Summary ####  
+  output$wgtSitesSummaryInfo <-  renderText({
+    req(RV$SiteSummaryInfo)
+    renderSiteSummary(RV$SiteSummaryInfo)
+  })
+  
+  #### ^ Render Site Summary Map ######  
+  output$UI_SiteSummaryMap <- renderLeaflet({
+    req(RV$SiteSummaryInfo)
+    renderSiteSummaryMap(RV$SiteSummaryInfo)
+  })
+  
+  
+  
+  output$wgtSiteDataSummaryTable <- renderReactable({
+    req(RV$SiteSummaryInfo)
+    formatHorizonsSummaryTable(si=RV$SiteSummaryInfo)
+  })
+  
   
 
 }
