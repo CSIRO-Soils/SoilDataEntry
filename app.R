@@ -62,8 +62,8 @@ if(machineName=='ROHAN-SL'){
 }
 
 if(machineName=='petrichor-i1'){
-  print('petrichor-i1')
-  #Sys.setenv(ODBCSYSINI = "/apps/msodbcsql/17.7.2.1/etc/")
+  # print('petrichor-i1')
+  # Sys.setenv(ODBCSYSINI = "/apps/msodbcsql/17.7.2.1/etc")
   }
 
 

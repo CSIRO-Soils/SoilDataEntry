@@ -36,7 +36,9 @@ getSiteSummaryInfo <- function(con, keys, configName=''){
     hors <- OS$DB$SiteSummaryQueries$getHorizonInfo_NSMP(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode, token=keys$Token)
     }else{
     sdf <- OS$DB$SiteSummaryQueries$GetSitesInfo(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
-  }
+    hors <- OS$DB$SiteSummaryQueries$getHorizonInfo(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
+    
+     }
  
  
   ol$ConfigName <- configName
