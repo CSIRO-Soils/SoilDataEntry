@@ -90,7 +90,7 @@ get_IngestFunctions <- function()
            # dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
             dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sn, skipEmptyRows = F, skipEmptyCols = F)
             
-     
+            if(SheetHasData(dataSheet, excelInfo)){
            
             
             ######  Check if site already exists and if it does delete it from the DB  #####
@@ -132,6 +132,7 @@ get_IngestFunctions <- function()
                 }
               }
             }
+          }
           }
           print('Finished ingesting')
        })

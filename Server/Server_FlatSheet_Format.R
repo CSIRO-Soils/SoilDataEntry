@@ -61,7 +61,7 @@ ot <- reactable(ft, compact = TRUE, defaultPageSize = 20,showPagination = F, sho
             Texture = colDef(minWidth = 60, align = "center", name = "Texture", cell = function(value) {div(div(style = list(color='red'), value))}),
             Text_Qualifier = colDef(minWidth = 20, align = "center", name = "Text-Qual", cell = function(value) {div(div(style = list(color='red'), value))}),
             
-            Colour = colDef(minWidth = 60, align = "center", name = "Hor-Col"),
+            Colour = colDef(minWidth = 80, align = "center", name = "Hor-Col"),
             
             Mott_Colour = colDef(minWidth = 20, align = "center", name = "Mot-Col", cell = function(value) {div(div(style = list(color='red'), value))}),
             Mott_Abun = colDef(minWidth = 20, align = "center", name = "Mot-Abun", cell = function(value) {div(div(style = list(color='red'), value))}),
