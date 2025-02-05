@@ -17,6 +17,12 @@
 
 #makeFlatSiteDescriptionSheetfromDB(con, fname, agency, proj, sid, oid)
 
+con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
+agency <- '994'
+proj <- 'NSMP'
+sid <- 'N5006'
+o_id=1
+
 get_FlatSheetFunctions <- function()
 {
   fs <- list()
@@ -41,7 +47,7 @@ get_FlatSheetFunctions <- function()
           outMat[idxs] <- ''
           
           cns <- outMat[3,]
-          outMat <- outMat[5:nrow(outMat),]
+          outMat <- outMat[4:nrow(outMat),]
           c1 <- str_replace_all(cns, ' ', '_')
           c2 <- str_replace_all(c1, '[(]', '')
           c3 <- str_replace_all(c2, '[)]', '')
@@ -146,6 +152,7 @@ get_FlatSheetFunctions <- function()
                               " ORDER BY h_upper_depth, h_lower_depth")
             svs <- OS$DB$Helpers$doQuery(con, horSQL)
             
+            if(nrow(svs)>0){
             
             tm <- outMat
             fldnames <- colnames(svs)
@@ -167,6 +174,9 @@ get_FlatSheetFunctions <- function()
               }
             }
       return(tm)
+            }else{
+              return(outMat)
+            }
       }
       
       
@@ -193,26 +203,29 @@ get_FlatSheetFunctions <- function()
           siteSQL <- paste0("SELECT o_id, h_no, ", keys[tn],"_no, ", s, " FROM ", tn, "  WHERE agency_code='", agency, "' and proj_code='", proj, "' and s_id ='", sid, "' and o_id=",oid)
           svs <- OS$DB$Helpers$doQuery(con, siteSQL)
           
+          if(nrow(svs)>0){
+          
           fldnames <- colnames(svs)
           
-          for (i in 1:nrow(svs)) {
-            
-            for (j in 4:length(fldnames)) {
-              fld <- fldnames[j]
-              snum <- svs[i,3]
-              hnum <- svs[i,2]
-              r <- si[si$recNum==as.character(hnum) & si$dbFld==fld & si$recSubNum==as.character(snum), ]
-              if( fld=='ph_depth' | fld=='ph_value'){
-                v <- 0
-              }else{
-                v <- svs[i, r$dbFld]
+              for (i in 1:nrow(svs)) {
+                
+                for (j in 4:length(fldnames)) {
+                  fld <- fldnames[j]
+                  snum <- svs[i,3]
+                  hnum <- svs[i,2]
+                  r <- si[si$recNum==as.character(hnum) & si$dbFld==fld & si$recSubNum==as.character(snum), ]
+                  if( fld=='ph_depth' | fld=='ph_value'){
+                    v <- 0
+                  }else{
+                    v <- svs[i, r$dbFld]
+                  }
+                  
+                  if(!is.na(v)){
+                    outMat[r$row, r$col] <- v
+                  }
+                }
               }
-              
-              if(!is.na(v)){
-                outMat[r$row, r$col] <- v
-              }
-            }
-          }
+        }
           
         }
         return(outMat)

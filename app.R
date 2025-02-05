@@ -21,6 +21,8 @@
 #  ?config=NSMP&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 #  ?config=PacificSoils&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
 
+#?config=NSMP&agencycode=994&projectcode=NSMP&token=Capital
+
 library(shiny)
 library(shinyjs)
 library(shinyalert)
@@ -220,12 +222,13 @@ server <- function(input, output,session) {
   #### ^  Get the list of available sites  #####
   observe({
     req(RV$DBCon, RV$Keys)
-    print(RV$DBCon)
     sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
+   
     RV$AvailableSitesIDs <- sites
   }) 
   
   observe({
+    req(RV$AvailableSitesIDs)
     updateSelectInput(inputId = "vwgtSiteID", choices = RV$AvailableSitesIDs)
     updateSelectInput(inputId = "vwgtSiteIDFlatView", choices = RV$AvailableSitesIDs)
   })

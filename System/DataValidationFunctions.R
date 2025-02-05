@@ -10,6 +10,8 @@
 #fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry/www/Configs/NSMP/No Errors -  Entry Template - NSMP.xlsx'
 #setwd('C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry')
 
+#fname='C:/Temp/Data Entry Template - NSMP_NSMP_Capital.xlsx'
+
 get_DataValidationFunctions <- function(){
   
   dv <- list()
