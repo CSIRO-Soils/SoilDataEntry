@@ -163,7 +163,7 @@ server <- function(input, output,session) {
   
   observe({
     req(RV$ConfigName, RV$Keys)
-    OS$Logging$logSession(configName = RV$ConfigName, keys = RV$Keys)
+   # OS$Logging$logSession(configName = RV$ConfigName, keys = RV$Keys)
   })
  
   #### ^  Connect to the App NatSoil DB  #### 
