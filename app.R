@@ -67,10 +67,10 @@ source("Helpers/busyHelper.R")
 
 ####. ####
 #### ^ UI Functions load  ####
-source('UI_Modules/Tab_DataIngestion.R' )
-source('UI_Modules/Tab_SiteViewer.R')
-source('UI_Modules/Tab_Admin.R')
-source('UI_Modules/Tab_About.R')
+# source('UI_Modules/Tab_DataIngestion.R' )
+# source('UI_Modules/Tab_SiteViewer.R')
+# source('UI_Modules/Tab_Admin.R')
+# source('UI_Modules/Tab_About.R')
 
 availableDBs <<- c('Portable', "NatSoil")
 
@@ -103,6 +103,7 @@ server <- function(input, output,session) {
   RV$RequiredParams <- NULL
   RV$SiteSummaryInfo <- NULL
   RV$AvailableSitesIDs <- NULL
+  RV$CurrentPhotoInfoTable <- NULL
   
   observe({
      cd <-reactiveValuesToList(session$clientData)
@@ -218,6 +219,9 @@ server <- function(input, output,session) {
     req(RV$AvailableSitesIDs)
     updateSelectInput(inputId = "vwgtSiteID", choices = RV$AvailableSitesIDs)
     updateSelectInput(inputId = "vwgtSiteIDFlatView", choices = RV$AvailableSitesIDs)
+    updateSelectInput(inputId = "vwgtSiteIDPhotoView", choices = RV$AvailableSitesIDs)
+    
+    
   })
   
   
@@ -657,6 +661,53 @@ server <- function(input, output,session) {
     req(RV$SiteSummaryInfo)
     formatHorizonsSummaryTable(si=RV$SiteSummaryInfo)
   })
+  
+  
+  ###.####
+  #### ***** Photos ***** #####
+  #### ^ Update site photos select list  #######
+  
+  observe({
+    req(input$vwgtSiteIDPhotoView)
+    
+    sql <- paste0("SELECT *  FROM [NatSoil].[dbo].[PHOTOS] 
+                  where agency_code='", RV$Keys$AgencyCode, "' and proj_code='", RV$Keys$ProjectCode,
+                  "' and s_id='", input$vwgtSiteIDPhotoView, "' and o_id=2")
+    print(sql)
+    
+   con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
+   df <- OS$DB$Helpers$doQuery(con, sql)
+   dbDisconnect(con)
+   RV$CurrentPhotoInfoTable <- df
+   
+  })
+  
+  
+  observe({
+    req(RV$CurrentPhotoInfoTable)
+    updateSelectInput(inputId = 'wgtPhotosSelectList', choices = RV$CurrentPhotoInfoTable$photo_alt_text )
+  })
+  
+  output$wgtPhotosImage <- renderImage({
+   
+    req(input$wgtPhotosSelectList)
+    
+    df <- RV$CurrentPhotoInfoTable 
+    rec <- df[df$photo_alt_text == input$wgtPhotosSelectList, ]
+    outfile <- tempfile(fileext = '.jpg')
+    binData <- rec$photo_img
+    content<-unlist(binData)
+    writeBin(content, con = outfile)
+
+    list(src = outfile,
+         contentType = 'image/jpg',
+         width = 1000,
+         height = 800,
+         alt = "This is alternate text")
+  }, deleteFile = TRUE)
+
+  
+  
   
   
 
