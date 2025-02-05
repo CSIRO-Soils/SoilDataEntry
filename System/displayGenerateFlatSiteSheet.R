@@ -17,11 +17,11 @@
 
 #makeFlatSiteDescriptionSheetfromDB(con, fname, agency, proj, sid, oid)
 
-con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
-agency <- '994'
-proj <- 'NSMP'
-sid <- 'N5006'
-o_id=1
+# con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
+# agency <- '994'
+# proj <- 'NSMP'
+# sid <- 'N5006'
+# o_id=1
 
 get_FlatSheetFunctions <- function()
 {
