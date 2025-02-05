@@ -71,7 +71,7 @@ get_DataValidationFunctions <- function(){
     usedSiteList <<- list()
     for (s in 1:length(siteSheets)) {
       itCnt <- itCnt + 1
-     # incProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
+      incProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
       
       print(paste0('Validating ', s))
       sn <- siteSheets[s]
@@ -140,10 +140,8 @@ get_DataValidationFunctions <- function(){
         
       }
       
-    #  incProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
+      incProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
     }
-    
-    #oedf <- odf[odf$Result=='Error',]
     
     
     sitesDF$ErrorCnt <- 0
