@@ -15,10 +15,11 @@ setupUIBasedOnConfigs <- function(config, url){
                               Tab_DataIngestion_UI(),
                               Tab_SiteViewer_UI(), 
                               Tab_SitesFlatView(),
+                              Tab_SitesPhotoView(),
                               Tab_SitesSummary(),
-                              #Tab_Admin(),
-                              Tab_About(),
-                              Tab_SitesPhotoView()
+                             # Tab_Admin(),
+                              Tab_About()
+                              
         )
       }else{
         html <- HTML(paste0('<h1>Oops.....</h1>
