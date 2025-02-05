@@ -30,7 +30,7 @@ Tab_DataIngestion_UI<- function() {
 
                           HTML('<BR><BR>'),
                         # shinyjs::hidden( downloadLink('wgtDownDB', label = 'DownloadYYYYYYY')),
-                          downloadLink('wgtDownDB', label = 'Download Database File'),
+                        #  downloadLink('wgtDownDB', label = 'Download Database File'),
                           HTML('<BR><BR>'),
                          
                          

@@ -83,7 +83,7 @@ get_IngestFunctions <- function()
           hcnt=0
           for (s in 1:length(siteSheets)) {
             
-          #  incProgress(s, detail = paste("Site ", s, ' of ', length(siteSheets)))
+            incProgress(s, detail = paste("Site ", s, ' of ', length(siteSheets)))
             
             print(paste0('Ingesting ', s))
             sn <- siteSheets[s]
