@@ -21,7 +21,7 @@ for (i in 1:length(files.sources)) {
   source(files.sources[i])
 }
 
-OS <- list()
+OS <<- list()
 OS$AppConfigs <- get_AppConfigs()
 OS$DB$Config <- get_DBConfig()
 OS$DB$Helpers <- get_DBHelpers()
