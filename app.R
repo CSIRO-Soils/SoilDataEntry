@@ -48,25 +48,12 @@ library(stringr)
 machineName <- as.character(Sys.info()['nodename'])
 
 if(machineName=='ROHAN-SL'){
-  #### Hack for env var not being set properly
-  # cwd <- getwd()
-  # Sys.setenv(JAVA_HOME = "C:/Program Files/OpenLogic/jdk-22.0.2.9-hotspot")
-  # setwd('C:/Program Files/OpenLogic/jdk-22.0.2.9-hotspot/bin')
-  # library(XLConnect)
-  # setwd(cwd)
-  
   develMode <<- T
-  
 }else{
   develMode <<- F
   #Sys.setenv(ODBCSYSINI = "/apps/msodbcsql/17.7.2.1/etc/")
-
 }
 
-if(machineName=='petrichor-i1'){
-  # print('petrichor-i1')
-  # Sys.setenv(ODBCSYSINI = "/apps/msodbcsql/17.7.2.1/etc")
-  }
 
 
 
@@ -76,7 +63,7 @@ source('System/ObjectStore.R')
 
 
 source("Helpers/busyHelper.R")
-#source("./Helpers/ingestHelpers.R")
+
 
 ####. ####
 #### ^ UI Functions load  ####
