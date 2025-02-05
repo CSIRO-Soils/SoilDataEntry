@@ -17,7 +17,8 @@ setupUIBasedOnConfigs <- function(config, url){
                               Tab_SitesFlatView(),
                               Tab_SitesSummary(),
                               #Tab_Admin(),
-                              Tab_About()
+                              Tab_About(),
+                              Tab_SitesPhotoView()
         )
       }else{
         html <- HTML(paste0('<h1>Oops.....</h1>
