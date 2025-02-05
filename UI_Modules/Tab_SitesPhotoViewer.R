@@ -7,12 +7,16 @@
 
 Tab_SitesPhotoView <- function() {
   
-  tabPanel("Photo Viewer",  icon = icon("table-cells", tags$style()),
+  tabPanel("Photo Viewer",  icon = icon("image", tags$style()),
            
            sidebarLayout(
              sidebarPanel(width = 2,
                           selectInput('vwgtSiteIDPhotoView', label = 'Site No.', choices = NULL),
-                          selectInput('wgtPhotosSelectList', label = 'Photo', choices = NULL)
+                          selectInput('wgtPhotosSelectList', label = 'Photo', choices = NULL),
+                          HTML('<BR><BR>'),
+                          uiOutput("uiPhotoInfo"),
+                          HTML('<BR><BR>'),
+                          hidden(downloadLink('wgtPhotoDownloadLink', 'Download Photo'))
                           ),
             mainPanel(
              fluidRow(imageOutput("wgtPhotosImage", width = 800, height = 800)  )
@@ -20,3 +24,4 @@ Tab_SitesPhotoView <- function() {
            
            )          
   )}
+

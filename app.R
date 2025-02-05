@@ -45,6 +45,10 @@ library(lubridate)
 library(stringr)
 
 
+library(jpeg)
+library(png)
+
+
 machineName <- as.character(Sys.info()['nodename'])
 
 if(machineName=='ROHAN-SL'){
@@ -673,7 +677,6 @@ server <- function(input, output,session) {
     sql <- paste0("SELECT *  FROM [NatSoil].[dbo].[PHOTOS] 
                   where agency_code='", RV$Keys$AgencyCode, "' and proj_code='", RV$Keys$ProjectCode,
                   "' and s_id='", input$vwgtSiteIDPhotoView, "' and o_id=2")
-    print(sql)
     
    con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
    df <- OS$DB$Helpers$doQuery(con, sql)
@@ -698,16 +701,74 @@ server <- function(input, output,session) {
     binData <- rec$photo_img
     content<-unlist(binData)
     writeBin(content, con = outfile)
-
+    
+    ext <- tools::file_ext(rec$photo_filename)
+    if(ext=='jpg'){
+    img <- readJPEG(outfile)
+    d <- dim(img)
+    } else if(ext=='png'){
+      img <- readPNG(outfile)
+      d <- dim(img)
+    }else{}
+    
+    RV$PhotoInfo$Width =d[1]
+    RV$PhotoInfo$Height = d[2]
+    
+    iratio <- d[1]/d[2]
+    
     list(src = outfile,
          contentType = 'image/jpg',
-         width = 1000,
-         height = 800,
+         width = 700,
+         height = 700 * iratio,
          alt = "This is alternate text")
   }, deleteFile = TRUE)
 
   
   
+  output$uiPhotoInfo <-  renderText({
+    req(RV$CurrentPhotoInfoTable, input$wgtPhotosSelectList)
+    
+    df <- RV$CurrentPhotoInfoTable 
+    rec <- df[df$photo_alt_text == input$wgtPhotosSelectList, ]
+    
+    if(nrow(rec) > 0){
+     ot <- paste0('<p><b>Date : </b>', rec$photo_taken_date, '</p>',
+                  '<p><b>File Name : </b>', rec$photo_filename, '</p>',
+                  '<p><b>Type : </b>', rec$photo_type_code, '</p>',
+                  '<p><b>width : </b>', RV$PhotoInfo$Width, '</p>',
+                  '<p><b>Height : </b>', RV$PhotoInfo$Height, '</p>'
+                  ) 
+    }
+  })
+  
+  observe({
+    req(input$wgtPhotosSelectList)
+    shinyjs::show('wgtPhotoDownloadLink')
+  })
+  
+  #### ^ Download Site Photo ####
+  output$wgtPhotoDownloadLink <- downloadHandler(
+    
+    filename = function() {
+      df <- RV$CurrentPhotoInfoTable 
+      rec <- df[df$photo_alt_text == input$wgtPhotosSelectList, ]
+      
+      ext <- tools::file_ext(rec$photo_filename)
+      fname = paste0(rec$agency_code, "_", rec$proj_code, "_", rec$s_id, "_", rec$photo_alt_text, '.', ext)
+      file <- fname
+    },
+    content = function(file) {
+      
+      df <- RV$CurrentPhotoInfoTable 
+      rec <- df[df$photo_alt_text == input$wgtPhotosSelectList, ]
+      outfile <- tempfile(fileext = '.jpg')
+      binData <- rec$photo_img
+      content<-unlist(binData)
+      writeBin(content, con = outfile)
+      file.copy(outfile, file, overwrite = T)
+      on.exit(unlink(outfile))
+    }
+  )
   
   
 
