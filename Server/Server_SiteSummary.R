@@ -1,28 +1,10 @@
+################################################################# #
+#####       Author : Ross Searle                              ###
+#####       Date :  Thu Feb  6 19:48:34 2025                  ###
+#####       Purpose : Site summary queries                    ###
+#####       Comments :                                        ###
+################################################################# #
 
-
-
-
-# getValidationResultsReactTable <- function(vTab){
-#   
-#     r <-  reactable(vTab, defaultPageSize = 15, filterable = TRUE, 
-#                 columns = list(
-#                   Result = colDef(width=100, cell = function(value) {
-#                     if (value == "Error") "\u274c Error" else paste0("\u2714\ufe0f", value)
-#                   }),
-#                   Site = colDef(width=70),
-#                   Value = colDef(width=100),
-#                   Table = colDef(width=150),
-#                   Field = colDef(width=150),
-#                   RecNum = colDef(width=40),
-#                   RecSnum = colDef(width=40)
-#                   #Issue = colDef(width=20)
-#                 ),
-#                 outlined = TRUE,
-#                 wrap = FALSE,
-#                 width=1200
-#       )
-#     return(r)    
-# }
 
 
 getSiteSummaryInfo <- function(con, keys, configName=''){
@@ -34,6 +16,12 @@ getSiteSummaryInfo <- function(con, keys, configName=''){
     sdf <- OS$DB$SiteSummaryQueries$getSitesInfo_NSMP(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode, token=keys$Token)
     pps <- OS$DB$SiteSummaryQueries$getNSMPPotentialSites(con$Connection, keys)
     hors <- OS$DB$SiteSummaryQueries$getHorizonInfo_NSMP(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode, token=keys$Token)
+    envelopes <- OS$DB$SiteSummaryQueries$getSiteEnvelopes_NSMP(con$Connection, keys, sites=as.character(sdf$s_id))
+        if(nrow(envelopes>0)){
+          polys <- st_as_sf(envelopes, wkt = 'geom', crs=4326)
+        }else{
+          polys=NULL
+        }
     }else{
     sdf <- OS$DB$SiteSummaryQueries$GetSitesInfo(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
     hors <- OS$DB$SiteSummaryQueries$getHorizonInfo(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
@@ -50,6 +38,7 @@ getSiteSummaryInfo <- function(con, keys, configName=''){
   
   if(configName=='NSMP'){
     ol$NSMP_ProposedSites <- pps
+    ol$Envelopes <- polys
   }
   return(ol)
 }
@@ -131,6 +120,8 @@ renderSiteSummaryMap<- function(si){
   
   df <- si$DataTable
   
+ 
+  
   sfdf <- st_as_sf( df, coords = c("o_longitude_GDA94", "o_latitude_GDA94"), crs = 4326)
   b <- st_bbox(sfdf)
   
@@ -151,7 +142,7 @@ renderSiteSummaryMap<- function(si){
     #markerColor = getColor(sfdf)
   )
   
-  leaflet() %>%
+ lm <- leaflet() %>%
     clearMarkers() %>%
     addTiles(group = "Map") %>%
     addProviderTiles("Esri.WorldImagery", options = providerTileOptions(noWrap = F), group = "Satellite") %>%
@@ -168,6 +159,15 @@ renderSiteSummaryMap<- function(si){
     
    # addCircleMarkers( data=sfdf, radius=6, color = ~pal(Result)), stroke=FALSE, fillOpacity=1, group="locations")
     addAwesomeMarkers(data=sfdf, icon=icons, label=~as.character(s_id), layerId = ~as.character(s_id))
+ 
+ print('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL')
+ print(si$Envelopes)
+ if(!is.null(si$Envelopes)){
+  
+   print(si$Envelopes)
+  lm <- lm %>% addPolygons(data=si$Envelopes)
+ }
+ lm
 }
 
 

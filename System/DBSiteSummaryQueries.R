@@ -63,6 +63,18 @@ FROM   dbo.SITES AS nsmp INNER JOIN
     return(hors)
   }
   
+  ss$getSiteEnvelopes_NSMP <- function(con, keys, sites){  
+    
+    sql <- paste0("SELECT [agency_code],[proj_code],[s_id],[s_geom_GDA94].STAsText() as geom FROM [NatSoil].[dbo].[SITES] 
+                  where  agency_code = '", keys$AgencyCode, "' and proj_code = '", keys$ProjectCode, "'")
+    envelopes <- OS$DB$Helpers$doQuery(con, sql)
+    idxs <- which(envelopes$s_id %in% sites)
+    e <- envelopes[idxs,]
+    
+    
+    return(e)
+  }
+  
   
   ss$GetSitesInfo <- function(con, agencyCode, projectCode){
     sql <- paste0("SELECT nsmp.agency_code, nsmp.proj_code, nsmp.s_id, nsmp.s_slope, nsmp.s_morph_type, nsmp.s_elem_type, nsmp.s_patt_type, nsmp.s_notes, nsmp.s_date_desc, OBSERVATIONS.o_type, OBSERVATIONS.o_desc_by, OBSERVATIONS.o_latitude_GDA94, 

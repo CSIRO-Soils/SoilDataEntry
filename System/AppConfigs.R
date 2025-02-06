@@ -12,7 +12,8 @@ get_AppConfigs <- function()
   
   c$ShowAdminKey = '123'
   c$DevelopConfigName = 'NSMP'
-  c$DevelopToken = 'Burnie'
+  #c$DevelopToken = 'Burnie'
+  c$DevelopToken = 'Capital'
   c$DevelopAgency = '994'
   c$DevelopProject = 'NSMP'
   
