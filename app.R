@@ -86,7 +86,6 @@ dbDisconnect(appcon)
 #### ^ Load UI components ####
 ui <- fluidPage(
  
-  
   uiOutput("uiHtmlHeader"),
   uiOutput("uiPageHeader"),
   uiOutput("appUI")
@@ -98,6 +97,7 @@ ui <- fluidPage(
 ####. ####
 #### .========     SERVER  ========  ####
 server <- function(input, output,session) {
+  
 
   ####.   ======  App Configuration  ============== ###### 
 
@@ -462,6 +462,7 @@ server <- function(input, output,session) {
     }else{
 
         req(RV$ConfigName)
+
         isolate({
 
          
@@ -482,7 +483,7 @@ server <- function(input, output,session) {
 
         })
     }
-  })
+    })
   
   
   #### ^ Ingest Excel into DB ####
@@ -506,6 +507,33 @@ server <- function(input, output,session) {
       
     }else{
       
+      str1 = tags$span(
+        paste('Just Checking ....'),
+        style = "font-size: 20px; color: orange; font-weight: bold;"
+      )
+      str2 = tags$span(
+        HTML(paste("Uploading the data from this spreadsheet will overwrite any existing data for sites already in the staging database.<BR><BR>Are you sure you want to proceed ?")),
+        style = "font-size: 15px; color: #425df5"
+      )
+      
+      showModal(modalDialog(title =  tagList(str1),
+                            str2,
+                            size = 's',
+                            fade=F ,
+                            
+                            footer = tagList(
+                              modalButton("Cancel"),
+                              actionButton(inputId = "wgtInjectDataConfirmButton", "Do It")
+                            )
+      ))
+      
+    }
+  })
+  
+  observeEvent(input$wgtInjectDataConfirmButton, {
+   
+    removeModal()
+      
       req(RV$ConfigName)
         isolate({
         RV$XLfile <- input$wgtXLFile$datapath
@@ -515,8 +543,9 @@ server <- function(input, output,session) {
         RV$AvailableSitesIDs <- sites
         
       })
-    }
   })
+    
+
   
   
   output$uiErrorsTableTitle <-  renderText({

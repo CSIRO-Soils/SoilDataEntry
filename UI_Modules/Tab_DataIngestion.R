@@ -11,7 +11,7 @@ Tab_DataIngestion_UI<- function() {
                             HTML('<BR>'),
                             downloadLink('wgtDownloadDataEntrySheet', label = 'Download Site Data Entry Sheet'),
                             
-                          
+                            actionButton('wgtPopTest', 'test', class = "btn-success"),
                             
                             HTML('<BR><BR>'),
                             uiOutput("uiIngestTokenText"),
