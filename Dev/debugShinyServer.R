@@ -9,5 +9,5 @@ r
 
 bits <- str_split(r, ' ')
 nlines <- length(bits[[1]])
-read_lines(bits[[1]][nlines])
+readr::read_lines(bits[[1]][nlines])
 
