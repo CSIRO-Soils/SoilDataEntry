@@ -115,12 +115,7 @@ renderSiteSummary <- function(si){
 
 renderSiteSummaryMap<- function(si){
   
-  
- # df <-  OS$DB$NatSoilQueries$getSitesForAProject(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
-  
   df <- si$DataTable
-  
- 
   
   sfdf <- st_as_sf( df, coords = c("o_longitude_GDA94", "o_latitude_GDA94"), crs = 4326)
   b <- st_bbox(sfdf)
@@ -160,7 +155,7 @@ renderSiteSummaryMap<- function(si){
    # addCircleMarkers( data=sfdf, radius=6, color = ~pal(Result)), stroke=FALSE, fillOpacity=1, group="locations")
     addAwesomeMarkers(data=sfdf, icon=icons, label=~as.character(s_id), layerId = ~as.character(s_id))
  
- print('LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL')
+
  print(si$Envelopes)
  if(!is.null(si$Envelopes)){
   
