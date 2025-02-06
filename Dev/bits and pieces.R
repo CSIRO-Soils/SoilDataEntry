@@ -17,3 +17,6 @@ WHERE (project.PROPOSED_SITES.ps_token = N'Burnie')"
 OS$DB$Helpers$doQuery(conInfo$Connection, sql)
 
 
+cond <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
+OS$DB$Helpers$deleteAllData(cond)
+

@@ -271,11 +271,11 @@ get_IngestHelpers <- function()
               }
               siteSheets <- sheets[-idxs]
               ps <- siteSheets[1]
-              dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, skipEmptyRows = F, skipEmptyCols = F)
+              dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = 6, skipEmptyRows = F, skipEmptyCols = F)
 
               
-              agencyCode=dataSheet[5,2]
-              projCode=dataSheet[6,2]
+              agencyCode=dataSheet[4,2]
+              projCode=dataSheet[5,2]
               
               ol$OK<-T
               ol$Message <-paste0('<p><b>Upload Info</b></p>',

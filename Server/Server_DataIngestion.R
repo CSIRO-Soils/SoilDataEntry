@@ -1,3 +1,9 @@
+################################################################# #
+#####       Author : Ross Searle                              ###
+#####       Date :  Thu Feb  6 10:29:44 2025                  ###
+#####       Purpose : Renders validation outcomes on the page ###
+#####       Comments :                                        ###
+################################################################# #
 
 
 
@@ -27,36 +33,42 @@ getValidationResultsReactTable <- function(vTab){
 
 renderDataValidationOutcomes <- function(outcomes){
   
+  if(outcomes$Type=='Validation'){
   
-  df <- outcomes$validationResultsTable
-  if(nrow(df) > 0){
-    df2 <- df[df$Result=='Error',]
-    if(nrow(df2) > 0 ){
-      siteerrors <- nrow(df2)
-    }else{
-      siteerrors = 0
-    }
+          df <- outcomes$validationResultsTable
+          if(nrow(df) > 0){
+            df2 <- df[df$Result=='Error',]
+            if(nrow(df2) > 0 ){
+              siteerrors <- nrow(df2)
+            }else{
+              siteerrors = 0
+            }
+          }else{
+            siteerrors = 0
+          }
+          
+          ot <- '<h3>Validation Results</h3>'
+          ot <- paste0(ot, '<p>Number of Sheets : ', outcomes$NumSheets,
+                       '</p><p>Number of Sites with Data: ', outcomes$sheetsWithData,
+                       '</p><p>Total Number of Errors : ',  outcomes$ErrorCount,
+                       '</p><p>Number of Sites with Errors : ', outcomes$SitesWithErrorCnt,
+                       '</p>'
+          )
+          
+          if(outcomes$ErrorCount ==0){
+            ot <- paste0(ot, '<p style="color:green">There are no errors in the data that we could find. You are good to load this dataset into the database.</p>' )
+          }else{
+            ot <- paste0(ot, '<p style="color:red">There are some errors in the dataset you have uploaded. 
+                            Please fix these errors in the Excel spreadsheet before trying to upload the data again.</p>' )
+            
+          }
+          
+          return(paste0(ot))
+          
   }else{
-    siteerrors = 0
+
+   return( outcomes$html)
   }
-  
-  ot <- '<h3>Validation Results</h3>'
-  ot <- paste0(ot, '<p>Number of Sheets : ', outcomes$NumSheets,
-               '</p><p>Number of Sites with Data: ', outcomes$sheetsWithData,
-               '</p><p>Total Number of Errors : ',  outcomes$ErrorCount,
-               '</p><p>Number of Sites with Errors : ', outcomes$SitesWithErrorCnt,
-               '</p>'
-  )
-  
-  if(outcomes$ErrorCount ==0){
-    ot <- paste0(ot, '<p style="color:green">There are no errors in the data that we could find. You are good to load this dataset into the database.</p>' )
-  }else{
-    ot <- paste0(ot, '<p style="color:red">There are some errors in the dataset you have uploaded. 
-                    Please fix these errors in the Excel spreadsheet before trying to upload the data again.</p>' )
-    
-  }
-  
-  paste0(ot)
 }
 
 

@@ -86,7 +86,6 @@ availableDBs <<- c('Portable', "NatSoil")
 #### ^ Load UI components ####
 ui <- fluidPage(
  
-  
   uiOutput("uiHtmlHeader"),
   uiOutput("uiPageHeader"),
   uiOutput("appUI")
@@ -98,6 +97,7 @@ ui <- fluidPage(
 ####. ####
 #### .========     SERVER  ========  ####
 server <- function(input, output,session) {
+  
 
   ####.   ======  App Configuration  ============== ###### 
 
@@ -462,6 +462,7 @@ server <- function(input, output,session) {
     }else{
 
         req(RV$ConfigName)
+
         isolate({
 
          
@@ -482,7 +483,7 @@ server <- function(input, output,session) {
 
         })
     }
-  })
+    })
   
   
   #### ^ Ingest Excel into DB ####
@@ -506,31 +507,56 @@ server <- function(input, output,session) {
       
     }else{
       
-      req(RV$ConfigName)
+      str1 = tags$span(
+        paste('Just Checking ....'),
+        style = "font-size: 20px; color: orange; font-weight: bold;"
+      )
+      str2 = tags$span(
+        HTML(paste("Uploading the data from this spreadsheet will overwrite any existing data for sites already in the staging database.<BR><BR>Are you sure you want to proceed ?")),
+        style = "font-size: 15px; color: #425df5"
+      )
       
-      isolate({
-        
-        RV$XLfile <- input$wgtXLFile$datapath
-        # 
-        # if(RV$ConfigName==RV$Token){
-        #   t=RV$Token
-        # }else{
-        #   t=NULL
-        # }
-        # 
-        outcome <- OS$DB$IngestSiteData$ingestXL(con=RV$DBCon, XLFile=RV$XLfile)
-       # RV$IngestOutcomes <- outcome
-        
-      })
+      showModal(modalDialog(title =  tagList(str1),
+                            str2,
+                            size = 's',
+                            fade=F ,
+                            
+                            footer = tagList(
+                              modalButton("Cancel"),
+                              actionButton(inputId = "wgtInjectDataConfirmButton", "Do It")
+                            )
+      ))
+      
     }
   })
+  
+  observeEvent(input$wgtInjectDataConfirmButton, {
+   
+    removeModal()
+      
+      req(RV$ConfigName)
+        isolate({
+        RV$XLfile <- input$wgtXLFile$datapath
+        outcome <- OS$DB$IngestSiteData$ingestXL(con=RV$DBCon, XLFile=RV$XLfile)
+        RV$ValidationOutcomes <- outcome
+        sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
+        RV$AvailableSitesIDs <- sites
+        
+      })
+  })
+    
+
   
   
   output$uiErrorsTableTitle <-  renderText({
     req(RV$ValidationOutcomes)
     
-    if(nrow(RV$ValidationOutcomes$validationResultsTable) > 0){
-        paste0('<h4>Validation Errors Table</h4>') 
+    if(RV$ValidationOutcomes$Type=='Validation'){
+        if(nrow(RV$ValidationOutcomes$validationResultsTable) > 0){
+            paste0('<h4>Validation Errors Table</h4>') 
+        }
+    }else{
+      
     }
   })
   
@@ -568,6 +594,8 @@ server <- function(input, output,session) {
   output$wgtValidationResultsTable <- renderReactable({
     req(RV$ValidationOutcomes)
 
+    if(RV$ValidationOutcomes$Type=='Validation'){
+      
       if(nrow(RV$ValidationOutcomes$validationResultsTable) > 0){
           shinyjs::show('wgtDownloadErrorTable')
           shinyjs::show('wgtShowAllErrorsLink')
@@ -577,12 +605,20 @@ server <- function(input, output,session) {
           shinyjs::hide('wgtDownloadErrorTable')
           shinyjs::hide('wgtShowAllErrorsLink')
       }
+    }else{
+      
+    }
   })
   
   observe({
     req( RV$ValidationOutcomes$validationResultsTable)
+    
+    if(RV$ValidationOutcomes$Type=='Validation'){
     input$wgtShowAllErrorsLink
     updateReactable("wgtValidationResultsTable", data =  RV$ValidationOutcomes$validationResultsTable)
+    }else{
+      
+    }
   })
   
   observeEvent(input$UI_IngestMap_marker_click, { 
@@ -593,7 +629,7 @@ server <- function(input, output,session) {
     updateReactable("wgtValidationResultsTable", data = filtered)
   })
 
-### ^ Render validation outcomes ####  
+### ^ Render validation & Ingestion outcomes ####  
   output$wgtIngestOutcomeInfo <-  renderText({
     req(RV$ValidationOutcomes)
     renderDataValidationOutcomes(outcomes <- RV$ValidationOutcomes)
@@ -602,7 +638,11 @@ server <- function(input, output,session) {
   #### ^ Render Site Ingestion Map ######  
   output$UI_IngestMap <- renderLeaflet({
     req(RV$ValidationOutcomes)
+    if(RV$ValidationOutcomes$Type=='Validation'){
     renderDataValidationOutcomesSiteMap(outcomes=RV$ValidationOutcomes)
+    }else{
+      
+    }
   })
   
   
@@ -622,7 +662,7 @@ server <- function(input, output,session) {
     withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
     
     xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
-    df <- OS$Reporting$FlatSheet$makeFlatSiteDescriptionSheetfromDB(con=RV$DBCon$Connection, fname=xlPathName, agency='994', proj='NSMP', sid=input$vwgtSiteIDFlatView, oid=1)
+    df <- OS$Reporting$FlatSheet$makeFlatSiteDescriptionSheetfromDB(con=RV$DBCon$Connection, fname=xlPathName, agency=RV$Keys$AgencyCode, proj=RV$Keys$ProjectCode, sid=input$vwgtSiteIDFlatView, oid=1)
     RV$FlatViewSiteDF <- df
     })
     
