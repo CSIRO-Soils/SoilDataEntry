@@ -507,19 +507,12 @@ server <- function(input, output,session) {
     }else{
       
       req(RV$ConfigName)
-      
-      isolate({
-        
+        isolate({
         RV$XLfile <- input$wgtXLFile$datapath
-        # 
-        # if(RV$ConfigName==RV$Token){
-        #   t=RV$Token
-        # }else{
-        #   t=NULL
-        # }
-        # 
         outcome <- OS$DB$IngestSiteData$ingestXL(con=RV$DBCon, XLFile=RV$XLfile)
-       # RV$IngestOutcomes <- outcome
+        RV$ValidationOutcomes <- outcome
+        sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
+        RV$AvailableSitesIDs <- sites
         
       })
     }
@@ -529,8 +522,12 @@ server <- function(input, output,session) {
   output$uiErrorsTableTitle <-  renderText({
     req(RV$ValidationOutcomes)
     
-    if(nrow(RV$ValidationOutcomes$validationResultsTable) > 0){
-        paste0('<h4>Validation Errors Table</h4>') 
+    if(RV$ValidationOutcomes$Type=='Validation'){
+        if(nrow(RV$ValidationOutcomes$validationResultsTable) > 0){
+            paste0('<h4>Validation Errors Table</h4>') 
+        }
+    }else{
+      
     }
   })
   
@@ -568,6 +565,8 @@ server <- function(input, output,session) {
   output$wgtValidationResultsTable <- renderReactable({
     req(RV$ValidationOutcomes)
 
+    if(RV$ValidationOutcomes$Type=='Validation'){
+      
       if(nrow(RV$ValidationOutcomes$validationResultsTable) > 0){
           shinyjs::show('wgtDownloadErrorTable')
           shinyjs::show('wgtShowAllErrorsLink')
@@ -577,12 +576,20 @@ server <- function(input, output,session) {
           shinyjs::hide('wgtDownloadErrorTable')
           shinyjs::hide('wgtShowAllErrorsLink')
       }
+    }else{
+      
+    }
   })
   
   observe({
     req( RV$ValidationOutcomes$validationResultsTable)
+    
+    if(RV$ValidationOutcomes$Type=='Validation'){
     input$wgtShowAllErrorsLink
     updateReactable("wgtValidationResultsTable", data =  RV$ValidationOutcomes$validationResultsTable)
+    }else{
+      
+    }
   })
   
   observeEvent(input$UI_IngestMap_marker_click, { 
@@ -593,7 +600,7 @@ server <- function(input, output,session) {
     updateReactable("wgtValidationResultsTable", data = filtered)
   })
 
-### ^ Render validation outcomes ####  
+### ^ Render validation & Ingestion outcomes ####  
   output$wgtIngestOutcomeInfo <-  renderText({
     req(RV$ValidationOutcomes)
     renderDataValidationOutcomes(outcomes <- RV$ValidationOutcomes)
@@ -602,7 +609,11 @@ server <- function(input, output,session) {
   #### ^ Render Site Ingestion Map ######  
   output$UI_IngestMap <- renderLeaflet({
     req(RV$ValidationOutcomes)
+    if(RV$ValidationOutcomes$Type=='Validation'){
     renderDataValidationOutcomesSiteMap(outcomes=RV$ValidationOutcomes)
+    }else{
+      
+    }
   })
   
   
@@ -622,7 +633,7 @@ server <- function(input, output,session) {
     withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
     
     xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
-    df <- OS$Reporting$FlatSheet$makeFlatSiteDescriptionSheetfromDB(con=RV$DBCon$Connection, fname=xlPathName, agency='994', proj='NSMP', sid=input$vwgtSiteIDFlatView, oid=1)
+    df <- OS$Reporting$FlatSheet$makeFlatSiteDescriptionSheetfromDB(con=RV$DBCon$Connection, fname=xlPathName, agency=RV$Keys$AgencyCode, proj=RV$Keys$ProjectCode, sid=input$vwgtSiteIDFlatView, oid=1)
     RV$FlatViewSiteDF <- df
     })
     

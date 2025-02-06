@@ -7,6 +7,59 @@ get_DBHelpers <- function()
   DB <- list()
   
   
+  makeParameterInsertQuery <- function(sql){
+    
+    sql <- str_replace_all(sql, "[']", '')
+    
+    bits = str_split(sql, 'VALUES')
+    
+    vals <- bits[[1]][2]
+    s1 <-str_remove(vals, '[(]')
+    s2 <-str_remove(s1,  '[)]')
+    sqlRawParams <- str_trim(str_split(s2, ',')[[1]])
+    
+    flds <- bits[[1]][1]
+    f1 <-str_split(flds, '[(]')
+    f2 <-str_remove(f1[[1]][2],  '[)]')
+    sqlRawFields <- str_trim(str_split(f2, ',')[[1]])
+    
+    paramSQLStr <- '( '
+    paramList <- vector(mode = "list", length = length(ps))
+    
+    for (i in 1:length(sqlRawParams)) {
+      paramSQLStr <- paste0(paramSQLStr, ' ?, ')
+      
+      fld <- sqlRawFields[i]
+      
+      if(fld %in% c('s_date_desc', 's_trans_date', 'o_date_desc')){
+        
+        y <- str_sub(sqlRawParams[i], 1, 4)
+        m <- str_sub(sqlRawParams[i], 5, 6)
+        d <- str_sub(sqlRawParams[i], 7, 8)
+        
+        dte <- paste0(y, '-', m, '-', d)
+        
+        paramList[[i]] <- as.character(dte)
+      }else{
+        paramList[[i]] <-  sqlRawParams[i]
+      }
+    }
+    
+    paramSQLStr <-  paste0(gsub(", $" ," ", paramSQLStr), ')')
+    
+    outSql <- paste0(bits[[1]][1], ' VALUES ', paramSQLStr) 
+    
+    ol <- list()
+    # ol$Vals <- list('994', 'NSMP', 'N20558', as.character('2001-01-01'), as.character('2001-01-01'))  ### this list works for reference
+    
+    ol$SQL <- outSql
+    ol$Vals <- paramList
+    
+    return(ol)
+    
+  }
+  
+  
   DB$doQuery <- function(con, sql){
         res <- dbSendQuery(con, sql)
         rows <- dbFetch(res)
@@ -16,13 +69,28 @@ get_DBHelpers <- function()
       
   DB$doInsert <- function(con, sql){
         if(!is.null(sql)){
-        res <- dbSendStatement (con, sql)
-        rows <- dbClearResult(res)
+        
+         ql <- makeParameterInsertQuery(sql)
+          res <- dbSendStatement(con, ql$SQL)
+          dbBind(res,ql$Vals)
+          rows <- dbGetRowsAffected(res)
+          dbClearResult(res)
+          
         return(rows)
         }else{
           return(0)
         }
-      }
+  }
+  
+  DB$doInsertUsingRawSQL <- function(con, sql){
+    if(!is.null(sql)){
+      res <- dbSendStatement (con, sql)
+      rows <- dbClearResult(res)
+      return(rows)
+    }else{
+      return(0)
+    }
+  }
       
   DB$doExec <- function(con, sql){
         res <- dbExecute (con, sql)

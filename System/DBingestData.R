@@ -37,8 +37,8 @@ get_IngestFunctions <- function()
           idxs <- match(OS$Validation$Constants$Sheetnames, sheets)
           siteSheets <- sheets[-idxs]
           
-          withProgress(message = paste0('Ingesting soil data into the Database....'), max=length(siteSheets), value = 0, {
-            incProgress(0.1, detail = paste("Reading data ..."))
+          withProgress(message = paste0('Ingesting soil data....'), max=length(siteSheets)+1, value = 0, {
+            incProgress(0.1, detail = paste("Reading configuration data ..."))
           
           excelInfo <<- OS$IngestHelpers$getExcelFormInfo(fname)
           tablesInSheet <<- unique(excelInfo$tableName)
@@ -87,7 +87,6 @@ get_IngestFunctions <- function()
             
             print(paste0('Ingesting ', s))
             sn <- siteSheets[s]
-           # dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
             dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sn, skipEmptyRows = F, skipEmptyCols = F)
             
             if(SheetHasData(dataSheet, excelInfo)){
@@ -112,6 +111,7 @@ get_IngestFunctions <- function()
             }
             
             sql <- OS$IngestHelpers$makeSQLFromForm(sheet=dataSheet, formRegion='S',tableName = 'SITES')
+            print(sql)
             OS$DB$Helpers$doInsert(ingestCon,sql)
             sql <- OS$IngestHelpers$makeSQLFromForm(sheet=dataSheet, formRegion='S',tableName = 'OBSERVATIONS')
             OS$DB$Helpers$doInsert(ingestCon,sql)
@@ -139,27 +139,32 @@ get_IngestFunctions <- function()
         
         
         ol <- list()
-        
+        ol$Type='Ingestion'
         bbox <- OS$DB$NatSoilQueries$getBoundingBoxForProject(ingestCon, agencyCode, projCode)
         
-        ot <- paste0('<H3>Finished loading data</H3><BR>')
-        ot <- paste0(ot, '<p>Database Name : ', con$Name , '</p>')
-        ot <- paste0(ot, '<p>Agency Code : ', agencyCode, '</p><p>Project Code : ', projCode)
-        ot <- paste0(ot, '<p>Number of Sites : ', length(siteSheets), '</p><p>Number of Horizons : ', hcnt)
-        
+        ot <- paste0('<H3 style="color:green;"><b>Finished loading data into the Staging Database</b></H3><BR>')
+         ot <- paste0(ot, '<p>Well done, you have successfully loaded you soil site data into the Staging Database.
+                              You can now use the Tabs above to explore and review your data.</p><BR>')
+         
+        ot <- paste0(ot, '<p><b>Database Name : </b>', con$Name , '</p>')
+        ot <- paste0(ot, '<p><b>Agency Code : </b>', agencyCode, '</p>' )
+        ot <- paste0(ot, '<p><b>Project Code : </b>', projCode, '</p>')
+        ot <- paste0(ot, '<p><b>Number of Sites : </b>', length(siteSheets), '</p>')
+
+
         if(nrow(bbox)==0){
-          ot <- paste0(ot, '<p>No site locations have been recorded</p>')
+          ot <- paste0(ot, '<p><b>No site locations have been recorded</b></p>')
           ol$HasLocs=F
         }else{
-          ot <- paste0(ot, '<p>Minimum Longitude : ', bbox$minx, '</p><p>Maximum Longitude : ', bbox$maxx, '</p>')
-          ot <- paste0(ot, '<p>Minimum Latitude : ', bbox$miny, '</p><p>Maximum Latitude : ', bbox$maxy, '</p>')
+          ot <- paste0(ot, '<p><b>Minimum Longitude : </b>', bbox$minx, '</p><p><b>Maximum Longitude : </b>', bbox$maxx, '</p>')
+          ot <- paste0(ot, '<p><b>Minimum Latitude : </b>', bbox$miny, '</p><p><b>Maximum Latitude : </b>', bbox$maxy, '</p>')
           ol$HasLocs=T
         }
-        
+
         ol$html <- ot
         ol$locs <- OS$DB$NatSoilQueries$getProjectLocationInfo(ingestCon, agencyCode, projCode)
         
-        dbDisconnect(ingestCon)
+      #  dbDisconnect(ingestCon)
           return(ol)
       }
 

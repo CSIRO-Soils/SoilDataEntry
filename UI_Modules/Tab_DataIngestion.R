@@ -44,8 +44,8 @@ Tab_DataIngestion_UI<- function() {
              mainPanel(
                
                fluidRow(
-                 column(6, htmlOutput('wgtIngestOutcomeInfo')),
-                        column(6, HTML('<BR>'), leafletOutput("UI_IngestMap", width = 350, height = 250),HTML('<BR>')
+                 column(8, htmlOutput('wgtIngestOutcomeInfo')),
+                        column(4, HTML('<BR>'), leafletOutput("UI_IngestMap", width = 350, height = 250),HTML('<BR>')
                         ),
                
                fluidRow(

@@ -174,6 +174,7 @@ get_DataValidationFunctions <- function(){
     }
     
     ol <- list()
+    ol$Type='Validation'
     ol$ErrorCount = errorCnt
     ol$validationResultsTable <- odf
     ol$Sites <- sitesDF
