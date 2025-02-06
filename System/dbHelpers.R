@@ -24,7 +24,7 @@ get_DBHelpers <- function()
     sqlRawFields <- str_trim(str_split(f2, ',')[[1]])
     
     paramSQLStr <- '( '
-    paramList <- vector(mode = "list", length = length(ps))
+    paramList <- vector(mode = "list", length = length(sqlRawParams))
     
     for (i in 1:length(sqlRawParams)) {
       paramSQLStr <- paste0(paramSQLStr, ' ?, ')
