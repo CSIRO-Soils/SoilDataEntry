@@ -78,9 +78,9 @@ source("Helpers/busyHelper.R")
 
 availableDBs <<- c('Portable', "NatSoil")
 
-appcon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
-codes <<- OS$DB$Helpers$doQuery(appcon, 'select * from Codes')
-dbDisconnect(appcon)
+ appcon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
+ codes <<- OS$DB$Helpers$doQuery(appcon, 'select * from Codes')
+ dbDisconnect(appcon)
 ####. ####
 #### .========     UI  ========  ####
 #### ^ Load UI components ####
