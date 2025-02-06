@@ -10,13 +10,9 @@ Tab_DataIngestion_UI<- function() {
                             HTML(paste0('<font color="#425df5"><H4><b>Ingest Site Description Sheets</b></H4></font>')),
                             HTML('<BR>'),
                             downloadLink('wgtDownloadDataEntrySheet', label = 'Download Site Data Entry Sheet'),
-                            
-                            actionButton('wgtPopTest', 'test', class = "btn-success"),
-                            
                             HTML('<BR><BR>'),
                             uiOutput("uiIngestTokenText"),
 
-                            
                             fileInput('wgtXLFile', 'Drag your sites spreadsheet here')),
                           
                           shinyjs::hidden( actionButton('wgtValidateButton', 'Validate Site Data', class = "btn-success")),
