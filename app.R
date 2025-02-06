@@ -696,7 +696,7 @@ server <- function(input, output,session) {
   #### ^ Render Site Summary Map ######  
   output$UI_SiteSummaryMap <- renderLeaflet({
     req(RV$SiteSummaryInfo)
-    renderSiteSummaryMap(RV$SiteSummaryInfo)
+   # renderSiteSummaryMap(RV$SiteSummaryInfo)
   })
   
   
