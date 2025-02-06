@@ -54,7 +54,6 @@ get_DBHelpers <- function()
     
     ol$SQL <- outSql
     ol$Vals <- paramList
-    print('Paramterised query')
     return(ol)
     
   }
