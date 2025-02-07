@@ -12,6 +12,8 @@ Tab_DataIngestion_UI<- function() {
                             downloadLink('wgtDownloadDataEntrySheet', label = 'Download Site Data Entry Sheet'),
                             HTML('<BR><BR>'),
                             #uiOutput("uiIngestTokenText"),
+                            
+                            HTML('Hi From Me'),
 
                             fileInput('wgtXLFile', 'Drag your sites spreadsheet here')),
                           
