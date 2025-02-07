@@ -13,7 +13,6 @@ Tab_DataIngestion_UI<- function() {
                             HTML('<BR><BR>'),
                             #uiOutput("uiIngestTokenText"),
                             
-                            HTML('Hi From Me'),
 
                             fileInput('wgtXLFile', 'Drag your sites spreadsheet here')),
                           
