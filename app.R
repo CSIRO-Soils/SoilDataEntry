@@ -15,14 +15,6 @@
 ##### .##########################  ####
 
 
-# http://127.0.0.1:3902/?config=NSMP&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
-#  ?config=NSMP&token=Burnie&adminkey=123
-#  ?config=PacificSoils&agencycode=994&projectcode=PACSOILS
-#  ?config=NSMP&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
-#  ?config=PacificSoils&agencycode=994&projectcode=NSMP&token=Burnie&adminkey=123
-
-#?config=NSMP&agencycode=994&projectcode=NSMP&token=Capital
-
 library(shiny)
 library(shinyjs)
 library(shinyalert)
@@ -127,19 +119,18 @@ server <- function(input, output,session) {
       RV$Keys$AdminKey <- query$adminkey
     }else{
       if(develMode){
-        RV$Keys$Token <- OS$AppConfigs$DevelopToken
         RV$ConfigName <- OS$AppConfigs$DevelopConfigName
         RV$Keys$AgencyCode <- OS$AppConfigs$DevelopAgency
         RV$Keys$ProjectCode <- OS$AppConfigs$DevelopProject
-        RV$Keys$AdminKey <- OS$AppConfigs$ShowAdminKey
+        RV$Keys$Token <- OS$AppConfigs$DevelopToken
+     #   RV$Keys$AdminKey <- OS$AppConfigs$ShowAdminKey
+        RV$Keys$AdminKey <- NULL
       }else{
         RV$Keys$Token <- 'None'
         RV$ConfigName <- OS$AppConfigs$DevelopToken
-        RV$Keys$AdminKey <- 'None'
+        RV$Keys$AdminKey <- NULL
       }
     }
-    
-   
 
     if(!is.null(RV$ConfigName) & !is.null(RV$Keys$AgencyCode)  & !is.null(RV$Keys$ProjectCode)) 
     {
@@ -273,12 +264,6 @@ server <- function(input, output,session) {
   })
   
   
-  #### Dynamic IngestionTab Token Box Rendering 
-  # output$uiIngestTokenText <- renderUI({
-  #   req(RV$ConfigName, RV$ConfigValues)
-  #    OS$UI$DynamicUI$ShowHideIngestionTokenTextbox(config=RV$ConfigName, token=RV$Token)
-  # })
-  
   ###.####
   #### ^ About Page  ####### 
   #### ^^ Dynamic About Page Rendering  ####### 
@@ -293,26 +278,6 @@ server <- function(input, output,session) {
    
   
   
-  # Dynamic Tabs Rendering Depending on Role 
-  # observe({
-  #   req(RV$Keys$Token)
-  #     OS$UI$DynamicUI$ShowHideTabs(RV$ConfigName, RV$Keys$Token)
-  # })
-  
-  #### ^ Show or hide the Admin Tab   
-  # observe({
-  #   req(RV$ConfigName)
-  #   OS$UI$DynamicUI$ShowHideAdminTab(RV$ConfigName, RV$AdminKey)
-  # })
-  
-  # Show DB Connection Info on Admin Tab  
-  # output$uiAdminDBCon <- renderUI({
-  #   
-  #   req(RV$CurrentDBCon)
-  #   html <- paste0('<BR>App is connected to <font color="darkgreen"><b>', RV$CurrentDBCon$Name, '</b></font> - ', RV$CurrentDBCon$Description)
-  #   HTML(html)
-  # })
-  
 ####.  ####  
 ####. ======  PAGES  ============ ####
   ####.  ####
@@ -321,15 +286,14 @@ server <- function(input, output,session) {
   
   #### ^ Click show site description button to populate data ####
   observeEvent(input$vwgtViewSiteButton,{
-    #req( RV$DBcon, input$vwgtAgency, input$vwgtProject, input$vwgtSiteID, input$vwgtObsID)
-    
+
     req( RV$DBCon)
     con <- RV$DBCon$Connection
 
     withBusyIndicatorServer("vwgtViewSiteButton", {
       
-        RV$CurrentSiteLocation <- OS$DB$NatSoilQueries$getLocationInfo(con, '994', 'NSMP', input$vwgtSiteID, input$vwgtObsID)
-        RV$SiteDesc <- getSiteDescription(con=con, agencyCode='994', projectCode='NSMP', siteID=input$vwgtSiteID, obsID=input$vwgtObsID)
+        RV$CurrentSiteLocation <- OS$DB$NatSoilQueries$getLocationInfo(con, RV$Keys$AgencyCode, RV$Keys$ProjectCode, input$vwgtSiteID, input$vwgtObsID)
+        RV$SiteDesc <- getSiteDescription(con=con, agencyCode=RV$Keys$AgencyCode, projectCode=RV$Keys$ProjectCode, siteID=input$vwgtSiteID, obsID=input$vwgtObsID)
         RV$ProfPlotData <- RV$SiteDesc$ProfPlotData
         if(nrow(RV$SiteDesc$LabData)>0){
           shinyjs::show('UI_SiteDescription_LabResults')
@@ -352,12 +316,12 @@ server <- function(input, output,session) {
   #### ^ Download Site Description   #### 
   output$wgtDownloadSiteSheetBtn <- downloadHandler(
     filename = function() {
-      paste0('NatSoil_', '994', "_", 'NSMP',  "_",input$vwgtSiteID, "_",input$vwgtObsID, '.docx')
+      paste0('NatSoil_', RV$Keys$AgencyCode, "_", RV$Keys$ProjectCode,  "_",input$vwgtSiteID, '.docx')
     },
     content = function(file) {
 
       of <-  tempfile(pattern = 'SitesDesc_', fileext = '.docx') 
-      ProfPlotPath <- 'C:/Temp/profile.PNG'
+      #ProfPlotPath <- 'C:/Temp/profile.PNG'
       if(nrow( RV$ProfPlotData) > 0){
         saveSoilProfileDiagram('sid', p= RV$SiteDesc$ProfPlotData,  RV$SiteDesc$ProfilePlotPath)
         ProfPlotPath <- RV$SiteDesc$ProfilePlotPath
@@ -368,15 +332,6 @@ server <- function(input, output,session) {
       file.copy(of, file)
     }
   )
-  
-####  Render Project Description   
-  # output$pwgtAllProjectsDescription = renderText({
-  #   #req(input$vwgtAgency, input$vwgtProject)
-  #   req( RV$DBCon)
-  #   projs <- RV$AllProjectsInfo[RV$AllProjectsInfo$AgencyCode=='NSMP' & RV$AllProjectsInfo$proj_code=='NSMP', ]
-  #   phtml <- getProjectDescriptionHTML(p=projs)
-  #   phtml
-  # })
   
   #### ^ Render profile diagram   ####  
   
@@ -404,7 +359,8 @@ server <- function(input, output,session) {
       if(RV$ConfigName =='NSMP'){
       tof <- str_replace(RV$DataEntryFileName, '.xlsx', paste0('_', RV$Keys$ProjectCode, '_', RV$Keys$Token, '.xlsx'))
       }else{
-        tof <- str_replace(RV$DataEntryFileName, '.xlsx', paste0('_', RV$Keys$ProjectCode, '.xlsx'))
+        #tof <- str_replace(RV$DataEntryFileName, '.xlsx', paste0('_', RV$Keys$ProjectCode, '.xlsx'))
+        tof <- RV$DataEntryFileName
       }
     },
     content = function(file) {
@@ -414,11 +370,12 @@ server <- function(input, output,session) {
       
       if(RV$ConfigName =='NSMP'){
         downloadPath <- OS$DataEntry$generateNSMPSiteSheet(fname=xlPathName,  token= RV$Keys$Token)
+        on.exit(unlink(downloadPath))
       }else{
         downloadPath <- xlPathName
       }
       file.copy(downloadPath, file, overwrite = T)
-      on.exit(unlink(downloadPath))
+
     }
   )
   
@@ -659,12 +616,12 @@ server <- function(input, output,session) {
   observeEvent(input$vwgtViewSiteButtonFlatView, {
     
     req(RV$DBCon, input$vwgtSiteIDFlatView)
-    withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
+   # withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
     
     xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
     df <- OS$Reporting$FlatSheet$makeFlatSiteDescriptionSheetfromDB(con=RV$DBCon$Connection, fname=xlPathName, agency=RV$Keys$AgencyCode, proj=RV$Keys$ProjectCode, sid=input$vwgtSiteIDFlatView, oid=1)
     RV$FlatViewSiteDF <- df
-    })
+  #  })
     
   })
   

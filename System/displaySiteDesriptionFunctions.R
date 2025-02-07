@@ -44,6 +44,8 @@ getProjectDescriptionHTML <- function(p){
 getSiteDescription <- function(con, agencyCode, projectCode, siteID, obsID){
   
  ol<-list()
+ 
+ print('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
 
 agencyInfo <- OS$DB$NatSoilQueries$getAgencyInfo(con, agencyCode = agencyCode)[1,]
 projectInfo <- OS$DB$NatSoilQueries$getProjectInfo(con, agencyCode = agencyCode, projectCode=projectCode)[1,]
@@ -69,7 +71,7 @@ html <- paste0('<BR><table>
                    <col span="1" style="width: 500px;">
                    <col span="1" style="width: 500px;">
                 </colgroup><tbody>
-                 <tr><td><b>Profile ID: </b>', agencyC, '_', projC , '_', siteID, '_',obsID, '</td>')
+                 <tr><td><b>Profile ID: </b>', siteID, '</td>')
 
 ol$AgencyCode <- paste0( agencyC)
 ol$ProjectCode <- paste0( projC)
@@ -308,7 +310,6 @@ for (i in 1:nrow(horizonInfo)) {
   rl$ProfilePlotPath <-  tempfile(pattern = 'ProfPlot_', fileext = '.png')
   rl$HorizonText <- htext
   
- # saveRDS(rl, 'c:/temp/siteInfo.rds')
 
  return(rl) 
 

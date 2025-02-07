@@ -31,6 +31,8 @@ get_FlatSheetFunctions <- function()
       fs$makeFlatSiteDescriptionSheetfromDB <- function(con, fname, agency, proj, sid, oid){
         
        # fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/NationalSoilMonitoring/NSMData/www/Configs/NSMP/Data Entry Template - NSMP.xlsx'
+       # fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry/www/Configs/PacificSoils/Data Entry Template - PacificSoils.xlsx'
+        
         
         keys <<- c(COLOURS='col', MOTTLES='mott', COARSE_FRAGS='cf', STRUCTURES='str', SEGREGATIONS='seg', 
                   STRENGTHS='strg', CUTANS='cutan', PANS='pan', ROOTS='root', PHS='ph')
@@ -188,7 +190,7 @@ get_FlatSheetFunctions <- function()
         tablenames <- t1[-1]
         
         for(j in 1:length(tablenames)){
-      
+          
           tn <- tablenames[j]
           si <- excelInfo[excelInfo$tableName==tn,]
           flds <- unique(si[,c('tableName','dbFld')])

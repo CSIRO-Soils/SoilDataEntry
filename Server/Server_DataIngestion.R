@@ -77,16 +77,12 @@ renderDataValidationOutcomesSiteMap<- function(outcomes){
   
   sfdf <- st_as_sf( outcomes$Sites, coords = c("x", "y"), crs = 4326)
   b <- st_bbox(sfdf)
-  
-  print(head(sfdf))
-  if(nrow(outcomes$Sites) == 1){
-    
-    b$xmin <-  b$xmin - 0.01
-    b$xymin <-  b$ymin - 0.01
-    b$ymax <-  b$ymax + 0.01
-    b$xmax <-  b$xmax + 0.01
-    
-  }
+ 
+   expand = 1
+  b$xmin <-  b$xmin - expand
+  b$xymin <-  b$ymin - expand
+  b$ymax <-  b$ymax + expand
+  b$xmax <-  b$xmax + expand
   
   getColor <- function(sfdf) {
     sapply(sfdf$ErrorCnt, function(ErrorCnt) {

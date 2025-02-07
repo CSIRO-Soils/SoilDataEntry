@@ -24,15 +24,12 @@ get_DataEntryFunctions <- function()
 
         tmpD <- tempdir()
         
-      #  tmpD <- 'C:/temp/xltemp'
-        
         if(!dir.exists(tmpD)){dir.create(tmpD, recursive = T)}
         b <- basename(fname)
         tof <-  paste0(tmpD, '/', str_replace(b, '.xlsx', paste0('_', token, '.xlsx')))
         if(file.exists(tof)){unlink(tof)}
 
          wb <- openxlsx::loadWorkbook(file.path(fname) )
-        #setStyleAction(wb, XLC$"STYLE_ACTION.DATA_FORMAT_ONLY")
 
         con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
         df <- OS$DB$Helpers$doQuery(con, paste0("select * from project.PROPOSED_SITES where ps_token='", token, "'"))

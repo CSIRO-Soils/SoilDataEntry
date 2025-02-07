@@ -58,9 +58,23 @@ getListOfAvailableSites <- function(con, keys){
   
   if(keys$ProjectCode=='NSMP'){
     
+    if(is.null(keys$AdminKey)){
     sql <- paste0("SELECT nat.[s_id] FROM [NatSoil].[project].[PROPOSED_SITES] nat JOIN [NSMP_Holding].[dbo].[SITES] nsmp
             ON nat.[agency_code] = nsmp.[agency_code] AND nat.[proj_code] = nsmp.[proj_code] AND nat.[s_id] = nsmp.[s_id]
             where nat.agency_code='", keys$AgencyCode, "' and nat.proj_code='", keys$ProjectCode, "' and ps_token='", keys$Token, "'")
+    }else{
+      
+      if(keys$AdminKey==OS$AppConfigs$ShowAdminKey){
+          sql <- paste0("SELECT nat.[s_id] FROM [NatSoil].[project].[PROPOSED_SITES] nat JOIN [NSMP_Holding].[dbo].[SITES] nsmp
+                ON nat.[agency_code] = nsmp.[agency_code] AND nat.[proj_code] = nsmp.[proj_code] AND nat.[s_id] = nsmp.[s_id]
+                where nat.agency_code='", keys$AgencyCode, "' and nat.proj_code='", keys$ProjectCode, "'")
+      }else{
+          sql <- paste0("SELECT nat.[s_id] FROM [NatSoil].[project].[PROPOSED_SITES] nat JOIN [NSMP_Holding].[dbo].[SITES] nsmp
+                ON nat.[agency_code] = nsmp.[agency_code] AND nat.[proj_code] = nsmp.[proj_code] AND nat.[s_id] = nsmp.[s_id]
+                where nat.agency_code='", keys$AgencyCode, "' and nat.proj_code='", keys$ProjectCode, "' and ps_token='", keys$Token, "'")
+      }
+      
+    }
     
 
   }else{

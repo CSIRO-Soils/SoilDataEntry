@@ -111,7 +111,6 @@ get_IngestFunctions <- function()
             }
             
             sql <- OS$IngestHelpers$makeSQLFromForm(sheet=dataSheet, formRegion='S',tableName = 'SITES')
-            print(sql)
             OS$DB$Helpers$doInsert(ingestCon,sql)
             sql <- OS$IngestHelpers$makeSQLFromForm(sheet=dataSheet, formRegion='S',tableName = 'OBSERVATIONS')
             OS$DB$Helpers$doInsert(ingestCon,sql)

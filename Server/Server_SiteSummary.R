@@ -13,9 +13,9 @@ getSiteSummaryInfo <- function(con, keys, configName=''){
   ol <- list()
   
   if(configName=='NSMP'){
-    sdf <- OS$DB$SiteSummaryQueries$getSitesInfo_NSMP(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode, token=keys$Token)
+    sdf <- OS$DB$SiteSummaryQueries$getSitesInfo_NSMP(con$Connection, keys)
     pps <- OS$DB$SiteSummaryQueries$getNSMPPotentialSites(con$Connection, keys)
-    hors <- OS$DB$SiteSummaryQueries$getHorizonInfo_NSMP(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode, token=keys$Token)
+    hors <- OS$DB$SiteSummaryQueries$getHorizonInfo_NSMP(con$Connection, keys)
     envelopes <- OS$DB$SiteSummaryQueries$getSiteEnvelopes_NSMP(con$Connection, keys, sites=as.character(sdf$s_id))
         if(nrow(envelopes>0)){
           polys <- st_as_sf(envelopes, wkt = 'geom', crs=4326)
@@ -23,8 +23,9 @@ getSiteSummaryInfo <- function(con, keys, configName=''){
           polys=NULL
         }
     }else{
-    sdf <- OS$DB$SiteSummaryQueries$GetSitesInfo(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
-    hors <- OS$DB$SiteSummaryQueries$getHorizonInfo(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
+      
+    sdf <- OS$DB$SiteSummaryQueries$GetSitesInfo(con$Connection, keys)
+    hors <- OS$DB$SiteSummaryQueries$getHorizonInfo(con$Connection, keys)
     
      }
  
@@ -120,14 +121,13 @@ renderSiteSummaryMap<- function(si){
   sfdf <- st_as_sf( df, coords = c("o_longitude_GDA94", "o_latitude_GDA94"), crs = 4326)
   b <- st_bbox(sfdf)
   
-  if(nrow(df) == 1){
+  expand = 1
+    b$xmin <-  b$xmin - expand
+    b$xymin <-  b$ymin - expand
+    b$ymax <-  b$ymax + expand
+    b$xmax <-  b$xmax + expand
     
-    b$xmin <-  b$xmin - 0.01
-    b$xymin <-  b$ymin - 0.01
-    b$ymax <-  b$ymax + 0.01
-    b$xmax <-  b$xmax + 0.01
-    
-  }
+
   
 
   icons <- awesomeIcons(
@@ -155,8 +155,6 @@ renderSiteSummaryMap<- function(si){
    # addCircleMarkers( data=sfdf, radius=6, color = ~pal(Result)), stroke=FALSE, fillOpacity=1, group="locations")
     addAwesomeMarkers(data=sfdf, icon=icons, label=~as.character(s_id), layerId = ~as.character(s_id))
  
-
- print(si$Envelopes)
  if(!is.null(si$Envelopes)){
   
    print(si$Envelopes)
@@ -168,6 +166,7 @@ renderSiteSummaryMap<- function(si){
 
 formatHorizonsSummaryTable <- function(si){
   
+
   df <- si$Horizons
   
   if(si$ConfigName == 'NSMP'){
@@ -214,7 +213,7 @@ formatHorizonsSummaryTable <- function(si){
     
     obsflds <- c("s_id", "o_date_desc", "o_desc_by", "o_latitude_GDA94", "o_longitude_GDA94", 
                  "o_type", "s_slope", "s_morph_type", 
-                 "s_elem_type", "s_patt_type", "lu_code",
+                 "s_elem_type", "s_patt_type", 
                  "o_asc_ord", "o_asc_subord", "o_asc_gg", "o_asc_subg", 
                  "o_notes", "s_notes" )
     
@@ -242,8 +241,8 @@ formatHorizonsSummaryTable <- function(si){
                     o_asc_subord = colDef(maxWidth = 40, name = "ASO"),
                     o_asc_gg = colDef(maxWidth = 40, name = "AGg"),
                     o_asc_subg = colDef(maxWidth = 40, name = "ASG"),
-                    s_notes = colDef(maxWidth = 100, name = "S_Notes"),
-                    o_notes = colDef(maxWidth = 100, name = "O_Notes")
+                    s_notes = colDef(maxWidth = 500, name = "S_Notes"),
+                    o_notes = colDef(maxWidth = 500, name = "O_Notes")
                   ) 
   }
   
