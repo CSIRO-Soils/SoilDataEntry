@@ -100,6 +100,7 @@ server <- function(input, output,session) {
   RV$SiteSummaryInfo <- NULL
   RV$AvailableSitesIDs <- NULL
   RV$CurrentPhotoInfoTable <- NULL
+  RV$PublishedAndDraftSiteInfo <- NULL
   
   observe({
      cd <-reactiveValuesToList(session$clientData)
@@ -157,7 +158,8 @@ server <- function(input, output,session) {
       print('Connecting to DB')
       RV$DBCon <- con
      
-  #    updateTabsetPanel(session, "MainTabsetPanel", selected = "Sites Summary"    )
+     # updateTabsetPanel(session, "MainTabsetPanel", selected = "Laboratory Data Ingestion")
+      updateTabsetPanel(session, "MainTabsetPanel", selected = "Publish Sites")
   })
 
   
@@ -206,8 +208,12 @@ server <- function(input, output,session) {
   observe({
     req(RV$DBCon, RV$Keys)
     sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
-   
     RV$AvailableSitesIDs <- sites
+    
+    if(RV$ConfigName == 'NSMP'){
+      RV$PublishedAndDraftSiteInfo$Draft <- getDraftOrPublishedSites(type='Draft', keys=RV$Keys)
+      RV$PublishedAndDraftSiteInfo$Published<- getDraftOrPublishedSites(type='Published', keys=RV$Keys)
+    }
   }) 
   
   observe({
@@ -293,7 +299,7 @@ server <- function(input, output,session) {
     withBusyIndicatorServer("vwgtViewSiteButton", {
       
         RV$CurrentSiteLocation <- OS$DB$NatSoilQueries$getLocationInfo(con, RV$Keys$AgencyCode, RV$Keys$ProjectCode, input$vwgtSiteID, input$vwgtObsID)
-        RV$SiteDesc <- getSiteDescription(con=con, agencyCode=RV$Keys$AgencyCode, projectCode=RV$Keys$ProjectCode, siteID=input$vwgtSiteID, obsID=input$vwgtObsID)
+        RV$SiteDesc <- getSiteDescription(con=con, agencyCode=RV$Keys$AgencyCode, projectCode=RV$Keys$ProjectCode, siteID=input$vwgtSiteID, obsID=1)
         RV$ProfPlotData <- RV$SiteDesc$ProfPlotData
         if(nrow(RV$SiteDesc$LabData)>0){
           shinyjs::show('UI_SiteDescription_LabResults')
@@ -348,6 +354,20 @@ server <- function(input, output,session) {
   
   
   
+  #### ^ Render Site View Publish type   ####  
+  output$uiSiteViewSitePublishType <-  renderText({
+    req(RV$ConfigName, input$vwgtSiteID)
+    if(RV$ConfigName=='NSMP'){
+      shinyjs::show('uiSiteViewSitePublishType')
+      if(input$vwgtSiteID %in% RV$PublishedAndDraftSiteInfo$Draft$s_id){
+        message <- 'This site is <span style="color:orange">Draft</span><BR><BR>'
+      }else if (input$vwgtSiteID %in% RV$PublishedAndDraftSiteInfo$Published$s_id) {
+        message <- 'This site is <span style="color:green">Published</span><BR><BR>'
+      }
+      paste0(HTML(message))
+    }
+  })
+  
 
   
   ####.####
@@ -379,7 +399,7 @@ server <- function(input, output,session) {
     }
   )
   
-  #### ^ Upload Excel File ####
+  #### ^ Upload Soil Morphology Excel File ####
   output$wgtIngestFileInfo <-  renderText({
     
     shinyjs::hide('wgtIngestButton')
@@ -387,7 +407,7 @@ server <- function(input, output,session) {
     req(file)
     fname <- file$datapath
     RVExcelFile <- file$datapath
-    r <- OS$IngestHelpers$checkXLFileFormat(fname, 'Site Data Sheet')
+    r <- OS$IngestHelpers$checkXLLabDataFileFormat(fname, 'LabData Sheet')
     if(!r$OK){
       
     }else{
@@ -395,6 +415,10 @@ server <- function(input, output,session) {
     }
     paste0(r$Message)
   })
+  
+  
+
+  
   
   
   #### ^ Validate Site Data ####
@@ -604,7 +628,27 @@ server <- function(input, output,session) {
   
   
 
-
+####. ####
+  ####  ***** Lab Data Ingestion  *****  #####
+  #### ^ Upload Lab Data Excel File ####
+  output$wgtLabDataIngestFileInfo <-  renderText({
+    
+    shinyjs::hide('wgtValidateButtonLabResults')
+    file <- input$wgtXLFileLabData
+    req(file)
+    fname <- file$datapath
+    r <- OS$IngestHelpers$checkXLLabDataFileFormat(fname)
+    print(r)
+    if(!r$OK){
+      
+    }else{
+      print('mmmMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM')
+      shinyjs::show('wgtValidateButtonLabResults')
+    }
+    print(r$Message)
+    paste0(r$Message)
+  })
+  
   
   
 
@@ -633,7 +677,19 @@ server <- function(input, output,session) {
   })
   
   
-  
+  #### ^ Render Publish type   ####  
+  output$uiFlatViewSitePublishType<-  renderText({
+    req(RV$ConfigName, input$vwgtSiteIDFlatView)
+    if(RV$ConfigName=='NSMP'){
+      shinyjs::show('uiSiteViewSitePublishType')
+      if(input$vwgtSiteIDFlatView %in% RV$PublishedAndDraftSiteInfo$Draft$s_id){
+        message <- 'This site is  <span style="color:orange">Draft</span><BR><BR>'
+      }else if (input$vwgtSiteIDFlatView %in% RV$PublishedAndDraftSiteInfo$Published$s_id) {
+        message <- 'This site is  <span style="color:green">Published</span><BR><BR>'
+      }
+      paste0(message)
+    }
+  })
   
   
   ####.####
@@ -766,6 +822,95 @@ server <- function(input, output,session) {
       on.exit(unlink(outfile))
     }
   )
+  
+  
+  
+  
+  ###.####
+  #### ***** Publish Sites to NatSoil ***** #####
+  
+  
+  output$wgtHoldingSitesTable <- renderReactable({
+    req(RV$PublishedAndDraftSiteInfo)
+    #df <- getDraftOrPublishedSites(type='Draft', keys=RV$Keys)
+    df <- RV$PublishedAndDraftSiteInfo$Draft
+    reactable(
+      df,
+      selection = "multiple",
+      columns = list(
+        .selection = colDef(
+          headerStyle = list(pointerEvents = "none")
+        )
+      ),
+      theme = reactableTheme(
+        headerStyle = list("& input[type='checkbox']" = list(display = "none"))
+      )
+    )
+    
+  })
+  
+  output$wgtPublishedSitesTable <- renderReactable({
+    req(RV$DBCon)
+    # df <-   df <- getDraftOrPublishedSites(type='Published', keys=RV$Keys)
+    # reactable(df)
+    reactable(RV$PublishedAndDraftSiteInfo$Published)
+  })
+    
+  
+  observeEvent(input$wgtPublishSitesBtn, {
+    
+    req(RV$DBCon)
+  
+    selectedSitesRows <- reactable::getReactableState("wgtHoldingSitesTable", "selected")
+    selRowsDF <- RV$HoldingSites[selectedSitesRows,]
+    
+    appCon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$AppDB)$Connection
+    natSoilCon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilDev)$Connection
+    holdCon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
+    
+    sql <- 'Select * from NatSoil_TableLevels order by Level'
+    tables <- OS$DB$Helpers$doQuery(appCon, sql)
+    
+    for (i in 1:nrow(selRowsDF)) {
+      rec <- selRowsDF[i,]
+      print(rec)
+       ac <-  rec$agency_code
+       pc <-  rec$proj_code
+       sid <- rec$s_id
+       oid=1
+
+       OS$DB$Helpers$deleteWholeSite(devcon, verbose=T, agencyCode = ac, projCode = pc, siteID=sid, obsNo=NULL)
+       
+      for (j in 1:nrow(tables)) {
+        t <- tables[j,]$Table
+        print(t)
+        if(t %in% c('SITES', 'ELEM_GEOMORPHS', 'LAND_COVER', 'LAND_USES', 'PATT_GEOMORPHS', 'DISTURBANCES')){
+          sql <- paste0("Select * from ", t, " WHERE agency_code = '", ac, "' and proj_code='", pc, "' and s_id = '", sid, "'" )
+        }else{
+          sql <- paste0("Select * from ", t, " WHERE agency_code = '", ac, "' and proj_code='", pc, "' and s_id = '", sid, "' and o_id=1" )
+          
+        }
+
+        dt <- OS$DB$Helpers$doQuery(holdCon, sql)
+        if(j==1){
+          dt <- dt[,-c(44)]
+        }
+        
+        if(j==2){
+        dt <- dt[,-c(116:118)]
+        }
+        print(dt)
+        if(nrow(dt)>0){
+          dbWriteTable(natSoilCon, t, dt, append=T )
+        }
+      }
+      
+       #OS$DB$Helpers$deleteWholeSite(holdCon, verbose=T, agencyCode = '994', projCode = 'NSMP', siteID='N5006', obsNo=NULL)
+       sql <- paste0("Insert Into PublishedSites values('", ac, "', '", pc, "', '", sid, "', '", "20250211", "' )")
+       OS$DB$Helpers$doInsertUsingRawSQL(holdCon, sql)
+    }
+    
+    })
   
   
 

@@ -135,21 +135,23 @@ get_DBHelpers <- function()
     for (i in 1:nrow(dfd)) {
       rec<-dfd[i,]$Table
       if(verbose){  print(paste0('Deleting data from ', rec)) }
-      if(!is.null(obsNo)){
-      sql <- paste0("DELETE from ", rec, " WHERE 
-                         agency_code = '", agencyCode, "' and ",
-                    "proj_code = '", projCode, "' and ",
-                    "s_id = '", siteID, "' and ",
-                    "o_id = '", obsNo
-      )
-      }else{
+      # if(!rec %in% c('SITES', 'ELEM_GEOMORPHS', 'LAND_COVER', 'LAND_USES', 'PATT_GEOMORPHS', 'DISTURBANCES')){
+      #   
+      # sql <- paste0("DELETE from ", rec, " WHERE 
+      #                    agency_code = '", agencyCode, "' and ",
+      #               "proj_code = '", projCode, "' and ",
+      #               "s_id = '", siteID, "' and ",
+      #               "o_id = '", obsNo, "'"
+      # )
+      # }else{
         sql <- paste0("DELETE from ", rec, " WHERE 
                          agency_code = '", agencyCode, "' and ",
                       "proj_code = '", projCode, "' and ",
                       "s_id = '", siteID, "'"
         )
         
-      }
+      #}
+        print(sql)
      OS$DB$Helpers$doExec(con, sql)
     }
     

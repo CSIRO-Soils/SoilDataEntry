@@ -26,9 +26,12 @@ tabPanel("Site Viewer", icon = icon("file-lines"),
                         
                           
                           selectInput('vwgtSiteID', label = 'Site No.', choices = NULL),
-                          selectInput('vwgtObsID', label = 'Obs No.', choices = c('1'), selected = '1')),
+                          #selectInput('vwgtObsID', label = 'Obs No.', choices = c('1'), selected = '1')
+                          ),
                           fluidRow(
                           HTML("<BR>"),
+                          
+                          uiOutput("uiSiteViewSitePublishType"),
                           
                           withBusyIndicatorUI(actionButton('vwgtViewSiteButton', 'View Site Data',  class = "btn-success")),
                           

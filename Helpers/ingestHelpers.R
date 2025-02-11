@@ -233,6 +233,50 @@ get_IngestHelpers <- function()
       }
       
       
+      H$checkXLLabDataFileFormat <- function(fname){
+        
+        ol <- list()
+        
+        ext <- tools::file_ext(fname)
+        
+        if(ext!='xlsx'){
+          ol$OK<-F
+          ol$Message <-paste0('<P style="color:red;">You need to upload an MS Excel spreadsheet with a specific data entry template.</P>
+                               <P>You can download the required template from the link above.</P>')
+          return(ol)
+        }
+        
+        wb <- openxlsx::loadWorkbook (xlsxFile = fname)
+        sheets <- names(wb)
+        
+
+          idxs <- na.omit(match(c('Lab Data',"About", "Filled Example" ), sheets))
+          if(length(idxs) != 3){
+            ol$OK<-F
+            ol$Message <-paste0('<P style="color:red;">It looks like the file you have uploaded is not the required MS Excel Lab Data Sheet template.</P>
+                                     <P>You can download the required template from the link below.</P>')
+            return(ol)
+          }
+          if(length(sheets) == 7){
+            ol$OK<-F
+            ol$Message <-paste0('<P>The data entry template does not contain any sites to ingest.</P>')
+            return(ol)
+          }
+
+          ld <- openxlsx::readWorkbook(xlsxFile = fname, sheet='Lab Data', skipEmptyRows=F, skipEmptyCols = F)
+          nsites <- unique(ld$SiteID)
+          nhoriz <- nrow(ld)
+          nmeth = ncol(ld)-8
+          ol$Message <-paste0('<p><b>Upload Info</b></p>',
+                              '<p><b>Number of Sites : </b>', nsites, '</p>',
+                              '<p><b>Number of Horizons : </b>', nhoriz, '</p>',
+                              '<p><b>Number of Lab Methods : </b>', nmeth, '</p>')
+        
+        
+        ol$OK = TRUE
+        return(ol)
+        
+      }
       
       
       H$checkXLFileFormat <- function(fname, templateType){
@@ -243,8 +287,8 @@ get_IngestHelpers <- function()
         
         if(ext!='xlsx'){
           ol$OK<-F
-          ol$Message <-paste0('<P>You need to upload an MS Excel spreadsheet with a specific data enrty template.</P>
-                               <P>You can download the required template from the link below.</P>')
+          ol$Message <-paste0('<P>You need to upload an MS Excel spreadsheet with a specific data entry template.</P>
+                               <P>You can download the required template from the link above.</P>')
           return(ol)
         }
         

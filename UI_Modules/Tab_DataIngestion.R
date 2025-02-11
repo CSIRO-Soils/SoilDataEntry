@@ -13,15 +13,12 @@ Tab_DataIngestion_UI<- function() {
                             HTML('<BR><BR>'),
                             #uiOutput("uiIngestTokenText"),
                             
-
-                            fileInput('wgtXLFile', 'Drag your sites spreadsheet here')),
-                          
+                           ###  import morphology widgets
+                          fileInput('wgtXLFile', 'Drag your morphology sites spreadsheet here')),
                           shinyjs::hidden( actionButton('wgtValidateButton', 'Validate Site Data', class = "btn-success")),
                           HTML('<BR><BR>'),
-                          #shinyjs::hidden( actionButton('wgtIngestButton', 'Import Site Data to DB', class = "btn-success")),
                           withBusyIndicatorUI(  shinyjs::hidden( actionButton('wgtIngestButton', 'Import Site Data to DB', class = "btn-success"))),
-                          
-                          
+                         
                           HTML('<BR><BR>'),
                           htmlOutput('wgtIngestFileInfo'),
 
