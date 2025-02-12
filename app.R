@@ -414,7 +414,7 @@ server <- function(input, output,session) {
     req(file)
     fname <- file$datapath
     RVExcelFile <- file$datapath
-    r <- OS$IngestHelpers$checkXLLabDataFileFormat(fname, 'LabData Sheet')
+    r <- OS$IngestHelpers$checkXLFileFormat(fname, 'Site Data Sheet')
     if(!r$OK){
       
     }else{
@@ -462,7 +462,7 @@ server <- function(input, output,session) {
             t=NULL
           }
           
-          outcome <- OS$Validation$ValidateSites(fname=RV$XLfile, config=RV$ConfigName, token=t)
+          outcome <- OS$Validation$ValidateSites(fname=RV$XLfile, config=RV$ConfigName, key=RV$Keys)
           RV$ValidationOutcomes <- outcome
 
           if(RV$ValidationOutcomes$ErrorCount==0){
@@ -525,10 +525,13 @@ server <- function(input, output,session) {
       req(RV$ConfigName)
         isolate({
         RV$XLfile <- input$wgtXLFile$datapath
-        outcome <- OS$DB$IngestSiteData$ingestXL(con=RV$DBCon, XLFile=RV$XLfile)
+        outcome <- OS$DB$IngestSiteData$ingestXL(con=RV$DBCon, XLFile=RV$XLfile, config=RV$ConfigName)
         RV$ValidationOutcomes <- outcome
-        sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
-        RV$AvailableSitesIDs <- sites
+        
+        
+        # sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
+        # RV$AvailableSitesIDs <- sites
+        RV$SiteUpdateCount =  RV$SiteUpdateCount + 1
         
       })
   })

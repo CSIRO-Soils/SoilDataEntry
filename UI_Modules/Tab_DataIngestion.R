@@ -40,24 +40,26 @@ Tab_DataIngestion_UI<- function() {
                fluidRow(
                  column(8, htmlOutput('wgtIngestOutcomeInfo')),
                         column(4, HTML('<BR>'), leafletOutput("UI_IngestMap", width = 350, height = 250),HTML('<BR>')
-                        ),
+                        )
+                 ),
                
-               fluidRow(
+             #  fluidRow(
                  uiOutput("uiErrorsTableTitle"),
-                 shinyjs::hidden( downloadLink('wgtDownloadErrorTable', label = 'Click here to download the errors table')),
+                 shinyjs::hidden( downloadLink('wgtDownloadErrorTable', label = 'Download the validation table')),
                 HTML('<BR>'),
                 
                 
-                 shinyjs::hidden( actionLink('wgtShowAllErrorsLink', 'Show All Errors')),
+                 shinyjs::hidden( actionLink('wgtShowAllErrorsLink', 'Show all validation records')),
                         reactableOutput("wgtValidationResultsTable")
-                        ),
+              #          ),
 
               
-               fluidRow( HTML('<BR><BR>')),
-               
-               fluidRow( shinyjs::hidden( downloadLink('wgtDBLink', label = 'Click here to download the data base you just created'))),
-               HTML('<BR><BR>'),
-             )
+             #   fluidRow( HTML('<BR><BR>')
+             #             ),
+             #   
+             # #  fluidRow( shinyjs::hidden( downloadLink('wgtDBLink', label = 'Click here to download the data base you just created'))),
+             #   HTML('<BR><BR>'),
+             # )
            )
            
   )  

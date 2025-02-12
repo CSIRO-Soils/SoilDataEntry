@@ -18,7 +18,7 @@ get_IngestFunctions <- function()
 {
   ig <- list()
   
-      ig$ingestXL <- function(con, XLFile, agencyCode='', projCode='', projName='', projManager='', proj_start_date='',  proj_finish_date=''){
+      ig$ingestXL <- function(con, XLFile, config, agencyCode='', projCode='', projName='', projManager='', proj_start_date='',  proj_finish_date=''){
         
      
        
@@ -78,6 +78,11 @@ get_IngestFunctions <- function()
         }
         
         
+        if(config=='NSMP'){
+          publishedSites <- getDraftOrPublishedSites(type='Published', keys=keys)$s_id
+        }
+        
+        
         #########   Insert Sites into DB  ###############################
         
           hcnt=0
@@ -88,6 +93,22 @@ get_IngestFunctions <- function()
             print(paste0('Ingesting ', s))
             sn <- siteSheets[s]
             dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = sn, skipEmptyRows = F, skipEmptyCols = F)
+            
+            
+            siteAlreadyPublished=F
+            if(config=='NSMP'){
+              loc <- excelInfo[excelInfo$dbFld=='s_id',]
+              sid <- dataSheet[loc$row, loc$col]
+              if(sid %in% publishedSites){
+                siteAlreadyPublished=T
+              }
+            }
+            
+            if(siteAlreadyPublished){
+              
+            }else{
+              
+            
             
             if(SheetHasData(dataSheet, excelInfo)){
            
@@ -130,6 +151,7 @@ get_IngestFunctions <- function()
                    OS$DB$Helpers$doInsert(ingestCon,sql)
                 }
               }
+            }
             }
           }
           }

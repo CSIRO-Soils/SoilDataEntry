@@ -7,7 +7,7 @@
 #fname <- 'C:/Projects/SiteDataEntryTool/NoErrors - PacificSoils.xlsx'
 
 
-#fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry/www/Configs/NSMP/No Errors -  Entry Template - NSMP.xlsx'
+#fname <- 'C:/Projects/SiteDataEntryTool/No Errors -  Entry Template - NSMP.xlsx'
 #setwd('C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry')
 
 #fname='C:/Temp/Data Entry Template - NSMP_NSMP_Capital.xlsx'
@@ -74,8 +74,9 @@ get_DataValidationFunctions <- function(){
   
   
 
+  ###########   Validate the Morphology Data  ####################################
   
-  dv$ValidateSites <- function(fname, config, token){
+  dv$ValidateSites <- function(fname, config, keys){
     
     
     wb <- openxlsx::loadWorkbook(file.path(fname) )
@@ -105,9 +106,11 @@ get_DataValidationFunctions <- function(){
     
     if(config=='NSMP'){
         con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
-        dfs <- OS$DB$Helpers$doQuery(con, paste0("select * from project.PROPOSED_SITES where ps_token='", token, "'"))
+        dfs <- OS$DB$Helpers$doQuery(con, paste0("select * from project.PROPOSED_SITES where ps_token='", keys$Token, "'"))
         allowedSites <<- dfs$s_id
         dbDisconnect(con)
+        
+       publishedSites <- getDraftOrPublishedSites(type='Published', keys=keys)$s_id
     }
     
     dbDisconnect(appcon)
@@ -117,7 +120,6 @@ get_DataValidationFunctions <- function(){
     #############################   Check site names validity  ####
     
     itCnt=0
-    
     odf <- data.frame()
     
     usedSiteList <<- list()
@@ -127,14 +129,11 @@ get_DataValidationFunctions <- function(){
       
       print(paste0('Validating ', s))
       sn <- siteSheets[s]
-      #dataSheet <- as.data.frame(suppressMessages( readxl::read_excel(fname, sheet = sn, col_names = F)))
       dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn, skipEmptyRows = F, skipEmptyCols = F)
-      
       r <- excelInfo[excelInfo$dbFld == 's_id',]
       val=dataSheet[r$row,r$col]
       
       if(SheetHasData(dataSheet, excelInfo)){
-        
         if(config=='NSMP'){
             if(!val %in% allowedSites){
               odf <- message(val, r, odf, sn, type='Error', msg='Site ID not in the allowed list of sites')
@@ -163,9 +162,26 @@ get_DataValidationFunctions <- function(){
       itCnt <- itCnt + 1
       print(paste0('Validating ', s))
       sn <- siteSheets[s]
-      #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = sn, col_names = F)))
       dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn, skipEmptyRows = F, skipEmptyCols = F)
       
+      siteAlreadyPublished=F
+      if(config=='NSMP'){
+        loc <- excelInfo[excelInfo$dbFld=='s_id',]
+        sid <- dataSheet[loc$row, loc$col]
+        if(sid %in% publishedSites){
+          siteAlreadyPublished=T
+          r <- list()
+          r$tableName = ''
+          r$dbFld = ''
+          r$recNum = ''
+          r$recSubNum = ''
+          odf <- message(sid, r, odf, sid,'Warning', paste0('Site ', sid, ' is  already published. It will not be ingested and can no longer be edited with this App.'))
+        }
+      }
+      
+      if(siteAlreadyPublished){
+       
+      }else{
       
       if(SheetHasData(dataSheet, excelInfo)){
         
@@ -179,6 +195,8 @@ get_DataValidationFunctions <- function(){
           }
         }
         
+        
+        ###  Add sites to a SF dataframe
         rlat <- excelInfo[excelInfo$dbFld=='o_latitude_GDA94',]
         y <- dataSheet[rlat$row, rlat$col]
         rlng <- excelInfo[excelInfo$dbFld=='o_longitude_GDA94',]
@@ -191,6 +209,7 @@ get_DataValidationFunctions <- function(){
       }else{
         
       }
+    }
       
       incProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
     }

@@ -118,34 +118,6 @@ getListOfAvailableSites <- function(con, keys){
 #  
 # }
 
-getDraftOrPublishedSites <- function(type='Draft', keys=NULL){
-  
-  if(type=='Draft'){
-    T=''
-  }else(
-    T=' NOT '
-  )
- 
-  holdCon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
-  
-  
-  sql <- paste0("SELECT natProp.ps_token, nsmp.agency_code, nsmp.proj_code, nsmp.s_id, dbo.OBSERVATIONS.o_id, dbo.PublishedSites.s_id AS PublishedSite, dbo.OBSERVATIONS.o_desc_by, dbo.OBSERVATIONS.o_date_desc, dbo.OBSERVATIONS.o_latitude_GDA94, 
-             dbo.OBSERVATIONS.o_longitude_GDA94, nsmp.s_slope, nsmp.s_morph_type, nsmp.s_elem_type, nsmp.s_patt_type, nsmp.s_date_desc, natProp.lu_code, natProp.ps_soil_class, natProp.ps_soil_land_use, dbo.OBSERVATIONS.o_type, dbo.OBSERVATIONS.o_asc_ord, 
-             dbo.OBSERVATIONS.o_asc_subord, dbo.OBSERVATIONS.o_asc_gg, dbo.OBSERVATIONS.o_asc_subg, nsmp.s_notes, dbo.OBSERVATIONS.o_notes
-              FROM   dbo.SITES AS nsmp INNER JOIN
-             NatSoil.project.PROPOSED_SITES AS natProp ON nsmp.agency_code = natProp.agency_code AND nsmp.proj_code = natProp.proj_code AND nsmp.s_id = natProp.s_id INNER JOIN
-             dbo.OBSERVATIONS ON nsmp.agency_code = dbo.OBSERVATIONS.agency_code AND nsmp.proj_code = dbo.OBSERVATIONS.proj_code AND nsmp.s_id = dbo.OBSERVATIONS.s_id LEFT OUTER JOIN
-             dbo.PublishedSites ON natProp.agency_code = dbo.PublishedSites.agency_code AND natProp.proj_code = dbo.PublishedSites.proj_code AND natProp.s_id = dbo.PublishedSites.s_id
-              WHERE (natProp.ps_token = N'Burnie') AND (nsmp.agency_code = ", keys$AgencyCode, ") AND (nsmp.proj_code = '", keys$ProjectCode, "')  
-                and ps_token='", keys$Token, "' AND (dbo.OBSERVATIONS.o_id = N'1') AND (dbo.PublishedSites.s_id IS ", T, " NULL)")
-
-  sites <- OS$DB$Helpers$doQuery(holdCon, sql)
-
-  
-  dbDisconnect(holdCon)
-  return(sites)
-  
-  }
 
   
   
