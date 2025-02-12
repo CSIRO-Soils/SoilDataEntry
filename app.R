@@ -19,6 +19,7 @@ library(shiny)
 library(shinyjs)
 library(shinyalert)
 library(shinybusy)
+library(shinyvalidate)
 library(rhandsontable)
 library(DT)
 library(munsell)
@@ -90,6 +91,10 @@ ui <- fluidPage(
 #### .========     SERVER  ========  ####
 server <- function(input, output,session) {
   
+  
+  iv <- InputValidator$new()
+  iv$add_rule("wgtAuthoriser", sv_required())
+  iv$enable()
 
   ####.   ======  App Configuration  ============== ###### 
 
@@ -101,6 +106,7 @@ server <- function(input, output,session) {
   RV$AvailableSitesIDs <- NULL
   RV$CurrentPhotoInfoTable <- NULL
   RV$PublishedAndDraftSiteInfo <- NULL
+  RV$SiteUpdateCount <- 1
   
   observe({
      cd <-reactiveValuesToList(session$clientData)
@@ -207,6 +213,7 @@ server <- function(input, output,session) {
   #### ^  Get the list of available sites  #####
   observe({
     req(RV$DBCon, RV$Keys)
+    RV$SiteUpdateCount 
     sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
     RV$AvailableSitesIDs <- sites
     
@@ -830,91 +837,60 @@ server <- function(input, output,session) {
   #### ***** Publish Sites to NatSoil ***** #####
   
   
+  observe({
+    req(RV$DBCon, RV$ConfigName)
+      
+    if(RV$ConfigName=='NSMP'){
+      con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
+      sql <- 'select * from Officers order by offr_code'
+      df <- OS$DB$Helpers$doQuery(con, sql)
+      updateSelectInput(session, 'wgtAuthoriser', choices=c('None', df$offr_name), selected = 'None')
+      dbDisconnect(con)
+    }
+  })
+  
   output$wgtHoldingSitesTable <- renderReactable({
     req(RV$PublishedAndDraftSiteInfo)
-    #df <- getDraftOrPublishedSites(type='Draft', keys=RV$Keys)
-    df <- RV$PublishedAndDraftSiteInfo$Draft
-    reactable(
-      df,
-      selection = "multiple",
-      columns = list(
-        .selection = colDef(
-          headerStyle = list(pointerEvents = "none")
-        )
-      ),
-      theme = reactableTheme(
-        headerStyle = list("& input[type='checkbox']" = list(display = "none"))
-      )
-    )
-    
+    PublishSites_formatTable(RV$PublishedAndDraftSiteInfo$Draft, type='Draft')
   })
   
   output$wgtPublishedSitesTable <- renderReactable({
-    req(RV$DBCon)
-    # df <-   df <- getDraftOrPublishedSites(type='Published', keys=RV$Keys)
-    # reactable(df)
-    reactable(RV$PublishedAndDraftSiteInfo$Published)
+    req(RV$PublishedAndDraftSiteInfo)
+    PublishSites_formatTable(RV$PublishedAndDraftSiteInfo$Published, type='Published')
   })
     
   
-  observeEvent(input$wgtPublishSitesBtn, {
-    
-    req(RV$DBCon)
+  output$wgtToDoSitesTable <- renderReactable({
+    req(RV$DBCon, RV$ConfigName)
+    PublishSites_formatToDoTable(con=RV$DBCon$Connection, keys=RV$Keys)
+  })
   
+  observe({
+    req(RV$PublishedAndDraftSiteInfo)
     selectedSitesRows <- reactable::getReactableState("wgtHoldingSitesTable", "selected")
-    selRowsDF <- RV$HoldingSites[selectedSitesRows,]
-    
-    appCon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$AppDB)$Connection
-    natSoilCon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilDev)$Connection
-    holdCon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
-    
-    sql <- 'Select * from NatSoil_TableLevels order by Level'
-    tables <- OS$DB$Helpers$doQuery(appCon, sql)
-    
-    for (i in 1:nrow(selRowsDF)) {
-      rec <- selRowsDF[i,]
-      print(rec)
-       ac <-  rec$agency_code
-       pc <-  rec$proj_code
-       sid <- rec$s_id
-       oid=1
-
-       OS$DB$Helpers$deleteWholeSite(devcon, verbose=T, agencyCode = ac, projCode = pc, siteID=sid, obsNo=NULL)
-       
-      for (j in 1:nrow(tables)) {
-        t <- tables[j,]$Table
-        print(t)
-        if(t %in% c('SITES', 'ELEM_GEOMORPHS', 'LAND_COVER', 'LAND_USES', 'PATT_GEOMORPHS', 'DISTURBANCES')){
-          sql <- paste0("Select * from ", t, " WHERE agency_code = '", ac, "' and proj_code='", pc, "' and s_id = '", sid, "'" )
+    print(selectedSitesRows)
+    if(is.null(selectedSitesRows)){
+      disable('wgtPublishSitesBtn')
+    }else{
+        if(length(selectedSitesRows) > 0 & input$wgtAuthoriser != 'None'){
+          enable('wgtPublishSitesBtn')
         }else{
-          sql <- paste0("Select * from ", t, " WHERE agency_code = '", ac, "' and proj_code='", pc, "' and s_id = '", sid, "' and o_id=1" )
-          
+          disable('wgtPublishSitesBtn')
         }
-
-        dt <- OS$DB$Helpers$doQuery(holdCon, sql)
-        if(j==1){
-          dt <- dt[,-c(44)]
-        }
-        
-        if(j==2){
-        dt <- dt[,-c(116:118)]
-        }
-        print(dt)
-        if(nrow(dt)>0){
-          dbWriteTable(natSoilCon, t, dt, append=T )
-        }
-      }
-      
-       #OS$DB$Helpers$deleteWholeSite(holdCon, verbose=T, agencyCode = '994', projCode = 'NSMP', siteID='N5006', obsNo=NULL)
-       sql <- paste0("Insert Into PublishedSites values('", ac, "', '", pc, "', '", sid, "', '", "20250211", "' )")
-       OS$DB$Helpers$doInsertUsingRawSQL(holdCon, sql)
     }
     
-    })
+  })
   
+  observeEvent(input$wgtPublishSitesBtn, {
+    req(RV$DBCon)
+    selectedSitesRows <- reactable::getReactableState("wgtHoldingSitesTable", "selected")
+    selRowsDF <- RV$PublishedAndDraftSiteInfo$Draft[selectedSitesRows,]
+    publishSitesToNatsoil(selectedDraftRows=selRowsDF, authPerson = input$wgtAuthoriser)
+    RV$SiteUpdateCount =  RV$SiteUpdateCount + 1
+    
+  })
+
   
-
-}
-
+}  #### End of server
 
 shinyApp(ui = ui, server = server)

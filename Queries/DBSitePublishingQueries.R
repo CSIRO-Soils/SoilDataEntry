@@ -50,6 +50,18 @@ get_SitePublishingQueries <- function()
     
   }
   
+  
+  sp$getToDoSites <- function(con, keys){
+    
+    sql <- paste0("SELECT nat.s_id, nsmp.s_id AS HoldingSites, nat.proj_code, nat.agency_code, nat.team_code, nat.ps_latitude_GDA94, nat.ps_longitude_GDA94, nat.ps_description, nat.lu_code, nat.ps_token, nat.ps_soil_class, nat.ps_soil_land_use, nat.ps_soil_color
+          FROM   NatSoil.project.PROPOSED_SITES AS nat LEFT OUTER JOIN
+          dbo.SITES AS nsmp ON nat.agency_code = nsmp.agency_code AND nat.proj_code = nsmp.proj_code AND nat.s_id = nsmp.s_id
+          WHERE (nat.agency_code = '", keys$AgencyCode, "') AND (nat.proj_code = '", keys$ProjectCode, "') AND (nat.ps_token = '", keys$Token, "') AND (nsmp.s_id IS NULL)")
+    
+    sites <- OS$DB$Helpers$doQuery(con, sql)
+    return(sites)
+  }
+  
   return(sp)
   
 }
