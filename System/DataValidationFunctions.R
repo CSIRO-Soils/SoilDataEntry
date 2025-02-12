@@ -110,7 +110,7 @@ get_DataValidationFunctions <- function(){
         allowedSites <<- dfs$s_id
         dbDisconnect(con)
         
-       publishedSites <- getDraftOrPublishedSites(type='Published', keys=keys)$s_id
+       publishedSites <- OS$PublishSitesToNatSoil$getDraftOrPublishedSites(type='Published', keys=keys)$s_id
     }
     
     dbDisconnect(appcon)

@@ -79,7 +79,7 @@ get_IngestFunctions <- function()
         
         
         if(config=='NSMP'){
-          publishedSites <- getDraftOrPublishedSites(type='Published', keys=keys)$s_id
+          publishedSites <- OS$PublishSitesToNatSoil$getDraftOrPublishedSites(type='Published', keys=keys)$s_id
         }
         
         

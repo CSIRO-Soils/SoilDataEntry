@@ -19,7 +19,6 @@ library(shiny)
 library(shinyjs)
 library(shinyalert)
 library(shinybusy)
-library(shinyvalidate)
 library(rhandsontable)
 library(DT)
 library(munsell)
@@ -91,10 +90,7 @@ ui <- fluidPage(
 #### .========     SERVER  ========  ####
 server <- function(input, output,session) {
   
-  
-  iv <- InputValidator$new()
-  iv$add_rule("wgtAuthoriser", sv_required())
-  iv$enable()
+
 
   ####.   ======  App Configuration  ============== ###### 
 
@@ -218,8 +214,8 @@ server <- function(input, output,session) {
     RV$AvailableSitesIDs <- sites
     
     if(RV$ConfigName == 'NSMP'){
-      RV$PublishedAndDraftSiteInfo$Draft <- getDraftOrPublishedSites(type='Draft', keys=RV$Keys)
-      RV$PublishedAndDraftSiteInfo$Published<- getDraftOrPublishedSites(type='Published', keys=RV$Keys)
+      RV$PublishedAndDraftSiteInfo$Draft <- OS$PublishSitesToNatSoil$getDraftOrPublishedSites(type='Draft', keys=RV$Keys)
+      RV$PublishedAndDraftSiteInfo$Published<- OS$PublishSitesToNatSoil$getDraftOrPublishedSites(type='Published', keys=RV$Keys)
     }
   }) 
   
@@ -228,8 +224,6 @@ server <- function(input, output,session) {
     updateSelectInput(inputId = "vwgtSiteID", choices = RV$AvailableSitesIDs)
     updateSelectInput(inputId = "vwgtSiteIDFlatView", choices = RV$AvailableSitesIDs)
     updateSelectInput(inputId = "vwgtSiteIDPhotoView", choices = RV$AvailableSitesIDs)
-    
-    
   })
   
   
