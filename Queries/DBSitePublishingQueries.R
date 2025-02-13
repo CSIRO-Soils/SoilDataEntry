@@ -88,7 +88,7 @@ get_SitePublishingQueries <- function()
              NatSoil.project.PROPOSED_SITES AS natProp ON nsmp.agency_code = natProp.agency_code AND nsmp.proj_code = natProp.proj_code AND nsmp.s_id = natProp.s_id INNER JOIN
              dbo.OBSERVATIONS ON nsmp.agency_code = dbo.OBSERVATIONS.agency_code AND nsmp.proj_code = dbo.OBSERVATIONS.proj_code AND nsmp.s_id = dbo.OBSERVATIONS.s_id LEFT OUTER JOIN
              dbo.PublishedSites ON natProp.agency_code = dbo.PublishedSites.agency_code AND natProp.proj_code = dbo.PublishedSites.proj_code AND natProp.s_id = dbo.PublishedSites.s_id
-              WHERE (natProp.ps_token = N'Burnie') AND (nsmp.agency_code = ", keys$AgencyCode, ") AND (nsmp.proj_code = '", keys$ProjectCode, "')  
+              WHERE (nsmp.agency_code = ", keys$AgencyCode, ") AND (nsmp.proj_code = '", keys$ProjectCode, "')  
                 and ps_token='", keys$Token, "' AND (dbo.OBSERVATIONS.o_id = N'1') AND (dbo.PublishedSites.s_id IS ", T, " NULL)")
   
   sites <- OS$DB$Helpers$doQuery(holdCon, sql)

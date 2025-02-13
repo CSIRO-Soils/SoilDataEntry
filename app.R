@@ -359,6 +359,7 @@ server <- function(input, output,session) {
   output$uiSiteViewSitePublishType <-  renderText({
     req(RV$ConfigName, input$vwgtSiteID)
     if(RV$ConfigName=='NSMP'){
+      print(RV$PublishedAndDraftSiteInfo)
       shinyjs::show('uiSiteViewSitePublishType')
       if(input$vwgtSiteID %in% RV$PublishedAndDraftSiteInfo$Draft$s_id){
         message <- 'This site is <span style="color:orange">Draft</span><BR><BR>'
