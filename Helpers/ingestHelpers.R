@@ -222,7 +222,8 @@ get_IngestHelpers <- function()
         ### Some hacks to match DB schema rules
         if(str_to_upper(tableName)=='SITES'){
           tf <- paste0(tf, " s_trans_date")
-          tv <- paste0(tv, " '10000101'")
+          dt <- str_remove_all(Sys.Date(), '-')
+          tv <- paste0(tv, " '", dt, "'")
         }
         
         

@@ -22,3 +22,7 @@ OS$DB$Helpers$deleteAllData(cond)
 
 
 OS$DB$Helpers$deleteAllData(con=conNSMPHolding$Connection)
+
+OS$DB$Helpers$deleteWholeSite(con=conNSMPHolding$Connection )
+
+OS$DB$Helpers$deleteWholeSite(con=conNSMPHolding$Connection, verbose=F, agencyCode='994', projCode='NSMP', siteID='N5006' )
