@@ -10,12 +10,12 @@ library(stringr)
 
 # r <- system('ls /datasets/work/sc-shiny/work/scratch/app_logs/*/dbTest* -lrt | tail -1', intern = T)
 # r
-
+#r <- system('ls /datasets/work/sc-shiny/work/scratch/app_logs/*/app3* -lrt | tail -1', intern = T)
 
 r <- system('ls /datasets/work/sc-shiny/work/scratch/app_logs/*/app2* -lrt | tail -1', intern = T)
-r <- system('ls /datasets/work/sc-shiny/work/scratch/app_logs/*/soilDataEntr* -lrt | tail -1', intern = T)
 
-r <- system('ls /datasets/work/sc-shiny/work/scratch/app_logs/*/app3* -lrt | tail -1', intern = T)
+
+r <- system('ls /datasets/work/sc-shiny/work/scratch/app_logs/*/SoilData* -lrt | tail -1', intern = T)
 r
 
 bits <- str_split(r, ' ')
