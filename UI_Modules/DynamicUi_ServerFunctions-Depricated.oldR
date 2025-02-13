@@ -16,7 +16,6 @@ get_DynamicUi_ServerFunctions <- function()
   #   
   #   role <- ''
   #   
-  #   print('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV')
   #   
   #   if(config=='NSMP'){
   #     

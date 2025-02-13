@@ -151,7 +151,7 @@ get_DBHelpers <- function()
         )
         
       #}
-        print(sql)
+
      OS$DB$Helpers$doExec(con, sql)
     }
     

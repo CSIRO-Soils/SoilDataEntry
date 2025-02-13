@@ -161,7 +161,7 @@ server <- function(input, output,session) {
       RV$DBCon <- con
      
      # updateTabsetPanel(session, "MainTabsetPanel", selected = "Laboratory Data Ingestion")
-      updateTabsetPanel(session, "MainTabsetPanel", selected = "Publish Sites")
+     # updateTabsetPanel(session, "MainTabsetPanel", selected = "Publish Sites")
   })
 
   
@@ -380,14 +380,13 @@ server <- function(input, output,session) {
       if(RV$ConfigName =='NSMP'){
       tof <- str_replace(RV$DataEntryFileName, '.xlsx', paste0('_', RV$Keys$ProjectCode, '_', RV$Keys$Token, '.xlsx'))
       }else{
-        #tof <- str_replace(RV$DataEntryFileName, '.xlsx', paste0('_', RV$Keys$ProjectCode, '.xlsx'))
         tof <- RV$DataEntryFileName
       }
     },
     content = function(file) {
 
       xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
-    #  shinyBS::createAlert(session, "alert", "waitalert", title = "", content = paste0("<div id='zs1'><img src=wait.gif>&nbsp;&nbsp;Downloading data", " .....</div>"), append = FALSE, dismiss = F)
+      shinyBS::createAlert(session, "alert", "waitalert", title = "", content = paste0("<div id='zs1'><img src=wait.gif>&nbsp;&nbsp;Downloading data", " .....</div>"), append = FALSE, dismiss = F)
       
       if(RV$ConfigName =='NSMP'){
         downloadPath <- OS$DataEntry$generateNSMPSiteSheet(fname=xlPathName,  token= RV$Keys$Token)
@@ -519,7 +518,7 @@ server <- function(input, output,session) {
       req(RV$ConfigName)
         isolate({
         RV$XLfile <- input$wgtXLFile$datapath
-        outcome <- OS$DB$IngestSiteData$ingestXL(con=RV$DBCon, XLFile=RV$XLfile, config=RV$ConfigName)
+        outcome <- OS$DB$IngestSiteData$ingestXL(con=RV$DBCon, XLFile=RV$XLfile, config=RV$ConfigName, keys=RV$Keys)
         RV$ValidationOutcomes <- outcome
         
         
@@ -642,14 +641,12 @@ server <- function(input, output,session) {
     req(file)
     fname <- file$datapath
     r <- OS$IngestHelpers$checkXLLabDataFileFormat(fname)
-    print(r)
+
     if(!r$OK){
       
     }else{
-      print('mmmMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM')
       shinyjs::show('wgtValidateButtonLabResults')
     }
-    print(r$Message)
     paste0(r$Message)
   })
   
@@ -664,12 +661,12 @@ server <- function(input, output,session) {
   observeEvent(input$vwgtViewSiteButtonFlatView, {
     
     req(RV$DBCon, input$vwgtSiteIDFlatView)
-   # withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
+    withBusyIndicatorServer("vwgtViewSiteButtonFlatView", {
     
     xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
     df <- OS$Reporting$FlatSheet$makeFlatSiteDescriptionSheetfromDB(con=RV$DBCon$Connection, fname=xlPathName, agency=RV$Keys$AgencyCode, proj=RV$Keys$ProjectCode, sid=input$vwgtSiteIDFlatView, oid=1)
     RV$FlatViewSiteDF <- df
-  #  })
+    })
     
   })
   
@@ -701,18 +698,21 @@ server <- function(input, output,session) {
   
   observe({
     req(RV$Keys, RV$DBCon, RV$ConfigName)
+    RV$SiteUpdateCount
     RV$SiteSummaryInfo <-  getSiteSummaryInfo(con=RV$DBCon, keys=RV$Keys, RV$ConfigName)
   })
   
   ### ^ Render Sites Summary ####  
   output$wgtSitesSummaryInfo <-  renderText({
     req(RV$SiteSummaryInfo)
+    RV$SiteUpdateCount
     renderSiteSummary(RV$SiteSummaryInfo)
   })
   
   #### ^ Render Site Summary Map ######  
   output$UI_SiteSummaryMap <- renderLeaflet({
     req(RV$SiteSummaryInfo)
+    RV$SiteUpdateCount
     renderSiteSummaryMap(RV$SiteSummaryInfo)
   })
   
@@ -720,6 +720,7 @@ server <- function(input, output,session) {
   
   output$wgtSiteDataSummaryTable <- renderReactable({
     req(RV$SiteSummaryInfo)
+    RV$SiteUpdateCount
     formatHorizonsSummaryTable(si=RV$SiteSummaryInfo)
   })
   
@@ -865,7 +866,7 @@ server <- function(input, output,session) {
   observe({
     req(RV$PublishedAndDraftSiteInfo)
     selectedSitesRows <- reactable::getReactableState("wgtHoldingSitesTable", "selected")
-    print(selectedSitesRows)
+
     if(is.null(selectedSitesRows)){
       disable('wgtPublishSitesBtn')
     }else{

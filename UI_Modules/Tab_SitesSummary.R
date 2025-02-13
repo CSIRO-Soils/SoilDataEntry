@@ -8,7 +8,7 @@
 
 Tab_SitesSummary <- function() {
   
-  tabPanel("Sites Summary",  icon = icon("list", tags$style()),
+  tabPanel("All Sites Summary",  icon = icon("list", tags$style()),
            
            
            fluidRow(

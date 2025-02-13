@@ -83,7 +83,7 @@ get_DataValidationFunctions <- function(){
     sheets <- names(wb)
     
     withProgress(message = paste0('Validating soil data ....'), value = 0,  max=length(sheets)*2, {
-    incProgress(1, detail = paste("Reading data ..."))
+    setProgress(0, detail = paste("Reading data ..."))
    
     
     
@@ -125,7 +125,7 @@ get_DataValidationFunctions <- function(){
     usedSiteList <<- list()
     for (s in 1:length(siteSheets)) {
       itCnt <- itCnt + 1
-      incProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
+      setProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
       
       print(paste0('Validating ', s))
       sn <- siteSheets[s]
@@ -211,7 +211,7 @@ get_DataValidationFunctions <- function(){
       }
     }
       
-      incProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
+      setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
     }
     
     
@@ -294,7 +294,8 @@ get_DataValidationFunctions <- function(){
          if(is.na(val) & str_to_upper(r$required)=='REQUIRED'){ return(T)}
        }else{
          if(r$recSubNum==1){
-           datasection <- dataSheet[row,8:ncol(dataSheet)]
+          # datasection <- dataSheet[row,8:ncol(dataSheet)]
+           datasection <- dataSheet[row,8:42]  # hardcoding this for now - this allows pHs etc to be on the right with having to have required horizon fields
            horHasData <- !all(is.na(datasection))
            if(horHasData){
              if(is.na(val) & str_to_upper(r$required)=='REQUIRED'){return(T)}
@@ -442,9 +443,9 @@ get_DataValidationFunctions <- function(){
   # xmin <- min( excelInfo$col)
   # xmax <- max( excelInfo$col)
   #   
-  #   datasection <- dataSheet[ymin:ymax, xmin:xmax]  # Looks athe the wholw data sheet
+  #   datasection <- dataSheet[ymin:ymax, xmin:xmax]  # Looks athe the whole data sheet
     
-    datasection <- dataSheet[10:11, 2]  ## Just loook at the location
+    datasection <- dataSheet[10:11, 2]  ## Just look at the location
     
     resp <- !all(is.na(datasection))
     return(resp)

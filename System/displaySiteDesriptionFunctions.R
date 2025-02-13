@@ -12,8 +12,6 @@ getProjectDescriptionHTML <- function(p){
     lhtml <- ''
   }
   
-  print(p$proj_start_date)
-  
   phtml <- paste0('<P><B>Project Name : </B>', ifelse(is.na(p$proj_name), "", p$proj_name), '</P>', 
                   '<P><B>Project Code : </B>', ifelse(is.na(p$proj_code), "", p$proj_code) , '</P>', 
                   '<P><B>Agency Name : </B>', ifelse(is.na(p$Agency), "", p$Agency) , ' (', p$AgencyCode, ')</P>', 
@@ -45,7 +43,6 @@ getSiteDescription <- function(con, agencyCode, projectCode, siteID, obsID){
   
  ol<-list()
  
- print('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
 
 agencyInfo <- OS$DB$NatSoilQueries$getAgencyInfo(con, agencyCode = agencyCode)[1,]
 projectInfo <- OS$DB$NatSoilQueries$getProjectInfo(con, agencyCode = agencyCode, projectCode=projectCode)[1,]

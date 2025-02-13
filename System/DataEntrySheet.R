@@ -22,6 +22,8 @@ get_DataEntryFunctions <- function()
 
       de$generateNSMPSiteSheet <- function(fname, token){
 
+       
+        
         tmpD <- tempdir()
         
         if(!dir.exists(tmpD)){dir.create(tmpD, recursive = T)}
@@ -34,14 +36,21 @@ get_DataEntryFunctions <- function()
         con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
         df <- OS$DB$Helpers$doQuery(con, paste0("select * from project.PROPOSED_SITES where ps_token='", token, "'"))
 
-        for (i in 1:nrow(df)) {
-          rec <- df[i, ]
-          s <- rec$s_id
-          print(paste0('Generating worksheet ', s))
-          openxlsx::cloneWorksheet(wb, sheetName = s, clonedSheet = "Template")
-          openxlsx::writeData(wb, sheet=s, x=s, startRow = 7, startCol = 2)
-        }
-        openxlsx::saveWorkbook(wb, file = tof, overwrite = T)
+        withProgress(message = paste0('Generating Soil Data Entry Spreadsheet ....'), value = 0,  max=nrow(df)+5, {
+        
+            for (i in 1:nrow(df)) {
+              setProgress(value=i, detail = paste("Sheet ", i, ' of ', nrow(df)))
+              rec <- df[i, ]
+              s <- rec$s_id
+              print(paste0('Generating worksheet ', s))
+              openxlsx::cloneWorksheet(wb, sheetName = s, clonedSheet = "Template")
+              openxlsx::writeData(wb, sheet=s, x=s, startRow = 7, startCol = 2)
+            }
+          setProgress(value=i+2, detail = paste("Preparing download !!! "))
+          
+          openxlsx::saveWorkbook(wb, file = tof, overwrite = T)
+        
+        })
         return(tof)
       }
 

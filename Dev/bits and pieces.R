@@ -1,5 +1,5 @@
 
-conInfo <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)
+conNSMPHolding <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)
 AnsisCon <- conInfo$Connection
 
 OS$DB$Helpers$doQuery(AnsisCon, 'select * from COLOURS')
@@ -20,3 +20,5 @@ OS$DB$Helpers$doQuery(conInfo$Connection, sql)
 cond <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
 OS$DB$Helpers$deleteAllData(cond)
 
+
+OS$DB$Helpers$deleteAllData(con=conNSMPHolding$Connection)

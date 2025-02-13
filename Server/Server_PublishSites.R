@@ -123,7 +123,6 @@ publishSitesToNatsoil <- function(selectedDraftRows, authPerson){
   officerCode <- df$offr_code[1]
   dbDisconnect(con)
   
-  
   selRowsDF <- selectedDraftRows
   
   appCon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$AppDB)$Connection
@@ -133,17 +132,21 @@ publishSitesToNatsoil <- function(selectedDraftRows, authPerson){
   sql <- 'Select * from NatSoil_TableLevels order by Level'
   tables <- OS$DB$Helpers$doQuery(appCon, sql)
   
+  withProgress(message = paste0('Publishing data ....'), value = 0,  max=nrow(selRowsDF), {
+  
   for (i in 1:nrow(selRowsDF)) {
     rec <- selRowsDF[i,]
     ac <-  rec$agency_code
     pc <-  rec$proj_code
     sid <- rec$s_id
     oid=1
-    print(paste0('Adding site sid'))
+
+    setProgress(i, detail = paste("Site ", sid))
     
     OS$DB$Helpers$deleteWholeSite(natSoilCon, verbose=T, agencyCode = ac, projCode = pc, siteID=sid, obsNo=NULL)
     
     for (j in 1:nrow(tables)) {
+      
       t <- tables[j,]$Table
       if(t %in% c('SITES', 'ELEM_GEOMORPHS', 'LAND_COVER', 'LAND_USES', 'PATT_GEOMORPHS', 'DISTURBANCES')){
         sql <- paste0("Select * from ", t, " WHERE agency_code = '", ac, "' and proj_code='", pc, "' and s_id = '", sid, "'" )
@@ -171,6 +174,7 @@ publishSitesToNatsoil <- function(selectedDraftRows, authPerson){
     
   }
 
+  })
 
 }
 

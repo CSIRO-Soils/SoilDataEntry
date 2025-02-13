@@ -46,68 +46,61 @@ getSiteSummaryInfo <- function(con, keys, configName=''){
 
 renderSiteSummary <- function(si){
   
- #df <-  OS$DB$NatSoilQueries$getSitesForAProject(con$Connection, agencyCode = keys$AgencyCode, projectCode = keys$ProjectCode)
- 
- mindate <- min(as.Date(unique(si$DataTable$o_date_desc)))
- maxdate <- max(as.Date(unique(si$DataTable$o_date_desc)))
- minslope <- min(as.numeric(si$DataTable$s_slope))
- maxslope <- max(as.numeric(si$DataTable$s_slope))
- 
- minX <- min(as.numeric(si$DataTable$o_longitude_GDA94))
- maxX <- max(as.numeric(si$DataTable$o_longitude_GDA94))
- minY <- min(as.numeric(si$DataTable$o_latitude_GDA94))
- maxY <- max(as.numeric(si$DataTable$o_latitude_GDA94))
- 
- elemTypes <- paste0(unique(si$DataTable$s_elem_type), collapse = '; ')
- patTypes <- paste0(unique(si$DataTable$s_patt_type), collapse = '; ')
- descBy <- paste0(unique(si$DataTable$o_desc_by), collapse = '; ')
- ASC <-  paste0(unique(si$DataTable$o_asc_ord), collapse = '; ')
- 
- 
- c1W <- '120px'
- c2W <- '150px'
- c3W <- '20px'
- c4W <- '120px'
- c5W <- '150px'
- 
-  ot <- '<h2 style="color:blue">Site Summary</h2>'
-  ot <- paste0(ot, 
-               '<table style="width:1500px;  border-spacing: 100px;" >
-            <tr><td style="width:', c1W, '"><b>Number of sites : </b></td>
-                <td align ="left", style="width:', c2W, '">', si$NumberOfSites, '</td>
-                <td style="width:', c3W, '"></td>',
-               '<td style="width:', c4W, '"><b>Date range : </b></td>
-               <td align ="left, style="width:', c5W, '" ">', mindate, ' to ', maxdate, '</td>
-            </tr>
-               
-                <tr><td style="width:', c1W, '"><b>Longitude range : </b></td>
-                <td align ="left", style="width:', c2W, '">', minX, ' to ', maxX,  '</td>
-                <td style="width:', c3W, '"></td>',
-               '<td style="width:', c4W, '"><b>Latitude range : </b></td>
-               <td align ="left, style="width:', c5W, '" ">', minY, ' to ', maxY, '</td>
-            </tr></table>',
-               
-               
-                '<p><b>Described By : </b>', descBy, '</p>',
-               # '<p><b>Longitude range : </b>', minX, ' to ', maxX, '</p>',
-               # '<p><b>Latitude range : </b>', minY, ' to ', maxY, '</p>',
-                '<p><b>Element Types : </b>', elemTypes, '</p>',
-                '<p><b>Pattern Types : </b>', patTypes, '</p>',
-                '<p><b>ASCs : </b>', ASC, '</p>'
-               
-               
-               
-               
-               
-               
-  )
-  # 
-  # if(outcomes$ErrorCount ==0){
-  #   ot <- paste0(ot, '<p style="color:green">There are no errors in the data that we could find. You are good to load this dataset into the database.</p>' )
-  # }else{
-  #   ot <- paste0(ot, '<p style="color:red">There are some errors in the dataset you have uploaded. 
-  #                   Please fix these errors in the Excel spreadsheet before trying to upload the data again.</p>' )
-  # }
+  ot <- '<h2 style="color:blue">All Sites Summary</h2>'
+  
+    if(nrow(si$DataTable) > 0){
+     mindate <- min(as.Date(unique(si$DataTable$o_date_desc)))
+     maxdate <- max(as.Date(unique(si$DataTable$o_date_desc)))
+     minslope <- min(as.numeric(si$DataTable$s_slope))
+     maxslope <- max(as.numeric(si$DataTable$s_slope))
+     
+     minX <- min(as.numeric(si$DataTable$o_longitude_GDA94))
+     maxX <- max(as.numeric(si$DataTable$o_longitude_GDA94))
+     minY <- min(as.numeric(si$DataTable$o_latitude_GDA94))
+     maxY <- max(as.numeric(si$DataTable$o_latitude_GDA94))
+     
+     elemTypes <- paste0(unique(si$DataTable$s_elem_type), collapse = '; ')
+     patTypes <- paste0(unique(si$DataTable$s_patt_type), collapse = '; ')
+     descBy <- paste0(unique(si$DataTable$o_desc_by), collapse = '; ')
+     ASC <-  paste0(unique(si$DataTable$o_asc_ord), collapse = '; ')
+     
+     
+     c1W <- '120px'
+     c2W <- '150px'
+     c3W <- '20px'
+     c4W <- '120px'
+     c5W <- '150px'
+     
+     
+      ot <- paste0(ot, 
+                   '<table style="width:1500px;  border-spacing: 100px;" >
+                <tr><td style="width:', c1W, '"><b>Number of sites : </b></td>
+                    <td align ="left", style="width:', c2W, '">', si$NumberOfSites, '</td>
+                    <td style="width:', c3W, '"></td>',
+                   '<td style="width:', c4W, '"><b>Date range : </b></td>
+                   <td align ="left, style="width:', c5W, '" ">', mindate, ' to ', maxdate, '</td>
+                </tr>
+                   
+                    <tr><td style="width:', c1W, '"><b>Longitude range : </b></td>
+                    <td align ="left", style="width:', c2W, '">', minX, ' to ', maxX,  '</td>
+                    <td style="width:', c3W, '"></td>',
+                   '<td style="width:', c4W, '"><b>Latitude range : </b></td>
+                   <td align ="left, style="width:', c5W, '" ">', minY, ' to ', maxY, '</td>
+                </tr></table>',
+                   
+                   
+                    '<p><b>Described By : </b>', descBy, '</p>',
+                   # '<p><b>Longitude range : </b>', minX, ' to ', maxX, '</p>',
+                   # '<p><b>Latitude range : </b>', minY, ' to ', maxY, '</p>',
+                    '<p><b>Element Types : </b>', elemTypes, '</p>',
+                    '<p><b>Pattern Types : </b>', patTypes, '</p>',
+                    '<p><b>ASCs : </b>', ASC, '</p>'
+                   
+                   )
+                   
+     }else{  # no sites to view
+       ot <- paste0(ot, '<p>There are no sites in the system.<p>')
+     }
   
   paste0(ot)
 }
@@ -116,51 +109,54 @@ renderSiteSummary <- function(si){
 
 renderSiteSummaryMap<- function(si){
   
-  df <- si$DataTable
-  
-  sfdf <- st_as_sf( df, coords = c("o_longitude_GDA94", "o_latitude_GDA94"), crs = 4326)
-  b <- st_bbox(sfdf)
-  
-  expand = 1
-    b$xmin <-  b$xmin - expand
-    b$xymin <-  b$ymin - expand
-    b$ymax <-  b$ymax + expand
-    b$xmax <-  b$xmax + expand
-    
-
-  
-
-  icons <- awesomeIcons(
-    icon = 'ios-close',
-    iconColor = 'blue',
-    library = 'ion'
-    #markerColor = getColor(sfdf)
-  )
-  
- lm <- leaflet() %>%
-    clearMarkers() %>%
-    addTiles(group = "Map") %>%
-    addProviderTiles("Esri.WorldImagery", options = providerTileOptions(noWrap = F), group = "Satellite") %>%
-    addMouseCoordinates()  %>%
-    addEasyButton(easyButton(
-      icon="fa-globe", title="Zoom to full extent",
-      onClick=JS("function(btn, map){ map.setView({lon: 135, lat: -28}, 3); }"))) %>%
-    addLayersControl(
-      baseGroups = c("Map", "Satellite"),
-      options = layersControlOptions(collapsed = FALSE)   
-    ) %>%
-    
-    fitBounds(lng1 = as.numeric(b$xmin), lng2 = as.numeric(b$xmax), lat1 = as.numeric(b$ymin), lat2 = as.numeric(b$ymax)) %>%
-    
-   # addCircleMarkers( data=sfdf, radius=6, color = ~pal(Result)), stroke=FALSE, fillOpacity=1, group="locations")
-    addAwesomeMarkers(data=sfdf, icon=icons, label=~as.character(s_id), layerId = ~as.character(s_id))
+      df <- si$DataTable
+      
+      if(nrow(df)>0){
+      
+      sfdf <- st_as_sf( df, coords = c("o_longitude_GDA94", "o_latitude_GDA94"), crs = 4326)
+      
  
- if(!is.null(si$Envelopes)){
-  
-   print(si$Envelopes)
-  lm <- lm %>% addPolygons(data=si$Envelopes)
- }
- lm
+      
+            b <- st_bbox(sfdf)
+            
+            expand = 1
+              b$xmin <-  b$xmin - expand
+              b$xymin <-  b$ymin - expand
+              b$ymax <-  b$ymax + expand
+              b$xmax <-  b$xmax + expand
+
+            icons <- awesomeIcons(
+              icon = 'ios-close',
+              iconColor = 'blue',
+              library = 'ion'
+              #markerColor = getColor(sfdf)
+            )
+            
+           lm <- leaflet() %>%
+              clearMarkers() %>%
+              addTiles(group = "Map") %>%
+              addProviderTiles("Esri.WorldImagery", options = providerTileOptions(noWrap = F), group = "Satellite") %>%
+              addMouseCoordinates()  %>%
+              addEasyButton(easyButton(
+                icon="fa-globe", title="Zoom to full extent",
+                onClick=JS("function(btn, map){ map.setView({lon: 135, lat: -28}, 3); }"))) %>%
+              addLayersControl(
+                baseGroups = c("Map", "Satellite"),
+                options = layersControlOptions(collapsed = FALSE)   
+              ) %>%
+              
+              fitBounds(lng1 = as.numeric(b$xmin), lng2 = as.numeric(b$xmax), lat1 = as.numeric(b$ymin), lat2 = as.numeric(b$ymax)) %>%
+              
+             # addCircleMarkers( data=sfdf, radius=6, color = ~pal(Result)), stroke=FALSE, fillOpacity=1, group="locations")
+              addAwesomeMarkers(data=sfdf, icon=icons, label=~as.character(s_id), layerId = ~as.character(s_id))
+           
+           if(!is.null(si$Envelopes)){
+            
+            lm <- lm %>% addPolygons(data=si$Envelopes)
+           }
+           lm
+     
+  }
 }
 
 
@@ -195,8 +191,8 @@ formatHorizonsSummaryTable <- function(si){
           s_elem_type = colDef(maxWidth = 50, name = "ET"),
           s_patt_type = colDef(maxWidth = 50, name = "PT"),
           lu_code = colDef(maxWidth = 100, name = "Luse"),
-          ps_soil_land_use = colDef(maxWidth = 150, name = "Prop-Luse"),
-          ps_soil_class = colDef(maxWidth = 120, name = "Prop-Soil"),
+          ps_soil_land_use = colDef(minWidth = 200, name = "Prop-Luse"),
+          ps_soil_class = colDef(minWidth = 150, name = "Prop-Soil"),
           
           
           o_asc_ord = colDef(maxWidth = 40, name = "ASC"),
@@ -206,8 +202,8 @@ formatHorizonsSummaryTable <- function(si){
           
           team_code = colDef(maxWidth = 50, name = "Team"),
           sample_barcode_start = colDef(maxWidth = 90, name = "BarCode"),
-          s_notes = colDef(maxWidth = 100, name = "S_Notes"),
-          o_notes = colDef(maxWidth = 100, name = "O_Notes")
+          s_notes = colDef(minWidth = 600, name = "S_Notes"),
+          o_notes = colDef(minWidth = 600, name = "O_Notes")
         ) 
   }else{
     
@@ -241,8 +237,10 @@ formatHorizonsSummaryTable <- function(si){
                     o_asc_subord = colDef(maxWidth = 40, name = "ASO"),
                     o_asc_gg = colDef(maxWidth = 40, name = "AGg"),
                     o_asc_subg = colDef(maxWidth = 40, name = "ASG"),
-                    s_notes = colDef(maxWidth = 500, name = "S_Notes"),
-                    o_notes = colDef(maxWidth = 500, name = "O_Notes")
+                    s_notes = colDef(minWidth = 600, name = "S_Notes"),
+                    o_notes = colDef(minWidth = 600, name = "O_Notes")
+                    # s_notes = colDef(name = "S_Notes"),
+                    # o_notes = colDef(maxWidth = 500, name = "O_Notes")
                   ) 
   }
   
@@ -254,7 +252,8 @@ formatHorizonsSummaryTable <- function(si){
   
 rt <-  reactable(data, compact = TRUE, defaultPageSize = 20,showPagination = T, showPageInfo = T, sortable = T, 
             resizable = TRUE, 
-            width = 1700,
+           # width = 1700,
+            style = list(maxWidth = 10000),
             striped = TRUE,
             highlight = TRUE,
             bordered = TRUE,
