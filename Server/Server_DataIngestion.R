@@ -11,21 +11,24 @@
 getValidationResultsReactTable <- function(vTab){
   
     r <-  reactable(vTab, defaultPageSize = 15, filterable = TRUE, 
+                    
+                    style = list(maxWidth = 10000,  minWidth=1500),
                 columns = list(
                   Result = colDef(width=100, cell = function(value) {
                     if (value == "Error") "\u274c Error" else paste0("\u2714\ufe0f", value)
                   }),
                   Site = colDef(width=70),
                   Value = colDef(width=100),
-                  Table = colDef(width=150),
-                  Field = colDef(width=150),
-                  RecNum = colDef(width=40),
-                  RecSnum = colDef(width=40)
+                  Table = colDef(width=150, name='DB Table'),
+                  Field = colDef(width=150, name='DB Field'),
+                  RecNum = colDef(width=40, name='H#'),
+                  RecSnum = colDef(width=50, name='sub#')
                   #Issue = colDef(width=20)
                 ),
                 outlined = TRUE,
-                wrap = FALSE,
-                width=1200
+                wrap = FALSE
+                #width=2000,
+               
       )
     return(r)    
 }

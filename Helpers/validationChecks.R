@@ -322,14 +322,15 @@ return(odf)
 
 checkSiteNameValidity <- function(fname, itCnt, siteSheets, excelInfo, odf, config, allowedSites){
 
-      itCnt=0
+
       usedSiteList <<- list()
       for (s in 1:length(siteSheets)) {
         itCnt <- itCnt + 1
         setProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
         
-        print(paste0('Checking Site Name ', s))
         sn <- siteSheets[s]
+        print(paste0('Checking Site Name : ', sn))
+        
         dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn, skipEmptyRows = F, skipEmptyCols = F)
         r <- excelInfo[excelInfo$dbFld == 's_id',]
         val=dataSheet[r$row,r$col]
@@ -440,13 +441,11 @@ checkRules <- function(val, r, odf, sn){
     }
   }
   
-  
-  
   #####  Slope
   if(r$dbFld=='s_slope'){
     
     if(!check.numeric(val, only.integer=F)){
-      odf <- message(val, r, odf, sn, type='Error', msg='Slope % ID has to be an numerical value')
+      odf <- message(val, r, odf, sn, type='Error', msg='Slope % has to be an numerical value')
     }else if(as.numeric(val) > 100){
       odf <- message(val, r, odf, sn, type='Warning', msg='Are you sure the slope is great than 100% ?')
     }
@@ -472,7 +471,39 @@ checkRules <- function(val, r, odf, sn){
       }
     }
   }
-  # ValidateSites(token)  
+
+  
+  #####  Depth to water
+  if(r$dbFld=='o_depth_water'){
+    
+    if(!check.numeric(val, only.integer=F)){
+      odf <- message(val, r, odf, sn, type='Error', msg='Slope % has to be an numerical value')
+    }else if(as.numeric(val) > 10){
+      odf <- message(val, r, odf, sn, type='Warning', msg='Did you really see water past 10m deep ?')
+    }
+  }
+  
+  #####  Horizon Designation
+  if(r$dbFld=='h_desig_master'){
+   h <- str_sub(val, 1,1)
+     if(str_detect(h,"[[:lower:]]")){
+        odf <- message(val, r, odf, sn, type='Error', msg='The first character of the horizon needs to be a capital letter')
+     }
+     if(!str_to_upper(h) %in% c('A', 'B', 'C', 'D', 'R', 'L', 'M', 'O')){
+       odf <- message(val, r, odf, sn, type='Error', msg="The first character of the horizon needs to be one of these - 'A', 'B', 'C', 'D', 'R', 'L', 'M', 'O'")
+     }
+  }
+  
+  if(r$dbFld=='h_desig_suffix'){
+
+    if(str_detect(val,"[[:upper:]]")){
+      odf <- message(val, r, odf, sn, type='Error', msg='The horizon designation suffix has to be lower case')
+    }
+    if(!str_to_upper(val) %in% c('a', 'b', 'c', 'cc', 'c', 'e', 'f', 'g','h', 'i', 'j', 'k', 'kk', 'm', 'n', 'o','p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'yy', 'z', '?')){
+      odf <- message(val, r, odf, sn, type='Error', msg="The horizon designation suffix has to be in the list in the yellow book P131.'")
+    }
+  }
+  
   
   return(odf)
 }

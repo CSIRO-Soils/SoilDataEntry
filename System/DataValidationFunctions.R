@@ -206,7 +206,7 @@ get_DataValidationFunctions <- function(){
       }
     }
       
-      setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
+#      setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
     }
     
     
@@ -272,11 +272,15 @@ get_DataValidationFunctions <- function(){
    #    odf <- validateCode(val, r, odf, sn)
    # }
    
-   if(config=='NSMP'){
-     odf <- checkNSMPSpecificRules(val, r, odf, sn)
+   if(!is.na(val)){
+     if(config=='NSMP'){
+       odf <- checkNSMPSpecificRules(val, r, odf, sn)
+     }
    }
    
-   odf <- checkRules(val, r, odf, sn)
+   if(!is.na(val)){
+      odf <- checkRules(val, r, odf, sn)
+   }
    
    return(odf)
  }
