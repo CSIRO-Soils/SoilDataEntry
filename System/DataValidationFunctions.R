@@ -16,7 +16,7 @@
 
 # fname = 'C:/Projects/SiteDataEntryTool/Validation Testing - NSMP - Burnie.xlsx'
 
-
+# fname = '/datasets/work/lw-soildatarepo/work/Ross/temp/Validation Testing - NSMP - Burnie.xlsx'
 
 get_DataValidationFunctions <- function(){
   
@@ -83,7 +83,7 @@ get_DataValidationFunctions <- function(){
   
   dv$ValidateSites <- function(fname, config, keys){
     
-    horizonDataSection = 8:42
+    #horizonDataSection = 8:42
     
     wb <- openxlsx::loadWorkbook(file.path(fname) )
     sheets <- names(wb)
@@ -175,7 +175,7 @@ get_DataValidationFunctions <- function(){
         
         
         #### Check depths validity
-        odf <- CheckDepths(dataSheet, sheetName=sn, excelInfo, odf, horizonDataSection)
+        odf <- CheckDepths(dataSheet, sheetName=sn, excelInfo, odf)
         #### Check field tests validity
         odf <- CheckFieldTests(dataSheet, sheetName=sn, excelInfo, odf)
         
@@ -262,7 +262,7 @@ get_DataValidationFunctions <- function(){
  validateCell <- function( row, col, dataSheet, r, odf, sn, config){
     
    val = dataSheet[row, col]
-   missing <- checkIfRequired(row, col, dataSheet, val, r, odf, sn,horizonDataSection)
+   missing <- checkIfRequired(row, col, dataSheet, val, r, odf, sn)
    if(missing){
      odf <- message(val, r, odf, sn, type='Error', msg='Value is required.')
      return(odf)

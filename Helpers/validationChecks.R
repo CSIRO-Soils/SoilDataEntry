@@ -168,7 +168,7 @@ processFieldChecks <- function(ft, df, odf, sn){
 ############ check depths ###########
 
 
-CheckDepths <- function(dataSheet, sheetName, excelInfo, odf, horizonDataSection){
+CheckDepths <- function(dataSheet, sheetName, excelInfo, odf){
       
       sn=sheetName
       udpos <- excelInfo[excelInfo$dbFld=='h_upper_depth' & excelInfo$recSubNum==1,]
@@ -224,7 +224,7 @@ CheckDepths <- function(dataSheet, sheetName, excelInfo, odf, horizonDataSection
         NaCheckPassed=T
         for (i in 1:nrow(depths)) {
 
-            datasection <- dataSheet[recNum,horizonDataSection[-c(1,2)]]
+            datasection <- dataSheet[recNum, c(8:42)[-c(1,2)]]
             horHasData <- !all(is.na(datasection))
             if(horHasData){
               
@@ -356,7 +356,7 @@ checkSiteNameValidity <- function(fname, itCnt, siteSheets, excelInfo, odf, conf
       return(ol)
 }
 
-checkIfRequired <- function(row, col, dataSheet, val, r, odf, sn, horizonDataSection){
+checkIfRequired <- function(row, col, dataSheet, val, r, odf, sn){
   
   if(!is.na(r$required) & r$required != ''){
     if(r$formRegion != 'H'){
@@ -364,7 +364,7 @@ checkIfRequired <- function(row, col, dataSheet, val, r, odf, sn, horizonDataSec
     }else{
       if(r$recSubNum==1){
         # datasection <- dataSheet[row,8:ncol(dataSheet)]
-        datasection <- dataSheet[row,horizonDataSection]  # hardcoding this for now - this allows pHs etc to be on the right with having to have required horizon fields
+        datasection <- dataSheet[row,c(8:42)]  # hardcoding this for now - this allows pHs etc to be on the right with having to have required horizon fields
         horHasData <- !all(is.na(datasection))
         if(horHasData){
           if(is.na(val) & str_to_upper(r$required)=='REQUIRED'){return(T)}
