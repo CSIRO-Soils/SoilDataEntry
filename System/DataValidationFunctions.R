@@ -13,7 +13,14 @@
 #fname='C:/Temp/Data Entry Template - NSMP_NSMP_Capital.xlsx'
 #fname='C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry/www/Configs/PacificSoils/Lab Data Entry Template - PacificSoils.xlsx'
 
+
+# fname = 'C:/Projects/SiteDataEntryTool/Validation Testing - NSMP - Burnie.xlsx'
+
+
+
 get_DataValidationFunctions <- function(){
+  
+ horizonDataSection = 8:42
   
   dv <- list()
   
@@ -154,6 +161,8 @@ get_DataValidationFunctions <- function(){
     #######  Check site data validity ####
     
     sheetsWithData=0
+    
+    # fname = 'C:/Projects/SiteDataEntryTool/Validation Testing - NSMP - Burnie.xlsx'
 
     sitesDF <- data.frame(x=numeric(), y=numeric(), sitename=character())
     
@@ -182,8 +191,16 @@ get_DataValidationFunctions <- function(){
       if(siteAlreadyPublished){
        
       }else{
+        
+       
+        
+        
       
       if(SheetHasData(dataSheet, excelInfo)){
+        
+
+        
+        
         
         for (j in 1:nrow(tableLevelsInSheet)) {
           tab <- tableLevelsInSheet[j,]$Table
@@ -295,7 +312,7 @@ get_DataValidationFunctions <- function(){
        }else{
          if(r$recSubNum==1){
           # datasection <- dataSheet[row,8:ncol(dataSheet)]
-           datasection <- dataSheet[row,8:42]  # hardcoding this for now - this allows pHs etc to be on the right with having to have required horizon fields
+           datasection <- dataSheet[row,horizonDataSection]  # hardcoding this for now - this allows pHs etc to be on the right with having to have required horizon fields
            horHasData <- !all(is.na(datasection))
            if(horHasData){
              if(is.na(val) & str_to_upper(r$required)=='REQUIRED'){return(T)}
@@ -364,8 +381,14 @@ get_DataValidationFunctions <- function(){
        }
      }
    
+      ######  Described By
+   if(r$dbFld=='o_desc_by'){
      
-     ##########   NEED TO DO SOMETHING ABOUT DESC_BY  ###############
+     if(nchar(val!=4)){
+       odf <- message(val, r, odf, sn, type='Error', msg='Described by needs to be 4 characters long')
+     }
+   }
+
      
      
      #####  Slope
