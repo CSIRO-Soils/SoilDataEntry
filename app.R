@@ -456,7 +456,7 @@ server <- function(input, output,session) {
             t=NULL
           }
           
-          outcome <- OS$Validation$ValidateSites(fname=RV$XLfile, config=RV$ConfigName, key=RV$Keys)
+          outcome <- OS$Validation$ValidateSites(fname=RV$XLfile, config=RV$ConfigName, keys=RV$Keys)
           RV$ValidationOutcomes <- outcome
 
           if(RV$ValidationOutcomes$ErrorCount==0){
