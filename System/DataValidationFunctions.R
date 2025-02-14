@@ -262,7 +262,7 @@ get_DataValidationFunctions <- function(){
  validateCell <- function( row, col, dataSheet, r, odf, sn, config){
     
    val = dataSheet[row, col]
-   missing <- checkIfRequired(row, col, dataSheet, val, r, odf, sn)
+   missing <- checkIfRequired(row, col, dataSheet, val, r, odf, sn,horizonDataSection)
    if(missing){
      odf <- message(val, r, odf, sn, type='Error', msg='Value is required.')
      return(odf)

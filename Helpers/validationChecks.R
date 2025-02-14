@@ -326,7 +326,7 @@ checkSiteNameValidity <- function(fname, itCnt, siteSheets, excelInfo, odf, conf
       usedSiteList <<- list()
       for (s in 1:length(siteSheets)) {
         itCnt <- itCnt + 1
-        setProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
+#        setProgress(itCnt, detail = paste("Checking site names - Site ", s, ' of ', length(siteSheets)))
         
         sn <- siteSheets[s]
         print(paste0('Checking Site Name : ', sn))
@@ -356,7 +356,7 @@ checkSiteNameValidity <- function(fname, itCnt, siteSheets, excelInfo, odf, conf
       return(ol)
 }
 
-checkIfRequired <- function(row, col, dataSheet, val, r, odf, sn){
+checkIfRequired <- function(row, col, dataSheet, val, r, odf, sn, horizonDataSection){
   
   if(!is.na(r$required) & r$required != ''){
     if(r$formRegion != 'H'){
