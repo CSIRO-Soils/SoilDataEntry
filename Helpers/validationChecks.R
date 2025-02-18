@@ -436,7 +436,7 @@ checkRules <- function(val, r, odf, sn){
   ######  Described By
   if(r$dbFld=='o_desc_by'){
     
-    if(nchar(val!=4)){
+    if(nchar(val)!=4){
       odf <- message(val, r, odf, sn, type='Error', msg='Described by needs to be 4 characters long')
     }
   }

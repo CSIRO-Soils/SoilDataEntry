@@ -18,7 +18,7 @@ get_IngestFunctions <- function()
 {
   ig <- list()
   
-      ig$ingestXL <- function(con, XLFile, config, keys, projName='', projManager='', proj_start_date='',  proj_finish_date=''){
+      ig$ingestXL <- function(con, XLFile, config, keys){
         
      
        
@@ -34,7 +34,7 @@ get_IngestFunctions <- function()
         wb <- openxlsx::loadWorkbook(file.path(fname) )
         sheets <- names(wb)
 
-          idxs <- match(OS$Validation$Constants$Sheetnames, sheets)
+          idxs <- match(OS$Constants$Sheetnames, sheets)
           siteSheets <- sheets[-idxs]
           
           withProgress(message = paste0('Ingesting soil data....'), max=length(siteSheets)+1, value = 0, {
@@ -66,13 +66,13 @@ get_IngestFunctions <- function()
         r <- excelInfo[excelInfo$dbFld == 'proj_code',]
         projCode=dataSheet[r$row, r$col]
 
-        pdf <- OS$DB$Helpers$doQuery(ingestCon, paste0("select * from projects where proj_code='", keys$ProjectCode, "'"))
+        
+        sql <- paste0("select * from projects where agency_code='",keys$AgencyCode, "' and proj_code='", keys$ProjectCode, "'")
+        print(sql)
+        pdf <- OS$DB$Helpers$doQuery(ingestCon, sql)
+       
         if(nrow(pdf)==0){
-          sql <- paste0("INSERT into PROJECTS ( AGENCY_CODE, proj_code, proj_name, proj_manager_code, proj_start_date, proj_finish_date )
-                      values ('", keys$AgencyCode, "' , '", keys$ProjectCode, "', '", projName, "', '", projManager, "', '", proj_start_date, "', '", proj_finish_date, "')")
-
-          OS$DB$Helpers$doInsert(ingestCon, sql)
-          print(paste0("Inserted new project - ", keys$ProjectCode))
+          stop('Project does not exist in the database')
         }else{
           print(paste0("Project exists - ", keys$ProjectCode))
         }

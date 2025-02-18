@@ -1,7 +1,7 @@
 Tab_DataIngestion_UI<- function() {
   
   
-  tabPanel("Sites Data Ingestion", icon = icon('cloud-arrow-up'),
+  tabPanel("Morphology Data Ingestion", icon = icon('person-digging'),
 
            sidebarLayout(
              sidebarPanel(width = 3,
@@ -14,9 +14,12 @@ Tab_DataIngestion_UI<- function() {
                             #uiOutput("uiIngestTokenText"),
                             
                            ###  import morphology widgets
-                          fileInput('wgtXLFile', 'Drag your morphology sites spreadsheet here')),
+                          fileInput('wgtXLFile', 'Drag your soil data spreadsheet here'),
                           shinyjs::hidden( actionButton('wgtValidateButton', 'Validate Site Data', class = "btn-success")),
                           HTML('<BR><BR>'),
+                          
+                        #  radioButtons("wgtIngestType", "Data type:", choices=c('Morphology Data', 'Lab Data', 'Photos')),
+                          
                           withBusyIndicatorUI(  shinyjs::hidden( actionButton('wgtIngestButton', 'Import Site Data to DB', class = "btn-success"))),
                          
                           HTML('<BR><BR>'),
@@ -33,7 +36,8 @@ Tab_DataIngestion_UI<- function() {
                                     HTML('<h4>Resources</h4>'),
                                     
                                     uiOutput("uiIngestDownloads"),
-                          ),
+                          )
+                          )
              ),
              mainPanel(
                
@@ -64,6 +68,7 @@ Tab_DataIngestion_UI<- function() {
            
   )  
            
-  )         
            
+          
+  ) 
 }

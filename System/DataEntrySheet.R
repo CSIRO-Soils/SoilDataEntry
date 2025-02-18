@@ -43,7 +43,7 @@ get_DataEntryFunctions <- function()
               rec <- df[i, ]
               s <- rec$s_id
               print(paste0('Generating worksheet ', s))
-              openxlsx::cloneWorksheet(wb, sheetName = s, clonedSheet = "Template")
+              openxlsx::cloneWorksheet(wb, sheetName = s, clonedSheet = "Morphology Template")
               openxlsx::writeData(wb, sheet=s, x=s, startRow = 7, startCol = 2)
             }
           setProgress(value=i+2, detail = paste("Preparing download !!! "))

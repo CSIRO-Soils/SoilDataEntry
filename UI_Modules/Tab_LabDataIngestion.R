@@ -1,7 +1,7 @@
 Tab_LabDataIngestion_UI<- function() {
   
   
-  tabPanel("Laboratory Data Ingestion", icon = icon('cloud-arrow-up'),
+  tabPanel("Laboratory Data Ingestion", icon = icon('flask'),
 
            sidebarLayout(
              sidebarPanel(width = 3,
@@ -9,11 +9,11 @@ Tab_LabDataIngestion_UI<- function() {
                           fluidRow(
                             HTML(paste0('<font color="#425df5"><H4><b>Ingest Laboratory Data</b></H4></font>')),
                             HTML('<BR>'),
-                            downloadLink('wgtDownloadLabDataEntrySheet', label = 'Download Lab Data Entry Sheet Template'),
-                            HTML('<BR><BR>'),
+                            #downloadLink('wgtDownloadLabDataEntrySheet', label = 'Download Lab Data Entry Sheet Template'),
+                            #HTML('<BR><BR>'),
                             
                           ###  import Lab widgets
-                          fileInput('wgtXLFileLabData', 'Drag your soil chemistry data spreadsheet here'),
+                          fileInput('wgtXLFileLabData', 'Drag your soil data spreadsheet here'),
                           shinyjs::hidden(shinyjs::hidden( actionButton('wgtValidateButtonLabResults', 'Validate Chemistry Data', class = "btn-success"))),
                           HTML('<BR><BR>'),
                           withBusyIndicatorUI(  shinyjs::hidden( actionButton('wgtIngestButtonLabResults', 'Import Chemistry Data to DB', class = "btn-success"))),

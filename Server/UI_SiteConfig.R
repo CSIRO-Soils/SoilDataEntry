@@ -13,14 +13,34 @@ setupUIBasedOnConfigs <- function(config, url){
         
         if(config$ProjectCode != 'NSMP'){
 
-        html <-  tabsetPanel( type = "tabs", id='MainTabsetPanel',
+        html <- tabsetPanel(type = "tabs", id='OverTabsetPanel',  
+                            
+                            tabPanel("Data Upload", icon = icon('cloud-arrow-up'),
+                            
+                            tabsetPanel( type = "tabs", id='IngestTabsetPanel',
                               Tab_DataIngestion_UI(),
-                              Tab_SiteViewer_UI(), 
-                              Tab_SitesFlatView(),
-                              Tab_SitesPhotoView(),
-                              Tab_SitesSummary(),
                               Tab_LabDataIngestion_UI(),
-                              Tab_About()
+                              Tab_PhotoIngestion_UI()
+                              
+                              
+                              )
+                            ),
+                            
+                            tabPanel("Data Viewing",  icon = icon('glasses'),
+                            
+                            tabsetPanel( type = "tabs", id='viewingTabsetPanel',
+                                     
+                                     Tab_SiteViewer_UI(), 
+                                     Tab_SitesFlatView(),
+                                     Tab_SitesPhotoView(),
+                                     Tab_SitesSummary()    
+                            )
+                            ),
+                            
+                            Tab_About()
+                            
+                            
+                            
         )
                               
         }else{

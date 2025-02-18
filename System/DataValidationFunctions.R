@@ -17,13 +17,12 @@
 # fname = 'C:/Projects/SiteDataEntryTool/Validation Testing - NSMP - Burnie.xlsx'
 
 # fname = '/datasets/work/lw-soildatarepo/work/Ross/temp/Validation Testing - NSMP - Burnie.xlsx'
+# fname <- 'C:/Projects/SiteDataEntryTool/aaaData Entry Testing - General.xlsx'
 
 get_DataValidationFunctions <- function(){
   
   dv <- list()
   
-  dv$Constants$Sheetnames <- c('Template', "TemplateOriginal","About", "Filled Example", "Codes", "DBInfo", "DBTableLevels" )
-  dv$RequiredLabFields <- c('AgencyCode', 'ProjectCode', 'SiteID', 'ObservationID', 'HorizonNumber', 'SampleNumber', 'UpperDepth', 'LowerDepth')
 
   dv$ValidateLabData <- function(fname, config){
     
@@ -92,7 +91,7 @@ get_DataValidationFunctions <- function(){
     setProgress(0, detail = paste("Reading data ..."))
     
     
-    idxs <- match(OS$Validation$Constants$Sheetnames, sheets)
+    idxs <- match(OS$Constants$Sheetnames, sheets)
     siteSheets <- sheets[-idxs]
     
     excelInfo <- OS$IngestHelpers$getExcelFormInfo(fname)

@@ -234,132 +234,53 @@ get_IngestHelpers <- function()
       }
       
       
-      H$checkXLLabDataFileFormat <- function(fname){
-        
-        ol <- list()
-        
-        ext <- tools::file_ext(fname)
-        
-        if(ext!='xlsx'){
-          ol$OK<-F
-          ol$Message <-paste0('<P style="color:red;">You need to upload an MS Excel spreadsheet with a specific data entry template.</P>
-                               <P>You can download the required template from the link above.</P>')
-          return(ol)
-        }
-        
-        wb <- openxlsx::loadWorkbook (xlsxFile = fname)
-        sheets <- names(wb)
-        
+      # H$checkXLLabDataFileFormat <- function(fname){
+      #   
+      #   ol <- list()
+      #   
+      #   ext <- tools::file_ext(fname)
+      #   
+      #   if(ext!='xlsx'){
+      #     ol$OK<-F
+      #     ol$Message <-paste0('<P style="color:red;">You need to upload an MS Excel spreadsheet with a specific data entry template.</P>
+      #                          <P>You can download the required template from the link above.</P>')
+      #     return(ol)
+      #   }
+      #   
+      #   wb <- openxlsx::loadWorkbook (xlsxFile = fname)
+      #   sheets <- names(wb)
+      #   
+      # 
+      #     idxs <- na.omit(match(c('Lab Data',"About", "Filled Example" ), sheets))
+      #     if(length(idxs) != 3){
+      #       ol$OK<-F
+      #       ol$Message <-paste0('<P style="color:red;">It looks like the file you have uploaded is not the required MS Excel Lab Data Sheet template.</P>
+      #                                <P>You can download the required template from the link below.</P>')
+      #       return(ol)
+      #     }
+      #     if(length(sheets) == 7){
+      #       ol$OK<-F
+      #       ol$Message <-paste0('<P>The data entry template does not contain any sites to ingest.</P>')
+      #       return(ol)
+      #     }
+      # 
+      #     ld <- openxlsx::readWorkbook(xlsxFile = fname, sheet='Lab Data', skipEmptyRows=F, skipEmptyCols = F)
+      #     nsites <- unique(ld$SiteID)
+      #     nhoriz <- nrow(ld)
+      #     nmeth = ncol(ld)-8
+      #     ol$Message <-paste0('<p><b>Upload Info</b></p>',
+      #                         '<p><b>Number of Sites : </b>', nsites, '</p>',
+      #                         '<p><b>Number of Horizons : </b>', nhoriz, '</p>',
+      #                         '<p><b>Number of Lab Methods : </b>', nmeth, '</p>')
+      #   
+      #   
+      #   ol$OK = TRUE
+      #   return(ol)
+      #   
+      # }
 
-          idxs <- na.omit(match(c('Lab Data',"About", "Filled Example" ), sheets))
-          if(length(idxs) != 3){
-            ol$OK<-F
-            ol$Message <-paste0('<P style="color:red;">It looks like the file you have uploaded is not the required MS Excel Lab Data Sheet template.</P>
-                                     <P>You can download the required template from the link below.</P>')
-            return(ol)
-          }
-          if(length(sheets) == 7){
-            ol$OK<-F
-            ol$Message <-paste0('<P>The data entry template does not contain any sites to ingest.</P>')
-            return(ol)
-          }
 
-          ld <- openxlsx::readWorkbook(xlsxFile = fname, sheet='Lab Data', skipEmptyRows=F, skipEmptyCols = F)
-          nsites <- unique(ld$SiteID)
-          nhoriz <- nrow(ld)
-          nmeth = ncol(ld)-8
-          ol$Message <-paste0('<p><b>Upload Info</b></p>',
-                              '<p><b>Number of Sites : </b>', nsites, '</p>',
-                              '<p><b>Number of Horizons : </b>', nhoriz, '</p>',
-                              '<p><b>Number of Lab Methods : </b>', nmeth, '</p>')
-        
-        
-        ol$OK = TRUE
-        return(ol)
-        
-      }
-      
-      
-      H$checkXLFileFormat <- function(fname, templateType){
-        
-        ol <- list()
-        
-        ext <- tools::file_ext(fname)
-        
-        if(ext!='xlsx'){
-          ol$OK<-F
-          ol$Message <-paste0('<P>You need to upload an MS Excel spreadsheet with a specific data entry template.</P>
-                               <P>You can download the required template from the link above.</P>')
-          return(ol)
-        }
-        
-       # s <- suppressMessages( readxl::read_xlsx (fname))
-       # sheets <- excel_sheets(fname)
-        
-        wb <- openxlsx::loadWorkbook (xlsxFile = fname)
-        sheets <- names(wb)
 
-        
-        
-        if(templateType=='Site Data Sheet'){
-              idxs <- na.omit(match(c('Template', "TemplateOriginal","About", "Filled Example", "Codes", "DBInfo", "DBTableLevels" ), sheets))
-              if(length(idxs) != 7){
-                ol$OK<-F
-                ol$Message <-paste0('<P>It looks like the file you have uploaded is not the required MS Excel Site Data Sheet template.</P>
-                                     <P>You can download the required template from the link below.</P>')
-                return(ol)
-              }
-              if(length(sheets) == 7){
-                ol$OK<-F
-                ol$Message <-paste0('<P>The data entry template does not contain any sites to ingest.</P>')
-                return(ol)
-              }
-              siteSheets <- sheets[-idxs]
-              ps <- siteSheets[1]
-              dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = 6, skipEmptyRows = F, skipEmptyCols = F)
-
-              
-              agencyCode=dataSheet[4,2]
-              projCode=dataSheet[5,2]
-              
-              ol$OK<-T
-              ol$Message <-paste0('<p><b>Upload Info</b></p>',
-                                   '<p><b>Agency Code : </b>', agencyCode, '</p>',
-                                   '<p><b>Project Code : </b>', projCode, '</p>',
-                                   '<p><b>No. Sites : </b>', length(siteSheets), '</p>'
-                                  )
-              return(ol)
-        }else if (templateType=='Flat Excel Format'){
-        
-          idxs <- na.omit(match(c('agencies', "projects","officers", "sites", "horizons"), sheets))
-          if(length(idxs) != 5){
-            ol$OK<-F
-            ol$Message <-paste0('<P>It looks like the file you have uploaded is not the required Flat Excel Format Data Entry template.</P>
-                                     <P>You can download the required template from the link below.</P>')
-            return(ol)
-          }
-          #dataSheet <- as.data.frame(suppressMessages( read_excel(fname, sheet = 'sites', col_names = T)))
-          dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, skipEmptyRows = F, skipEmptyCols = F)
-          agencyCode=dataSheet[1,1]
-          projCode=dataSheet[1,2]
-          
-          ol$OK<-T
-          ol$Message <-paste0('<p><b>Upload Info</b></p>',
-                              '<p><b>Agency Code : </b>', agencyCode, '</p>',
-                              '<p><b>Project Code : </b>', projCode, '</p>',
-                              '<p><b>No. Sites : </b>', nrow(dataSheet), '</p>'
-          )
-          return(ol)
-          
-        }else{
-          ol$OK<-F
-          ol$Message <-paste0('<P>It looks like the file you have uploaded is not a recognised data entry template.</P>
-                                     <P>You can download the required template from the link below.</P>')
-          return(ol)
-        }
-      }
-      
-      
       
       
       
@@ -392,6 +313,109 @@ get_IngestHelpers <- function()
 
         return(sql)
       }
+      
+      
+      
+      
+      
+      
+      ###.####
+      ### ^ Check Excel file formats  ####
+      
+      H$checkXLFileFormat <- function(fname, uploadType){
+        
+        ol <- list()
+        
+        ext <- tools::file_ext(fname)
+        
+        if(ext!='xlsx'){
+          ol$OK<-F
+          ol$Message <-paste0('<P>You need to upload an MS Excel spreadsheet with a specific data entry template.</P>
+                               <P>You can download the required template from the link above.</P>')
+          return(ol)
+        }
+        
+        wb <- openxlsx::loadWorkbook (xlsxFile = fname)
+        sheets <- names(wb)
+        
+        idxs <- na.omit(match(OS$Constants$Sheetnames, sheets))
+        if(length(idxs) != 8){
+          ol$OK<-F
+          ol$Message <-paste0('<P>It looks like the file you have uploaded is not the required MS Excel Site Data Sheet template.</P>
+                                     <P>You can download the required template from the link in the top left corner of the "Morphology Data Ingestion" tab')
+          return(ol)
+        }else{
+          
+          
+          
+          if(uploadType == OS$Constants$UploadTypes$Morphology_Data){
+            
+            if(length(sheets) == 8){
+              ol$OK<-F
+              ol$Message <-paste0('<P>The data entry template does not contain any sites to ingest.</P>')
+              return(ol)
+            }
+            
+            siteSheets <- sheets[-idxs]
+            ps <- siteSheets[1]
+            dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = 9, skipEmptyRows = F, skipEmptyCols = F)
+            
+            
+            agencyCode=dataSheet[4,2]
+            projCode=dataSheet[5,2]
+            
+            ol$OK<-T
+            ol$Message <-paste0('<p><b>Upload Info</b></p>',
+                                '<p><b>Agency Code : </b>', agencyCode, '</p>',
+                                '<p><b>Project Code : </b>', projCode, '</p>',
+                                '<p><b>No. Sites : </b>', length(siteSheets), '</p>'
+            )
+            return(ol)
+          }else if(uploadType == OS$Constants$UploadTypes$Lab_Data){
+            
+            ol$OK<-T
+            ol$Message <-paste0('<p><b>Lab Data</b></p>')
+            return(ol)
+            
+          }else if(uploadType == OS$Constants$UploadTypes$Photos){
+            
+            
+            dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet = 'Photos', skipEmptyRows = F, skipEmptyCols = F)
+            
+            colNames <- dataSheet[2,1:8]
+            idxs <- na.omit(match(OS$Constants$RequiredPhotoFields, colNames))
+            
+            if(length(idxs) != 8){
+              ol$OK<-F
+              ol$Message <-paste0('<P>It looks like the file you have uploaded is not the required MS Excel Site Data Sheet template.</P>
+                                     <P>You can download the required template from the link in the top left corner of the "Morphology Data Ingestion" tab')
+              return(ol)
+            }
+            
+            numPhotos = nrow(dataSheet)-2
+            numSites = length(unique(dataSheet[3:nrow(dataSheet),3]))
+            agencyCode = dataSheet[3,1]
+            projCode = dataSheet[3,2]
+
+            ol$OK<-T
+            ol$Message <- paste0('<p><b>Upload Info</b></p>',
+
+                                 '<p><b>Agency Code : </b>', agencyCode, '</p>',
+                                 '<p><b>Project Code : </b>', projCode, '</p>',
+                                 '<p><b>No. Sites : </b>', numSites, '</p>',
+                                 '<p><b>No. Photos: </b>', numPhotos, '</p>')
+
+            
+            
+            return(ol)
+          }
+        }
+      }
+      
+      
+      
+      
+      
 
 return(H)
 }

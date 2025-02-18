@@ -32,4 +32,6 @@ Tab_SitesFlatView <- function() {
              )
            
            )          
-  )}
+  )
+  
+  }

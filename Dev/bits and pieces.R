@@ -26,3 +26,19 @@ OS$DB$Helpers$deleteAllData(con=conNSMPHolding$Connection)
 OS$DB$Helpers$deleteWholeSite(con=conNSMPHolding$Connection )
 
 OS$DB$Helpers$deleteWholeSite(con=conNSMPHolding$Connection, verbose=F, agencyCode='994', projCode='NSMP', siteID='N5006' )
+
+
+
+con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
+
+sql <- 'Select Labm_code from LAB_METHODS'
+lc <- OS$DB$Helpers$doQuery(con, sql)
+write.csv(lc, 'c:/temp/codes.csv')
+
+
+OS$DB$Helpers$deleteWholeSite(con=OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilProjects)$Connection, verbose=F, agencyCode='994', projCode='SLAM', siteID='5' )
+
+
+
+
+

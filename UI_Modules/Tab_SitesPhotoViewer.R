@@ -7,7 +7,7 @@
 
 Tab_SitesPhotoView <- function() {
   
-  tabPanel("Photo Viewer",  icon = icon("image", tags$style()),
+  tabPanel("Photo Viewer",  icon = icon("photo-film", tags$style()),
            
            sidebarLayout(
              sidebarPanel(width = 2,

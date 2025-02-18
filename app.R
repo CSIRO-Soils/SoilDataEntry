@@ -39,7 +39,7 @@ library(stringr)
 
 library(jpeg)
 library(png)
-
+library(exifr)
 
 machineName <- as.character(Sys.info()['nodename'])
 
@@ -90,7 +90,7 @@ ui <- fluidPage(
 #### .========     SERVER  ========  ####
 server <- function(input, output,session) {
   
-
+  options(shiny.maxRequestSize=200*1024^2)
 
   ####.   ======  App Configuration  ============== ###### 
 
@@ -103,6 +103,7 @@ server <- function(input, output,session) {
   RV$CurrentPhotoInfoTable <- NULL
   RV$PublishedAndDraftSiteInfo <- NULL
   RV$SiteUpdateCount <- 1
+  RV$ValidationPhotosOutcomes <- NULL
   
   observe({
      cd <-reactiveValuesToList(session$clientData)
@@ -157,11 +158,13 @@ server <- function(input, output,session) {
     
       req(RV$DBName, RV$Keys$ProjectCode)
       con <- OS$DB$Config$getCon(RV$DBName, fname=RV$Keys$ProjectCode)
-      print('Connecting to DB')
+      print(paste0('Connecting to DB - ', RV$DBName))
       RV$DBCon <- con
      
      # updateTabsetPanel(session, "MainTabsetPanel", selected = "Laboratory Data Ingestion")
      # updateTabsetPanel(session, "MainTabsetPanel", selected = "Publish Sites")
+      updateTabsetPanel(session, "IngestTabsetPanel", selected = "Photo Ingestion")
+      
   })
 
   
@@ -408,7 +411,7 @@ server <- function(input, output,session) {
     req(file)
     fname <- file$datapath
     RVExcelFile <- file$datapath
-    r <- OS$IngestHelpers$checkXLFileFormat(fname, 'Site Data Sheet')
+    r <- OS$IngestHelpers$checkXLFileFormat(fname, OS$Constants$UploadTypes$Morphology_Data)
     if(!r$OK){
       
     }else{
@@ -641,7 +644,7 @@ server <- function(input, output,session) {
     file <- input$wgtXLFileLabData
     req(file)
     fname <- file$datapath
-    r <- OS$IngestHelpers$checkXLLabDataFileFormat(fname)
+    r <- OS$IngestHelpers$checkXLFileFormat(fname, OS$Constants$UploadTypes$Lab_Data)
 
     if(!r$OK){
       
@@ -651,7 +654,71 @@ server <- function(input, output,session) {
     paste0(r$Message)
   })
   
+  ###. ####
+  ### ***** Photos Ingestion ***** ####  
   
+  #### ^ Upload Photos spreadsheet ####
+  observe({
+    req(input$wgtXLFilePhotosDataEntrySheet)
+    shinyjs::hide('wgtXLFilePhotosImages')
+    file <- input$wgtXLFilePhotosDataEntrySheet
+    req(file)
+    odir <- paste0(tempdir(), '/Photos/', RV$Keys$AgencyCode, '_', RV$Keys$ProjectCode )
+    
+    if(dir.exists(odir)){
+      unlink(odir, recursive = T)
+    }
+    dir.create(odir, recursive = T)
+    of <- paste0(odir, '/photos.xlsx')
+    file.copy(fname, of)
+    r <- OS$IngestHelpers$checkXLFileFormat(fname=of, OS$Constants$UploadTypes$Photos)
+    if(!r$OK){
+    }else{
+      shinyjs::show('wgtXLFilePhotosImages')
+    }
+    paste0(r$Message)
+  })
+  
+  #### ^ Upload Photos image files ####
+  output$wgtPhotosIngestFileInfo <-  renderText({
+    
+    shinyjs::hide('wgtValidateButtonPhotos')
+    files <- input$wgtXLFilePhotosImages
+    req(files)
+    #print(files)
+    # write.csv(files, 'c:/temp/files.csv')
+    fname <- files$datapath
+    odir <- paste0(tempdir(), '/Photos/', RV$Keys$AgencyCode, '_', RV$Keys$ProjectCode )
+    file.copy(files$datapath, paste0(odir, '/', basename(files$name)))
+    
+    if(length(files)>0){
+      shinyjs::show('wgtValidateButtonPhotos')
+    }else{
+      shinyjs::hide('wgtValidateButtonPhotos')
+    }
+   # paste0(r$Message)
+  })
+  
+  
+  observeEvent(input$wgtValidateButtonPhotos,{
+    
+    req(input$wgtXLFilePhotosDataEntrySheet, input$wgtXLFilePhotosImages, RV$DBCon )
+    
+    outcome <- OS$Validation$Photos$validatePhotos( con=RV$DBCon$Connection, keys = RV$Keys )
+    RV$ValidationPhotosOutcomes <- outcome
+    
+   print( RV$ValidationPhotosOutcomes)
+    
+    if(RV$ValidationPhotosOutcomes$ErrorCount==0){
+      shinyjs::show('wgtIngestButtonPhotos')
+    }
+
+  })
+  
+  output$wgtPhotosValidationResultsTable <- renderReactable({
+    req(RV$ValidationPhotosOutcomes)
+    reactable( RV$ValidationPhotosOutcomes$validationResultsTable )
+  })
   
 
   ###. ####
