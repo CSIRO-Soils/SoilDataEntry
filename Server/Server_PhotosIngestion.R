@@ -63,8 +63,6 @@ get_IngestPhotos <- function()
     
     for (i in 1:nrow(photoRecs)) {
 
-     
-      
       rec <- photoRecs[i,]
       print(rec[1:8])
       
@@ -73,7 +71,6 @@ get_IngestPhotos <- function()
       sql <- paste0("DELETE from PHOTOS where agency_code=? and proj_code=? and s_id=? and o_id=? and photo_filename=?")
       params = list(keys$AgencyCode, keys$ProjectCode, as.character(rec$SiteID), as.character(rec$ObservationID), rec$FileName )
       res <- DBI::dbExecute(conn=con, statement=sql, params=params)
-      res
       
       sql <- paste0("select max(photo_no) from PHOTOS where agency_code=? and proj_code=? and s_id=?")
       params = list(keys$AgencyCode, keys$ProjectCode, as.character(rec$SiteID) )
@@ -89,9 +86,28 @@ get_IngestPhotos <- function()
       file_content <-  paste( as.character(  readBin(iName, what = "raw", n = file.info(iName)[["size"]])), collapse = "")
       query = paste0("INSERT INTO PHOTOS (agency_code, proj_code, s_id, photo_no, o_id, photo_type_code, photo_alt_text, photo_filename, photo_img)  
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      
+      
       params = list(keys$AgencyCode, keys$ProjectCode, as.character(rec$SiteID), pno, as.character(rec$ObservationID), rec$PhotoType, 
-                    rec$Description,  rec$FileName, file_content)
+                    rec$Description, rec$FileName, file_content)
       DBI::dbExecute(con, query, params )
+      
+      # query = paste0("INSERT INTO PHOTOS (agency_code, proj_code, s_id, photo_no, o_id, photo_type_code, photo_alt_text, photo_filename, photo_img)  
+      #                VALUES ('994', 'SLAM', '5', '8', '1', 'CR', 'test', 'test', '", file_content, "')" )
+      # OS$DB$Helpers$doInsertUsingRawSQL(con, query)
+      # 
+      # sql <- paste0("select * from PHOTOS 
+      #               where agency_code='994' and proj_code='SLAM' and s_id='5' and o_id='1' and photo_filename='profile1.jpg'")
+      # DBI::dbGetQuery(con, sql)
+      # 
+      
+      
+      # this is a hack as I can't get the above insert query to work with the date field in it
+      sql <- paste0("UPDATE PHOTOS set photo_taken_date='",rec$DateTaken, "' 
+                    where agency_code=? and proj_code=? and s_id=? and o_id=? and photo_filename=?")
+      params = list( keys$AgencyCode, keys$ProjectCode, as.character(rec$SiteID), as.character(rec$ObservationID), rec$FileName)
+      DBI::dbExecute(con, sql, params)
+      
       
     }
     })
