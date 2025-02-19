@@ -104,6 +104,8 @@ server <- function(input, output,session) {
   RV$PublishedAndDraftSiteInfo <- NULL
   RV$SiteUpdateCount <- 1
   RV$ValidationPhotosOutcomes <- NULL
+  RV$IngestPhotosCount <- 1
+  RV$PhotoUpdateCount <- 1
   
   observe({
      cd <-reactiveValuesToList(session$clientData)
@@ -524,17 +526,11 @@ server <- function(input, output,session) {
         RV$XLfile <- input$wgtXLFile$datapath
         outcome <- OS$DB$IngestSiteData$ingestXL(con=RV$DBCon, XLFile=RV$XLfile, config=RV$ConfigName, keys=RV$Keys)
         RV$ValidationOutcomes <- outcome
-        
-        
-        # sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
-        # RV$AvailableSitesIDs <- sites
         RV$SiteUpdateCount =  RV$SiteUpdateCount + 1
         
       })
   })
     
-
-  
   
   output$uiErrorsTableTitle <-  renderText({
     req(RV$ValidationOutcomes)
@@ -658,7 +654,10 @@ server <- function(input, output,session) {
   ### ***** Photos Ingestion ***** ####  
   
   #### ^ Upload Photos spreadsheet ####
-  observe({
+#  observe({
+  output$wgtPhotosIngestXLInfo <-  renderText({
+  
+  
     req(input$wgtXLFilePhotosDataEntrySheet)
     shinyjs::hide('wgtXLFilePhotosImages')
     file <- input$wgtXLFilePhotosDataEntrySheet
@@ -670,14 +669,18 @@ server <- function(input, output,session) {
     }
     dir.create(odir, recursive = T)
     of <- paste0(odir, '/photos.xlsx')
-    file.copy(fname, of)
+    file.copy(file$datapath, of)
     r <- OS$IngestHelpers$checkXLFileFormat(fname=of, OS$Constants$UploadTypes$Photos)
     if(!r$OK){
     }else{
       shinyjs::show('wgtXLFilePhotosImages')
     }
+    
+    print(r$Message)
     paste0(r$Message)
   })
+  
+  
   
   #### ^ Upload Photos image files ####
   output$wgtPhotosIngestFileInfo <-  renderText({
@@ -685,8 +688,7 @@ server <- function(input, output,session) {
     shinyjs::hide('wgtValidateButtonPhotos')
     files <- input$wgtXLFilePhotosImages
     req(files)
-    #print(files)
-    # write.csv(files, 'c:/temp/files.csv')
+
     fname <- files$datapath
     odir <- paste0(tempdir(), '/Photos/', RV$Keys$AgencyCode, '_', RV$Keys$ProjectCode )
     file.copy(files$datapath, paste0(odir, '/', basename(files$name)))
@@ -696,10 +698,16 @@ server <- function(input, output,session) {
     }else{
       shinyjs::hide('wgtValidateButtonPhotos')
     }
-   # paste0(r$Message)
+    if(nrow(files)==1){
+      paste0(nrow(files), ' photo was uploaded.')
+    }else{
+      paste0(nrow(files), ' photos where uploaded.')
+    }
+    
   })
   
   
+  #### ^ Photo Validation  ####
   observeEvent(input$wgtValidateButtonPhotos,{
     
     req(input$wgtXLFilePhotosDataEntrySheet, input$wgtXLFilePhotosImages, RV$DBCon )
@@ -707,17 +715,35 @@ server <- function(input, output,session) {
     outcome <- OS$Validation$Photos$validatePhotos( con=RV$DBCon$Connection, keys = RV$Keys )
     RV$ValidationPhotosOutcomes <- outcome
     
-   print( RV$ValidationPhotosOutcomes)
-    
     if(RV$ValidationPhotosOutcomes$ErrorCount==0){
       shinyjs::show('wgtIngestButtonPhotos')
+      shinyjs::show('wgtPhotosIngestReminderMessage')
     }
-
   })
   
+  output$wgtPhotosIngestReminderMessage<-  renderText({
+    HTML('<p>NB. Any exisiting photos with the same filename for a given site will be overwritten while ingesting this set of photos</p>')
+  })
+  
+  #### ^ Render the Photo Validation Table ####
   output$wgtPhotosValidationResultsTable <- renderReactable({
     req(RV$ValidationPhotosOutcomes)
-    reactable( RV$ValidationPhotosOutcomes$validationResultsTable )
+    if(nrow( RV$ValidationPhotosOutcomes$validationResultsTable) > 0){
+     # reactable( RV$ValidationPhotosOutcomes$validationResultsTable )
+      getPhotoValidationResultsReactTable(RV$ValidationPhotosOutcomes$validationResultsTable)
+    }
+  })
+  
+  observeEvent(input$wgtIngestButtonPhotos, {
+    RV$IngestPhotosCount = RV$IngestPhotosCount + 1
+  })
+  
+  #### ^ Ingest Photos ####
+  observe({
+    if(RV$IngestPhotosCount>1){
+      req(RV$ValidationPhotosOutcomes, RV$DBCon,input$wgtValidateButtonPhotos )
+      OS$Photos$IngestPhotos(RV$DBCon$Connection, RV$Keys)
+    }
   })
   
 
@@ -798,17 +824,28 @@ server <- function(input, output,session) {
   #### ^ Update site photos select list  #######
   
   observe({
-    req(input$vwgtSiteIDPhotoView)
+    req(input$vwgtSiteIDPhotoView, RV$ConfigName)
     
-    sql <- paste0("SELECT *  FROM [NatSoil].[dbo].[PHOTOS] 
+    if(RV$ConfigName=='NSMP'){
+      sql <- paste0("SELECT * FROM [NatSoil].[dbo].[PHOTOS] 
                   where agency_code='", RV$Keys$AgencyCode, "' and proj_code='", RV$Keys$ProjectCode,
-                  "' and s_id='", input$vwgtSiteIDPhotoView, "' and o_id=2")
-    
-   con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
+                    "' and s_id='", input$vwgtSiteIDPhotoView, "' and o_id=2")
+      con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
+    }else{
+      sql <- paste0("SELECT * FROM [PHOTOS] 
+                  where agency_code='", RV$Keys$AgencyCode, "' and proj_code='", RV$Keys$ProjectCode,
+                    "' and s_id='", input$vwgtSiteIDPhotoView, "' and o_id='1'")
+      con <-RV$DBCon$Connection
+    }
+
    df <- OS$DB$Helpers$doQuery(con, sql)
-   dbDisconnect(con)
-   RV$CurrentPhotoInfoTable <- df
-   
+   if(nrow(df)>0){
+     print(paste0('nrow : ', nrow(df)))
+      RV$CurrentPhotoInfoTable <- df
+   }
+   # else{
+   #   RV$CurrentPhotoInfoTable 
+   # }
   })
   
   
@@ -819,15 +856,21 @@ server <- function(input, output,session) {
   
   output$wgtPhotosImage <- renderImage({
    
-    req(input$wgtPhotosSelectList)
+   # req(input$wgtPhotosSelectList, input$vwgtSiteIDPhotoView )
     
+  #  RV$CurrentPhotoInfoTable
     df <- RV$CurrentPhotoInfoTable 
     rec <- df[df$photo_alt_text == input$wgtPhotosSelectList, ]
+   
+    a=NULL
+    if(nrow(rec)==1){a=1}
+    req(a)
+    
     outfile <- tempfile(fileext = '.jpg')
     binData <- rec$photo_img
     content<-unlist(binData)
     writeBin(content, con = outfile)
-    
+     
     ext <- tools::file_ext(rec$photo_filename)
     if(ext=='jpg'){
     img <- readJPEG(outfile)
@@ -846,7 +889,7 @@ server <- function(input, output,session) {
          contentType = 'image/jpg',
          width = 700,
          height = 700 * iratio,
-         alt = "This is alternate text")
+         alt = "")
   }, deleteFile = TRUE)
 
   

@@ -14,16 +14,15 @@ Tab_PhotoIngestion_UI<- function() {
                             
                           ###  import Photo widgets
                           fileInput('wgtXLFilePhotosDataEntrySheet', 'Drag your soil data spreadsheet here'),
-                          
+                          htmlOutput('wgtPhotosIngestXLInfo'),
                           shinyjs::hidden(fileInput('wgtXLFilePhotosImages', 'Drag your photo files here', multiple = T, accept = OS$Constants$PhotoFormats)),
-                          
-                          shinyjs::hidden( actionButton('wgtValidateButtonPhotos', 'Validate Photo Data', class = "btn-success")),
-                          HTML('<BR><BR>'),
-                          withBusyIndicatorUI(  shinyjs::hidden( actionButton('wgtIngestButtonPhotos', 'Import Photos to DB', class = "btn-success"))),
+                        htmlOutput('wgtPhotosIngestFileInfo'),
+                        HTML('<BR>'),
+                        withBusyIndicatorUI(   shinyjs::hidden( actionButton('wgtValidateButtonPhotos', 'Validate Photo Data', class = "btn-success"))),
+                          HTML('<BR>'),
+                          shinyjs::hidden( htmlOutput('wgtPhotosIngestReminderMessage')),
+                          shinyjs::hidden( actionButton('wgtIngestButtonPhotos', 'Import Photos to DB', class = "btn-success")),
                            
-                          HTML('<BR><BR>'),
-                          htmlOutput('wgtPhotosIngestFileInfo'),
-
                           HTML('<BR><BR>'),
                           HTML('<BR><BR>')
                          

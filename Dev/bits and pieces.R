@@ -20,8 +20,15 @@ OS$DB$Helpers$doQuery(conInfo$Connection, sql)
 cond <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
 OS$DB$Helpers$deleteAllData(cond)
 
+dev <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilDev)
+OS$DB$Helpers$deleteAllData(con=dev$Connection)
 
-OS$DB$Helpers$deleteAllData(con=conNSMPHolding$Connection)
+OS$DB$Helpers$deleteAllData(con=dev$Connection)
+OS$DB$Helpers$doExec(con=dev$Connection, paste0('DELETE from dbo.CSIS_Allowed_Sites'))
+OS$DB$Helpers$doExec(con=dev$Connection, paste0('DELETE from dbo.SITE_ENVELOPE'))
+OS$DB$Helpers$doExec(con=dev$Connection, paste0('DELETE from dbo.SITE_MNG_PRACS'))
+
+OS$DB$Helpers$doQuery(con, paste0('select * from dbo.CSIS_Allowed_Sites'))
 
 OS$DB$Helpers$deleteWholeSite(con=conNSMPHolding$Connection )
 

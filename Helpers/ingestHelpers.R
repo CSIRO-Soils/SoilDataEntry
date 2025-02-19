@@ -398,12 +398,16 @@ get_IngestHelpers <- function()
             projCode = dataSheet[3,2]
 
             ol$OK<-T
-            ol$Message <- paste0('<p><b>Upload Info</b></p>',
-
-                                 '<p><b>Agency Code : </b>', agencyCode, '</p>',
-                                 '<p><b>Project Code : </b>', projCode, '</p>',
-                                 '<p><b>No. Sites : </b>', numSites, '</p>',
-                                 '<p><b>No. Photos: </b>', numPhotos, '</p>')
+            
+            ol$Message <- paste0('The Data Entry Spreadsheet contains ', numPhotos, ' photo records across ', numSites, ' sites. 
+                                  Now drag the corresponding image files to the file upload box below.<BR><BR>')
+            
+            # ol$Message <- paste0('<p><b>Upload Info</b></p>',
+            # 
+            #                      '<p><b>Agency Code : </b>', agencyCode, '</p>',
+            #                      '<p><b>Project Code : </b>', projCode, '</p>',
+            #                      '<p><b>No. Sites : </b>', numSites, '</p>',
+            #                      '<p><b>No. Photos: </b>', numPhotos, '</p>')
 
             
             
