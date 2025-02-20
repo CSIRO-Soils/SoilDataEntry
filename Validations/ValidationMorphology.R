@@ -19,63 +19,12 @@
 # fname = '/datasets/work/lw-soildatarepo/work/Ross/temp/Validation Testing - NSMP - Burnie.xlsx'
 # fname <- 'C:/Projects/SiteDataEntryTool/aaaData Entry Testing - General.xlsx'
 
-get_DataValidationFunctions <- function(){
+get_ValidateMorphologyData <- function(){
   
   dv <- list()
   
 
-  dv$ValidateLabData <- function(fname, config){
-    
-    
-    ld <- openxlsx::readWorkbook(xlsxFile = fname, sheet = 'Lab Data', skipEmptyRows = F, skipEmptyCols = F)
-    
-    agencyCode = ld[1,1]
-    projectCode = ld[1,2]
-    
-    conInfo <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
-    conStaging <- OS$DB$Config$getCon(OS$DB$Config$DBNames$PacificSoils)$Connection
-    
-    AvailMeths <- OS$DB$NatSoilQueries$getLabMethods(conInfo)
-    sheetMeths <- colnames(ld[9:ncol(ld)])
-    idxs <- which(!sheetMeths %in% AvailMeths$LABM_CODE )
-    
-    
-    ####  check that provided lab method codes are legitimate
-    odf <- data.frame()
-    if(length(idxs)>0){
-      r<-list()
-      r$Table = 'LAB_RESULTS'
-      r$Field = 'labm_code'
-      r$RecNum =''
-      r$RecSnum =''
-      em <- paste0('Lab methods ', paste0(sheetMeths[idxs], collapse = '; '), ' are not valid lab method codes')
-      odf <-  message( val='', r, odf, '',  'Error', em)
-    }
-    
-    
-    #### Check that sites are in the DB already
-    sql <- paste0("select s_id from SITES where proj_code='", agencyCode, "' and proj_code='", projectCode, "'" )
-    sites <- OS$DB$Helpers$doQuery(conStaging, sql)
-    sheetSites <- unique(ld$SiteID)
-    
-    for(i in 1:length(sheetSites)){
-      site <- sheetSites[i]
-      if(!site %in% sites){
-        r<-list()
-        r$Table = 'LAB_RESULTS'
-        r$Field = ''
-        r$RecNum =''
-        r$RecSnum =''
-        odf <-  message( val= paste0("Site Id = ", rec$SiteID), r, odf, '',  'Error', "Site not on the Staging Database")
-      }  
-   }
-    
-    
-  
-    dbDisconnect(conStaging)
-    dbDisconnect(conInfo)
-    }
-  
+ 
   
 
   ###########   Validate the Morphology Data  ####################################

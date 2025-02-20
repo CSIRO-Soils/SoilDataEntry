@@ -23,6 +23,7 @@ get_AppConstants <- function()
   c$PhotosTabName <- 'Photos'
   
   c$PhotoFormats <- c('.jpg', '.jpeg', '.png')
+  c$LabTabName <- 'Laboratory Data'
   
   return(c)
 }

@@ -64,7 +64,7 @@ get_ValidationPhotos <- function()
       
       setProgress(i, detail = paste(rec$FileName))
       
-      uploadRec <- photoDF[photoDF$name==rec$FileName, ]
+     # uploadRec <- photoDF[photoDF$name==rec$FileName, ]
       
       
       photoPath <- paste0(tdir, '/', rec$FileName)  
@@ -165,11 +165,9 @@ get_ValidationPhotos <- function()
       }
     }
     ol <- list()
-    ol$Type='PhotoValidation'
+    ol$Type='Validation'
     ol$ErrorCount = errorCnt
     ol$validationResultsTable <- odf
-    
-    
     
     return(ol)
   }

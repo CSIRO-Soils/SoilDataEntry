@@ -9,14 +9,14 @@ Tab_LabDataIngestion_UI<- function() {
                           fluidRow(
                             HTML(paste0('<font color="#425df5"><H4><b>Ingest Laboratory Data</b></H4></font>')),
                             HTML('<BR>'),
-                            #downloadLink('wgtDownloadLabDataEntrySheet', label = 'Download Lab Data Entry Sheet Template'),
-                            #HTML('<BR><BR>'),
                             
                           ###  import Lab widgets
-                          fileInput('wgtXLFileLabData', 'Drag your soil data spreadsheet here'),
-                          shinyjs::hidden(shinyjs::hidden( actionButton('wgtValidateButtonLabResults', 'Validate Chemistry Data', class = "btn-success"))),
-                          HTML('<BR><BR>'),
-                          withBusyIndicatorUI(  shinyjs::hidden( actionButton('wgtIngestButtonLabResults', 'Import Chemistry Data to DB', class = "btn-success"))),
+                          fileInput('wgtXLFileLabData', 'Drag your laboratory data spreadsheet here'),
+                          shinyjs::hidden(shinyjs::hidden( actionButton('wgtValidateButtonLabResults', 'Validate Laboratory Data', class = "btn-success"))),
+                          HTML('<BR><BR><BR>'),
+                          shinyjs::hidden( htmlOutput('wgtLabDataIngestReminderMessage')),
+                          
+                          withBusyIndicatorUI(  shinyjs::hidden( actionButton('wgtIngestButtonLabResults', 'Import Laboratory Data to DB', class = "btn-success"))),
                            
                           HTML('<BR><BR>'),
                           htmlOutput('wgtLabDataIngestFileInfo'),
@@ -30,19 +30,19 @@ Tab_LabDataIngestion_UI<- function() {
              mainPanel(
                
                fluidRow(
-                 column(8, htmlOutput('wgtLadDataIngestOutcomeInfo')),
-                        column(4, HTML('<BR>'), leafletOutput("UI_IngestMap", width = 350, height = 250),HTML('<BR>')
+                 column(12, htmlOutput('wgtLabDataIngestOutcomeInfo'))
+                        
                         ),
                
-               fluidRow(
+               
                  uiOutput("uiLabDataErrorsTableTitle"),
-                 shinyjs::hidden( downloadLink('wgtDownloadErrorTable', label = 'Click here to download the errors table')),
-                HTML('<BR>'),
+                 shinyjs::hidden( downloadLink('wgtDownloadLabErrorTable', label = 'Click here to download the errors table')),
+                HTML('<BR><BR>'),
                 
                 
-                 shinyjs::hidden( actionLink('wgtShowAllLabDataErrorsLink', 'Show All Errors')),
-                        reactableOutput("wgtLabDataValidationResultsTable")
-                        ),
+               #  shinyjs::hidden( actionLink('wgtShowAllLabDataErrorsLink', 'Show All Errors')),
+                        reactableOutput("wgtLabDataValidationResultsTable"),
+                        
 
               
                fluidRow( HTML('<BR><BR>'))
@@ -52,6 +52,6 @@ Tab_LabDataIngestion_UI<- function() {
            
   )  
            
-  )         
+          
            
 }

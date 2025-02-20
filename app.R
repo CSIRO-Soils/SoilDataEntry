@@ -165,7 +165,8 @@ server <- function(input, output,session) {
      
      # updateTabsetPanel(session, "MainTabsetPanel", selected = "Laboratory Data Ingestion")
      # updateTabsetPanel(session, "MainTabsetPanel", selected = "Publish Sites")
-      updateTabsetPanel(session, "IngestTabsetPanel", selected = "Photo Ingestion")
+     # updateTabsetPanel(session, "IngestTabsetPanel", selected = "Photo Ingestion")
+      updateTabsetPanel(session, "IngestTabsetPanel", selected = "Laboratory Data Ingestion")
       
   })
 
@@ -364,7 +365,6 @@ server <- function(input, output,session) {
   output$uiSiteViewSitePublishType <-  renderText({
     req(RV$ConfigName, input$vwgtSiteID)
     if(RV$ConfigName=='NSMP'){
-      print(RV$PublishedAndDraftSiteInfo)
       shinyjs::show('uiSiteViewSitePublishType')
       if(input$vwgtSiteID %in% RV$PublishedAndDraftSiteInfo$Draft$s_id){
         message <- 'This site is <span style="color:orange">Draft</span><BR><BR>'
@@ -378,7 +378,7 @@ server <- function(input, output,session) {
 
   
   ####.####
-  ###  ***** Data Ingestion ****  ####
+  ###  ***** Morphology Data Ingestion ****  ####
   #### ^ Download Data Entry Template ####
   output$wgtDownloadDataEntrySheet <- downloadHandler(
     filename = function() {
@@ -524,7 +524,7 @@ server <- function(input, output,session) {
       req(RV$ConfigName)
         isolate({
         RV$XLfile <- input$wgtXLFile$datapath
-        outcome <- OS$DB$IngestSiteData$ingestXL(con=RV$DBCon, XLFile=RV$XLfile, config=RV$ConfigName, keys=RV$Keys)
+        outcome <- OS$DB$IngestData$ingestMorpholgyData(con=RV$DBCon, XLFile=RV$XLfile, config=RV$ConfigName, keys=RV$Keys)
         RV$ValidationOutcomes <- outcome
         RV$SiteUpdateCount =  RV$SiteUpdateCount + 1
         
@@ -633,22 +633,116 @@ server <- function(input, output,session) {
 
 ####. ####
   ####  ***** Lab Data Ingestion  *****  #####
+  
   #### ^ Upload Lab Data Excel File ####
   output$wgtLabDataIngestFileInfo <-  renderText({
-    
+
     shinyjs::hide('wgtValidateButtonLabResults')
     file <- input$wgtXLFileLabData
     req(file)
     fname <- file$datapath
     r <- OS$IngestHelpers$checkXLFileFormat(fname, OS$Constants$UploadTypes$Lab_Data)
 
+    print(r)
     if(!r$OK){
-      
+
     }else{
       shinyjs::show('wgtValidateButtonLabResults')
     }
     paste0(r$Message)
   })
+  
+  
+  #### ^ Validate Lab Data ####
+  
+  observeEvent(input$wgtValidateButtonLabResults, {
+    req(RV$ConfigName)
+    isolate({
+      if(RV$ConfigName=='NSMP'){
+        t=RV$Keys$Token
+      }else{
+        t=NULL
+      }
+      outcome <- OS$Validation$ValidateLabData(con = RV$DBCon$Connection, keys=RV$Keys, fname=input$wgtXLFileLabData$datapath, config=RV$ConfigName)
+      RV$LabValidationOutcomes <- outcome
+
+      if(RV$LabValidationOutcomes$ErrorCount==0){
+        shinyjs::show('wgtIngestButtonLabResults')
+        shinyjs::show('wgtLabDataIngestReminderMessage')
+      }
+    })
+  })
+
+  output$wgtLabDataIngestReminderMessage<-  renderText({
+    HTML('<p>NB. Any Lab data in the DB that matches these records will be overwitten while ingesting this lab data</p>')
+  })
+  
+  
+  #### ^ Render Lab validation errors table  #### 
+  output$wgtLabDataValidationResultsTable <- renderReactable({
+    req(RV$LabValidationOutcomes)
+    
+    if(RV$LabValidationOutcomes$Type=='Validation'){
+      
+      if(nrow(RV$LabValidationOutcomes$validationResultsTable) > 0){
+        shinyjs::show('wgtDownloadLabErrorTable')
+        getLabValidationResultsReactTable(vTab=RV$LabValidationOutcomes$validationResultsTable)
+      }else{
+        shinyjs::hide('wgtDownloadLabErrorTable')
+      }
+    }else{
+      
+    }
+  })
+
+  
+  ### ^ Render Lab validation & Ingestion outcomes ####  
+  output$wgtLabDataIngestOutcomeInfo <-  renderText({
+    req( RV$LabValidationOutcomes)
+    renderLabDataValidationOutcomes(outcomes =  RV$LabValidationOutcomes )
+  })
+  
+  observe({
+    req( RV$LabValidationOutcomes)
+    if(RV$LabValidationOutcomes$Type=='Ingestion'){
+      shinyjs::hide('wgtDownloadLabErrorTable')
+      shinyjs::hide('wgtIngestButtonLabResults')
+      shinyjs::hide('wgtLabDataIngestReminderMessage')
+    }
+  })
+  
+  
+ #### ^ Ingest Lab Data  #### 
+  observeEvent(input$wgtIngestButtonLabResults, {
+    
+    file <- input$wgtXLFileLabData
+    req(file)
+    fname <- file$datapath
+    outcome <- OS$DB$IngestData$IngestLabData(con=RV$DBCon, keys=RV$Keys, fname=fname)
+    RV$LabValidationOutcomes <- outcome
+  })
+  
+  
+  
+  
+  #### ^ Download Lab Validation Errors Table ####
+  output$wgtDownloadLabErrorTable <- downloadHandler(
+    filename = function() {
+      req(RV$LabValidationOutcomes)
+      if(RV$Keys$ProjectCode=='NSMP'){
+        tof <-  paste0('LabDataValidationErrors_', RV$Keys$ProjectCode, '_', RV$Keys$Token, '.csv')
+      }else{
+        tof <-  paste0('LabDataValidationErrors_', RV$Keys$ProjectCode, '.csv')
+      }
+    },
+    content = function(file) {
+      write.csv(RV$LabValidationOutcomes$validationResultsTable, file)
+    }
+  )
+  
+  
+  
+  
   
   ###. ####
   ### ***** Photos Ingestion ***** ####  
@@ -675,8 +769,6 @@ server <- function(input, output,session) {
     }else{
       shinyjs::show('wgtXLFilePhotosImages')
     }
-    
-    print(r$Message)
     paste0(r$Message)
   })
   
@@ -712,13 +804,19 @@ server <- function(input, output,session) {
     
     req(input$wgtXLFilePhotosDataEntrySheet, input$wgtXLFilePhotosImages, RV$DBCon )
     
-    outcome <- OS$Validation$Photos$validatePhotos( con=RV$DBCon$Connection, keys = RV$Keys )
+    outcome <- OS$Validation$validatePhotos( con=RV$DBCon$Connection, keys = RV$Keys )
     RV$ValidationPhotosOutcomes <- outcome
     
     if(RV$ValidationPhotosOutcomes$ErrorCount==0){
       shinyjs::show('wgtIngestButtonPhotos')
       shinyjs::show('wgtPhotosIngestReminderMessage')
     }
+  })
+  
+  ### ^ Render Lab validation & Ingestion outcomes ####  
+  output$wgtPhotoIngestOutcomeInfo <-  renderText({
+    req( RV$ValidationPhotosOutcomes)
+    renderPhotoValidationOutcomes(outcomes =  RV$ValidationPhotosOutcomes )
   })
   
   output$wgtPhotosIngestReminderMessage<-  renderText({
@@ -741,10 +839,22 @@ server <- function(input, output,session) {
   #### ^ Ingest Photos ####
   observe({
     if(RV$IngestPhotosCount>1){
-      req(RV$ValidationPhotosOutcomes, RV$DBCon,input$wgtValidateButtonPhotos )
-      OS$Photos$IngestPhotos(RV$DBCon$Connection, RV$Keys)
+      req(RV$DBCon,input$wgtValidateButtonPhotos )
+       RV$ValidationPhotosOutcomes <- OS$DB$IngestData$IngestPhotos(RV$DBCon$Connection, RV$Keys)
+     
     }
   })
+  
+  observe({
+    req( RV$ValidationPhotosOutcomes)
+    if(RV$ValidationPhotosOutcomes$Type=='Ingestion'){
+      shinyjs::hide('wgtPhotosValidationResultsTable')
+      shinyjs::hide('wgtIngestButtonPhotos')
+      shinyjs::hide('wgtPhotosIngestReminderMessage')
+    }
+  })
+  
+  
   
 
   ###. ####
@@ -840,12 +950,8 @@ server <- function(input, output,session) {
 
    df <- OS$DB$Helpers$doQuery(con, sql)
    if(nrow(df)>0){
-     print(paste0('nrow : ', nrow(df)))
       RV$CurrentPhotoInfoTable <- df
    }
-   # else{
-   #   RV$CurrentPhotoInfoTable 
-   # }
   })
   
   

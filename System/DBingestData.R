@@ -18,7 +18,7 @@ get_IngestFunctions <- function()
 {
   ig <- list()
   
-      ig$ingestXL <- function(con, XLFile, config, keys){
+      ig$ingestMorpholgyData <- function(con, XLFile, config, keys){
         
      
        
@@ -163,8 +163,8 @@ get_IngestFunctions <- function()
         ol$Type='Ingestion'
         bbox <- OS$DB$NatSoilQueries$getBoundingBoxForProject(ingestCon, keys$AgencyCode, keys$ProjectCode)
         
-        ot <- paste0('<H3 style="color:green;"><b>Finished loading data into the Staging Database</b></H3><BR>')
-         ot <- paste0(ot, '<p>Well done, you have successfully loaded you soil site data into the Staging Database.
+        ot <- paste0('<H3 style="color:green;"><b>Finished loading data into the Database</b></H3><BR>')
+         ot <- paste0(ot, '<p>Well done, you have successfully loaded your soil site data into the Database.
                               You can now use the Tabs above to explore and review your data.</p><BR>')
          
         ot <- paste0(ot, '<p><b>Database Name : </b>', con$Name , '</p>')

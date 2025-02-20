@@ -373,8 +373,18 @@ get_IngestHelpers <- function()
             return(ol)
           }else if(uploadType == OS$Constants$UploadTypes$Lab_Data){
             
+            ld <- openxlsx::readWorkbook(xlsxFile = fname, sheet = 'Laboratory Data', skipEmptyRows = F, skipEmptyCols = F, startRow = 3)
+            sheetMeths <- colnames(ld[9:ncol(ld)])
+            
+            
             ol$OK<-T
-            ol$Message <-paste0('<p><b>Lab Data</b></p>')
+            ol$Message <-paste0('<p><b>Lab Data Upload Info</b></p>',
+                                '<p><b>No. Sites : </b>', length(unique(ld$SiteID)), '</p>',
+                                '<p><b>No. Analysis Methods : </b>', length(sheetMeths), '</p>',
+                                '<p><b>No. Records : </b>', nrow(ld), '</p>'
+                                
+                                
+                                )
             return(ol)
             
           }else if(uploadType == OS$Constants$UploadTypes$Photos){

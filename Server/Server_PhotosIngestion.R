@@ -43,6 +43,41 @@ getPhotoValidationResultsReactTable <- function(vTab){
 }
 
 
+renderPhotoValidationOutcomes <- function(outcomes){
+  
+  if(outcomes$Type=='Validation'){
+    
+    df <- outcomes$validationResultsTable
+    
+    
+    ot <- '<h3>Photo Validation Results</h3>'
+    ot <- paste0(ot, 
+                 
+                 '</p><p>Total Number of Errors : ',  outcomes$ErrorCount,
+                 '</p><BR>'
+    )
+    
+    if(outcomes$ErrorCount ==0){
+      ot <- paste0(ot, '<p style="color:green">There are no errors in the Photo upload that we could find. You are good to load these photos into the database.</p>' )
+    }else{
+      ot <- paste0(ot, '<p style="color:red">There are some errors in the photos records you have uploaded. 
+                            Please fix these errors in the Excel spreadsheet before trying to upload the photos records again.</p><BR>' )
+      return(paste0(ot))
+    }
+    
+  }else{
+    
+    return( outcomes$html)
+    
+  }
+  
+}
+
+
+
+
+
+
 get_IngestPhotos <- function()
 {
   igp <- list()
@@ -64,7 +99,6 @@ get_IngestPhotos <- function()
     for (i in 1:nrow(photoRecs)) {
 
       rec <- photoRecs[i,]
-      print(rec[1:8])
       
       setProgress(i, detail = paste(rec$FileName))
       
@@ -82,7 +116,7 @@ get_IngestPhotos <- function()
       }
       
       iName = paste0(tdir, '/', rec$FileName)
-      print(iName)
+
       file_content <-  paste( as.character(  readBin(iName, what = "raw", n = file.info(iName)[["size"]])), collapse = "")
       query = paste0("INSERT INTO PHOTOS (agency_code, proj_code, s_id, photo_no, o_id, photo_type_code, photo_alt_text, photo_filename, photo_img)  
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
@@ -112,6 +146,26 @@ get_IngestPhotos <- function()
     }
     })
     
+    
+    ol <- list()
+    ol$Type='Ingestion'
+    
+    
+    ot <- paste0('<H3 style="color:green;"><b>Finished loading the photos into the database</b></H3><BR>')
+    ot <- paste0(ot, '<p>Splendid, you have successfully loaded your photos into the database.
+                              You can now use the Tabs above to explore and review your data.</p><BR>')
+    
+
+    ot <- paste0(ot, '<p><b>Agency Code : </b>', keys$AgencyCode, '</p>' )
+    ot <- paste0(ot, '<p><b>Project Code : </b>', keys$ProjectCode, '</p>')
+    ot <- paste0(ot, '<p><b>Number of Sites : </b>', length(unique(photoRecs$SiteID)), '</p>')
+    ot <- paste0(ot, '<p><b>Number of Records : </b>', nrow(ld), '</p>')
+    
+    
+    
+    ol$html <- ot
+    
+    return(ol)
   
     }
   
