@@ -17,7 +17,7 @@
 
 #makeFlatSiteDescriptionSheetfromDB(con, fname, agency, proj, sid, oid)
 
-# con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
+# con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilProjects)$Connection
 # agency <- '994'
 # proj <- 'NSMP'
 # sid <- 'N5006'
@@ -33,6 +33,7 @@ get_FlatSheetFunctions <- function()
        # fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/NationalSoilMonitoring/NSMData/www/Configs/NSMP/Data Entry Template - NSMP.xlsx'
        # fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry/www/Configs/PacificSoils/Data Entry Template - PacificSoils.xlsx'
         
+        print(fname)
         
         keys <<- c(COLOURS='col', MOTTLES='mott', COARSE_FRAGS='cf', STRUCTURES='str', SEGREGATIONS='seg', 
                   STRENGTHS='strg', CUTANS='cutan', PANS='pan', ROOTS='root', PHS='ph')
@@ -57,6 +58,9 @@ get_FlatSheetFunctions <- function()
       
           return(outMat)
       }
+      
+      return(fs)
+}
       
       
       generateBlankTemplate <- function(fname){
@@ -122,6 +126,8 @@ get_FlatSheetFunctions <- function()
             )
         
         svs <- OS$DB$Helpers$doQuery(con, siteSQL)
+        
+        print('you made it')
         
         
         for (i in 1:nrow(si)) {
@@ -233,7 +239,6 @@ get_FlatSheetFunctions <- function()
         return(outMat)
       }  
 
-      return(fs)
-}
+
 
 

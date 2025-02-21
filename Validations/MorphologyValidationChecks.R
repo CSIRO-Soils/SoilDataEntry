@@ -392,6 +392,10 @@ checkNSMPSpecificRules <- function(val, r, odf, sn){
     }
   }
   
+  if(year(d) < 2024){
+    odf <- message(val, r, odf, sn, type='Warning', msg="Are you sure the date is correct ? The NSMP didn't begin until 2020")
+  }
+  
   return(odf)
 }
 
@@ -408,21 +412,26 @@ checkRules <- function(val, r, odf, sn){
   
   ###### Described date
   if(r$dbFld=='s_date_desc'){
-    d <- as.Date(val, format='%Y%m%d')
-    if(nchar(val)!=8){
-      odf <- message(val, r, odf, sn, type='Error', msg='Date Described has to be an 8 characters string in the format YYYMMDD')
-    }else if(is.na(d)){
-      odf <- message(val, r, odf, sn, type='Error', msg='Date Described has to be an 8 characters string in the format YYYMMDD')
-    }else if(year(d) < 2024){
-      odf <- message(val, r, odf, sn, type='Warning', msg="Are you sure the date is correct ? The NSMP didn't begin until 2020")
-    }
-  }
+        d <- as.Date(val, format='%Y%m%d')
+        if(nchar(val)!=8){
+          odf <- message(val, r, odf, sn, type='Error', msg='Date Described has to be an 8 characters string in the format YYYMMDD')
+        }else if(is.na(d)){
+          odf <- message(val, r, odf, sn, type='Error', msg='Date Described has to be an 8 characters string in the format YYYMMDD')
+        }else if(d > Sys.Date()){
+              odf <- message(val, r, odf, sn, type='Warning', msg='Date supplied is in the future. Are you sure this is correct?'  )
+        }else if(year(d)<1900){
+              odf <- message(val, r, odf, sn, type='Warning', msg='Date supplied is before 1900. Are you sure this is correct?'  )
+        }
+  } 
+  
   
   #####  Location
   if(r$dbFld=='o_latitude_GDA94'){
     
     if(!check.numeric(val, only.integer=F)){
       odf <- message(val, r, odf, sn, type='Error', msg='Observation ID has to be an numerical value')
+    }else if(as.numeric(val)< -90 | as.numeric(val) > 90) {
+      odf <- message(val, r, odf, sn, type='Error', msg='Latitude has to be between -90 and 90 degrees')
     }
   }
   
@@ -430,7 +439,10 @@ checkRules <- function(val, r, odf, sn){
     
     if(!check.numeric(val, only.integer=F)){
       odf <- message(val, r, odf, sn, type='Error', msg='Observation ID has to be an numerical value')
+    }else if(as.numeric(val)< -180 | as.numeric(val) > 180) {
+      odf <- message(val, r, odf, sn, type='Error', msg='Longitude has to be between -180 and 180 degrees')
     }
+    
   }
   
   ######  Described By

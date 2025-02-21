@@ -58,19 +58,7 @@ if(machineName=='ROHAN-SL'){
 source('System/ObjectStore.R')
 
 
-source("Helpers/busyHelper.R")
-
-
-####. ####
-#### ^ UI Functions load  ####
-# source('UI_Modules/Tab_DataIngestion.R' )
-# source('UI_Modules/Tab_SiteViewer.R')
-# source('UI_Modules/Tab_Admin.R')
-# source('UI_Modules/Tab_About.R')
-
-availableDBs <<- c('Portable', "NatSoil")
-
- appcon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)$Connection
+ appcon <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
  codes <<- OS$DB$Helpers$doQuery(appcon, 'select * from Codes')
  dbDisconnect(appcon)
 ####. ####
@@ -166,7 +154,7 @@ server <- function(input, output,session) {
      # updateTabsetPanel(session, "MainTabsetPanel", selected = "Laboratory Data Ingestion")
      # updateTabsetPanel(session, "MainTabsetPanel", selected = "Publish Sites")
      # updateTabsetPanel(session, "IngestTabsetPanel", selected = "Photo Ingestion")
-      updateTabsetPanel(session, "IngestTabsetPanel", selected = "Laboratory Data Ingestion")
+     # updateTabsetPanel(session, "IngestTabsetPanel", selected = "Laboratory Data Ingestion")
       
   })
 
@@ -616,7 +604,14 @@ server <- function(input, output,session) {
 ### ^ Render validation & Ingestion outcomes ####  
   output$wgtIngestOutcomeInfo <-  renderText({
     req(RV$ValidationOutcomes)
+    if(RV$ValidationOutcomes$Type=='Ingestion'){
+      shinyjs::hide('wgtDownloadErrorTable')
+      shinyjs::hide('wgtIngestButton')
+      shinyjs::hide('wgtShowAllErrorsLink')
+    }
+    
     renderDataValidationOutcomes(outcomes <- RV$ValidationOutcomes)
+    
   })
   
   #### ^ Render Site Ingestion Map ######  
@@ -827,7 +822,6 @@ server <- function(input, output,session) {
   output$wgtPhotosValidationResultsTable <- renderReactable({
     req(RV$ValidationPhotosOutcomes)
     if(nrow( RV$ValidationPhotosOutcomes$validationResultsTable) > 0){
-     # reactable( RV$ValidationPhotosOutcomes$validationResultsTable )
       getPhotoValidationResultsReactTable(RV$ValidationPhotosOutcomes$validationResultsTable)
     }
   })
@@ -962,9 +956,6 @@ server <- function(input, output,session) {
   
   output$wgtPhotosImage <- renderImage({
    
-   # req(input$wgtPhotosSelectList, input$vwgtSiteIDPhotoView )
-    
-  #  RV$CurrentPhotoInfoTable
     df <- RV$CurrentPhotoInfoTable 
     rec <- df[df$photo_alt_text == input$wgtPhotosSelectList, ]
    

@@ -8,7 +8,7 @@
 
 
 
-# fname <- 'C:/Projects/SiteDataEntryTool/aaaData Entry Testing - General.xlsx'
+# fname <- 'C:/Projects/SiteDataEntryTool/aaa Errors Data Entry Testing - General .xlsx'
 # con <-OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilProjects)$Connection
 # keys <- list()
 # keys$AgencyCode <- '994'
@@ -193,10 +193,10 @@ get_ValidateLabData <- function(){
       }
     }
     
-    })
+    })  ###  End progress bar
     
     
-    #### Put the number of errors for each site into the spatial DF
+
     sitesWithErrorsCnt=0
     
     usites <- unique(ld$SiteID)

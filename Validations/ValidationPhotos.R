@@ -114,8 +114,7 @@ get_ValidationPhotos <- function()
          
          dt <- as.Date(paste0(y, '-', m, '-', d), format='%Y-%m-%d')
          if(is.na(dt)){
-           odf <- photoMessage(odf, 'Error', i, PhotoName=rec$FileName,  rec$SiteID, rec$ObservationID, val=rec$DateTaken, 
-                               paste0('Not a valid date.'  ))
+           odf <- photoMessage(odf, 'Error', i, PhotoName=rec$FileName,  rec$SiteID, rec$ObservationID, val=rec$DateTaken, paste0('Not a valid date.'  ))
          }else{
            if(dt > Sys.Date()){
              odf <- photoMessage(odf, 'Warning', i, PhotoName=rec$FileName,  rec$SiteID, rec$ObservationID, val=rec$DateTaken, 

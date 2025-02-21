@@ -28,12 +28,12 @@ OS$DB$Config <- get_DBConfig()
 OS$DataEntry <- get_DataEntryFunctions()
 OS$DB$Helpers <- get_DBHelpers()
 
-#OS$DB$IngestSiteData <- get_IngestFunctions()
+
 OS$DB$IngestData <- list() 
 OS$DB$IngestData <- c(OS$DB$IngestData, get_IngestFunctions())
 OS$DB$IngestData <- c(OS$DB$IngestData, get_IngestPhotos())
 OS$DB$IngestData <- c(OS$DB$IngestData, get_LabDataIngestion ())
-#OS$Photos <- get_IngestPhotos()
+
 
 OS$DB$Logins <- get_DBLogins()
 OS$DB$NatSoilQueries <- get_NatSoilQueries()
@@ -47,7 +47,7 @@ OS$Reporting$FlatSheet <- get_FlatSheetFunctions()
 OS$DB$SiteSummaryQueries <- get_SiteSummaryQueries()
 OS$UI$DynamicUI <- get_DynamicUi_ServerFunctions()
 
-#OS$Validation <- vector(mode='list', length = 3)
+
 OS$Validation = list()
 OS$Validation <- c(OS$Validation,  get_ValidateMorphologyData())
 OS$Validation <- c(OS$Validation,  get_ValidationPhotos())
