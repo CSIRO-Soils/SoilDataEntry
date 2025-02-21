@@ -79,7 +79,7 @@ processFieldChecks <- function(ft, df, odf, sn){
   
   if(numericCheckPassed){
     
-    all(is.na(df))
+   # all(is.na(df))
     idxs<- which(is.na(df[,1]) & is.na(df[,2]))
     if(length(idxs)>0){
       df <- df[-idxs,]
@@ -98,8 +98,11 @@ processFieldChecks <- function(ft, df, odf, sn){
     
     if(NaDepthCheckPassed){
       
+      
+      
       df$Depth <- as.numeric(df$Depth)
       df[,2] <- as.numeric(df[,2])
+      
       
       r$dbFld = ft
       
@@ -121,19 +124,33 @@ processFieldChecks <- function(ft, df, odf, sn){
       
       if(ft=='h_ec'){
         for (i in 1:nrow(df)) {
-          if(df$EC[i] > 50){
+          if( is.null(df$EC[i]) || is.na(df$EC[i]) ){
+            r$dbFld <-ft
             r$recNum=i
-            odf <- message(val=df$EC[i], r, odf, sn, type='Warning', msg="EC value is over 50 dS/m. Are you sure this is correct?")
-          }
-          if(df$EC[i] < 0){
-            r$recNum=i
-            odf <- message(val=df$EC[i], r, odf, sn, type='Error', msg="EC value is less than 0")
+            odf <- message(val='', r, odf, sn, type='Error', msg="EC value is missing")
+          }else{
+              if(df$EC[i] > 50){
+                r$recNum=i
+                odf <- message(val=df$EC[i], r, odf, sn, type='Warning', msg="EC value is over 50 dS/m. Are you sure this is correct?")
+              }
+              if(df$EC[i] < 0){
+                r$recNum=i
+                odf <- message(val=df$EC[i], r, odf, sn, type='Error', msg="EC value is less than 0")
+              }
+            
           }
         }
       }
       
       if(ft=='ph_value'){
         for (i in 1:nrow(df)) {
+          
+          if(is.null(df$pH[i]) || is.na(df$pH[i])){
+            r$dbFld <-ft
+            r$recNum=i
+            odf <- message(val='', r, odf, sn, type='Error', msg="pH value is missing")
+          }else{
+          
           if(df$pH[i] < 4){
             r$recNum=i
             odf <- message(val=df$pH[i], r, odf, sn, type='Warning', msg="pH value is less than 4. Are you sure this is correct?")
@@ -152,6 +169,7 @@ processFieldChecks <- function(ft, df, odf, sn){
           if(df$pH[i] > 11){
             r$recNum=i
             odf <- message(val=df$pH[i], r, odf, sn, type='Error', msg="pH value is greater than 11. ")
+          }
           }
         }
       }
@@ -392,8 +410,13 @@ checkNSMPSpecificRules <- function(val, r, odf, sn){
     }
   }
   
-  if(year(d) < 2024){
-    odf <- message(val, r, odf, sn, type='Warning', msg="Are you sure the date is correct ? The NSMP didn't begin until 2020")
+  if(r$dbFld=='s_date_desc'){
+      d <- as.Date(val, format='%Y%m%d')
+      if(!is.na(d)){
+          if(year(d) < 2024){
+            odf <- message(val, r, odf, sn, type='Warning', msg="Are you sure the date is correct ? The NSMP didn't begin until 2024")
+          }
+      }
   }
   
   return(odf)
@@ -511,7 +534,7 @@ checkRules <- function(val, r, odf, sn){
     if(str_detect(val,"[[:upper:]]")){
       odf <- message(val, r, odf, sn, type='Error', msg='The horizon designation suffix has to be lower case')
     }
-    if(!str_to_upper(val) %in% c('a', 'b', 'c', 'cc', 'c', 'e', 'f', 'g','h', 'i', 'j', 'k', 'kk', 'm', 'n', 'o','p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'yy', 'z', '?')){
+    if(!val %in% c('a', 'b', 'c', 'cc', 'c', 'e', 'f', 'g','h', 'i', 'j', 'k', 'kk', 'm', 'n', 'o','p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'yy', 'z', '?')){
       odf <- message(val, r, odf, sn, type='Error', msg="The horizon designation suffix has to be in the list in the yellow book P131.'")
     }
   }
@@ -526,11 +549,9 @@ validateCode <- function(val, r, odf, sn){
   if(nrow(cvs)>0){
     
     if(!val %in% cvs$code_value){
-      m <- message(val, r, odf, sn, type='Error', msg='Value not in the required codes list.')
-      odf <- rbind(odf, m)
+      odf <- message(val, r, odf, sn, type='Error', msg='Value not in the required codes list.')
+      
     }else{
-      # e$Type = 'OK'
-      # e$Issue = paste0('')
     }
   }
   return(odf)

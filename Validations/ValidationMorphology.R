@@ -2,30 +2,19 @@
 
 
 # conInfo <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)
-#fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/NationalSoilMonitoring/NSMData/www/Configs/NSMP/Data Entry Template - NSMP.xlsx'
-#fname <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/NationalSoilMonitoring/NSMData/www/Configs/NSMP/Errors - Entry Template - NSMP.xlsx'
-#fname <- 'C:/Projects/SiteDataEntryTool/NoErrors - PacificSoils.xlsx'
 
+# config='NSMP'
+# fname <- 'C:/Projects/SiteDataEntryTool/bbb Data Entry Template - NSMP_Capital.xlsx'
+# fname <- 'C:/Projects/SiteDataEntryTool/bbb No Errors Data Entry Template - NSMP_Capital.xlsx'
 
-#fname <- 'C:/Projects/SiteDataEntryTool/No Errors -  Entry Template - NSMP.xlsx'
-#setwd('C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry')
-
-#fname='C:/Temp/Data Entry Template - NSMP_NSMP_Capital.xlsx'
-#fname='C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry/www/Configs/PacificSoils/Lab Data Entry Template - PacificSoils.xlsx'
-
-
-# fname = 'C:/Projects/SiteDataEntryTool/Validation Testing - NSMP - Burnie.xlsx'
-
-# fname = '/datasets/work/lw-soildatarepo/work/Ross/temp/Validation Testing - NSMP - Burnie.xlsx'
-# fname <- 'C:/Projects/SiteDataEntryTool/aaaData Entry Testing - General.xlsx'
+# keys <- list()
+# keys$AgencyCode <- '994'
+# keys$ProjectCode <- 'SLAM'
+# keys$Token = 'Capital'
 
 get_ValidateMorphologyData <- function(){
   
   dv <- list()
-  
-
- 
-  
 
   ###########   Validate the Morphology Data  ####################################
   
@@ -33,12 +22,14 @@ get_ValidateMorphologyData <- function(){
     
     #horizonDataSection = 8:42
     
+    
     wb <- openxlsx::loadWorkbook(file.path(fname) )
     sheets <- names(wb)
     
-    withProgress(message = paste0('Validating soil data ....'), value = 0,  max=length(sheets)*2, {
-    setProgress(0, detail = paste("Reading data ..."))
-    
+
+        withProgress(message = paste0('Validating soil data ....'), value = 0,  max=length(sheets)*2, {
+        setProgress(0, detail = paste("Reading data ..."))
+
     
     idxs <- match(OS$Constants$Sheetnames, sheets)
     siteSheets <- sheets[-idxs]
@@ -154,7 +145,7 @@ get_ValidateMorphologyData <- function(){
       }
     }
       
-#      setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
+      setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
     }
     
     
@@ -216,9 +207,9 @@ get_ValidateMorphologyData <- function(){
      return(odf)
    }
    
-   # if(!is.na(val)){
-   #    odf <- validateCode(val, r, odf, sn)
-   # }
+   if(!is.na(val)){
+      odf <- validateCode(val, r, odf, sn)
+   }
    
    if(!is.na(val)){
      if(config=='NSMP'){

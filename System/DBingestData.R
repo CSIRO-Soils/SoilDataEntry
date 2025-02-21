@@ -24,7 +24,7 @@ get_IngestFunctions <- function()
        
 ##########   Dev Only   ###########################################################        
         # con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)
-        # XLFile <- 'C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/NationalSoilMonitoring/NSMData/www/Configs/NSMP/No Errors -  Entry Template - NSMP.xlsx'
+        # XLFile <- 'C:/Projects/SiteDataEntryTool/bbb No Errors Data Entry Template - NSMP_Capital.xlsx'
 
         #####################################################################################  
        #conInfo <- OS$DB$Config$getCon(conName$Name)
@@ -148,6 +148,7 @@ get_IngestFunctions <- function()
                 for (tn in 1:length(htabs)) {
                   tabname <- htabs[tn]
                    sql <- OS$IngestHelpers$makeHorizonsSQLFromForm(sheet=dataSheet, formRegion='H', tableName=tabname, horizonNum=h, subrecNum=hsub)
+                   print(sql)
                    OS$DB$Helpers$doInsert(ingestCon,sql)
                 }
               }
