@@ -58,7 +58,6 @@ get_ValidationPhotos <- function()
     
     for (i in 1:nrow(photoRecs)) {
       
-      print(i)
       rec <- photoRecs[i,]
       pfn <- basename(rec$FileName)
       

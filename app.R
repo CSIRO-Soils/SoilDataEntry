@@ -821,9 +821,14 @@ server <- function(input, output,session) {
   #### ^ Render the Photo Validation Table ####
   output$wgtPhotosValidationResultsTable <- renderReactable({
     req(RV$ValidationPhotosOutcomes)
-    if(nrow( RV$ValidationPhotosOutcomes$validationResultsTable) > 0){
-      getPhotoValidationResultsReactTable(RV$ValidationPhotosOutcomes$validationResultsTable)
+    
+    if(RV$ValidationPhotosOutcomes$Type!='Ingestion'){
+      if(nrow( RV$ValidationPhotosOutcomes$validationResultsTable) > 0){
+        getPhotoValidationResultsReactTable(RV$ValidationPhotosOutcomes$validationResultsTable)
+      }
     }
+    
+    
   })
   
   observeEvent(input$wgtIngestButtonPhotos, {

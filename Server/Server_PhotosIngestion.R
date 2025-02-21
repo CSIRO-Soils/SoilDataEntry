@@ -118,22 +118,19 @@ get_IngestPhotos <- function()
       iName = paste0(tdir, '/', rec$FileName)
 
       file_content <-  paste( as.character(  readBin(iName, what = "raw", n = file.info(iName)[["size"]])), collapse = "")
-      query = paste0("INSERT INTO PHOTOS (agency_code, proj_code, s_id, photo_no, o_id, photo_type_code, photo_alt_text, photo_filename, photo_img)  
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+#      query = paste0("INSERT INTO PHOTOS (agency_code, proj_code, s_id, photo_no, o_id, photo_type_code, photo_alt_text, photo_filename, photo_img)  
+#                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
       
-      
-      params = list(keys$AgencyCode, keys$ProjectCode, as.character(rec$SiteID), pno, as.character(rec$ObservationID), rec$PhotoType, 
-                    rec$Description, rec$FileName, file_content)
-      DBI::dbExecute(con, query, params )
-      
-      # query = paste0("INSERT INTO PHOTOS (agency_code, proj_code, s_id, photo_no, o_id, photo_type_code, photo_alt_text, photo_filename, photo_img)  
-      #                VALUES ('994', 'SLAM', '5', '8', '1', 'CR', 'test', 'test', '", file_content, "')" )
-      # OS$DB$Helpers$doInsertUsingRawSQL(con, query)
       # 
-      # sql <- paste0("select * from PHOTOS 
-      #               where agency_code='994' and proj_code='SLAM' and s_id='5' and o_id='1' and photo_filename='profile1.jpg'")
-      # DBI::dbGetQuery(con, sql)
-      # 
+      # params = list(keys$AgencyCode, keys$ProjectCode, as.character(rec$SiteID), pno, as.character(rec$ObservationID), rec$PhotoType, 
+      #               rec$Description, rec$FileName, file_content)
+      # DBI::dbExecute(con, query, params )
+      
+      
+      pdf <- data.frame(agency_code=keys$AgencyCode, proj_code=keys$ProjectCode, s_id=as.character(rec$SiteID), photo_no=pno, o_id=as.character(rec$ObservationID),  
+                        photo_type_code=rec$PhotoType, photo_alt_text=rec$Description, photo_filename=rec$FileName, photo_img=file_content)
+      
+      DBI::dbAppendTable(con, 'PHOTOS', pdf)
       
       
       # this is a hack as I can't get the above insert query to work with the date field in it
@@ -159,7 +156,7 @@ get_IngestPhotos <- function()
     ot <- paste0(ot, '<p><b>Agency Code : </b>', keys$AgencyCode, '</p>' )
     ot <- paste0(ot, '<p><b>Project Code : </b>', keys$ProjectCode, '</p>')
     ot <- paste0(ot, '<p><b>Number of Sites : </b>', length(unique(photoRecs$SiteID)), '</p>')
-    ot <- paste0(ot, '<p><b>Number of Records : </b>', nrow(ld), '</p>')
+    ot <- paste0(ot, '<p><b>Number of Records : </b>', nrow(photoRecs), '</p>')
     
     
     
