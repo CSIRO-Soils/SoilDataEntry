@@ -148,7 +148,7 @@ publishSitesToNatsoil <- function(selectedDraftRows, authPerson){
     if(m!='Migration completed.'){
       # do some manner of error message
     }else{
-      print(paste0('Site ', sid, ' - ', m)
+      print(paste0('Site ', sid, ' - ', m))
     }
         
    # OS$DB$Helpers$deleteWholeSite(natSoilCon, verbose=T, agencyCode = ac, projCode = pc, siteID=sid, obsNo=NULL)
