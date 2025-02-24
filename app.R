@@ -35,6 +35,7 @@ library(reactable)
 library(shinyBS)
 library(lubridate)
 library(stringr)
+library(httr)
 
 
 library(jpeg)

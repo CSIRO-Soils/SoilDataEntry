@@ -142,31 +142,41 @@ publishSitesToNatsoil <- function(selectedDraftRows, authPerson){
     oid=1
 
     setProgress(i, detail = paste("Site ", sid))
-    
-    OS$DB$Helpers$deleteWholeSite(natSoilCon, verbose=T, agencyCode = ac, projCode = pc, siteID=sid, obsNo=NULL)
-    
-    for (j in 1:nrow(tables)) {
-      
-      t <- tables[j,]$Table
-      if(t %in% c('SITES', 'ELEM_GEOMORPHS', 'LAND_COVER', 'LAND_USES', 'PATT_GEOMORPHS', 'DISTURBANCES')){
-        sql <- paste0("Select * from ", t, " WHERE agency_code = '", ac, "' and proj_code='", pc, "' and s_id = '", sid, "'" )
-      }else{
-        sql <- paste0("Select * from ", t, " WHERE agency_code = '", ac, "' and proj_code='", pc, "' and s_id = '", sid, "' and o_id=1" )
-      }
-      
-      dt <- OS$DB$Helpers$doQuery(holdCon, sql)
-      if(j==1){
-        dt <- dt[,-c(44)]
-      }
-      
-      if(j==2){
-        dt <- dt[,-c(116:118)]
-      }
 
-      if(nrow(dt)>0){
-        dbWriteTable(natSoilCon, t, dt, append=T )
-      }
+    resp <- POST(paste0('https://soils-daas-stg.csiro.au/Internal/nsmp-api/nsmp-site-migrator?agency=', ac ,'&project=', pc ,'&id=', sid))
+    m <- content(resp, 'text')
+    if(m!='Migration completed.'){
+      # do some manner of error message
+    }else{
+      print(paste0('Site ', sid, ' - ', m)
     }
+        
+   # OS$DB$Helpers$deleteWholeSite(natSoilCon, verbose=T, agencyCode = ac, projCode = pc, siteID=sid, obsNo=NULL)
+
+        #####  Publish to NSMP NAtsoil directly - for dev puposes only
+    
+    # for (j in 1:nrow(tables)) {
+    #   
+    #   t <- tables[j,]$Table
+    #   if(t %in% c('SITES', 'ELEM_GEOMORPHS', 'LAND_COVER', 'LAND_USES', 'PATT_GEOMORPHS', 'DISTURBANCES')){
+    #     sql <- paste0("Select * from ", t, " WHERE agency_code = '", ac, "' and proj_code='", pc, "' and s_id = '", sid, "'" )
+    #   }else{
+    #     sql <- paste0("Select * from ", t, " WHERE agency_code = '", ac, "' and proj_code='", pc, "' and s_id = '", sid, "' and o_id=1" )
+    #   }
+    #   
+    #   dt <- OS$DB$Helpers$doQuery(holdCon, sql)
+    #   if(j==1){
+    #     dt <- dt[,-c(44)]
+    #   }
+    #   
+    #   if(j==2){
+    #     dt <- dt[,-c(116:118)]
+    #   }
+    # 
+    #   if(nrow(dt)>0){
+    #     dbWriteTable(natSoilCon, t, dt, append=T )
+    #   }
+    # }
     
     dt <- str_remove_all(Sys.Date(), '-')
     sql <- paste0("Insert Into PublishedSites values('", ac, "', '", pc, "', '", sid, "', '", dt, "', '", officerCode ,"' )")

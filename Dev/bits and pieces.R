@@ -46,6 +46,10 @@ write.csv(lc, 'c:/temp/codes.csv')
 OS$DB$Helpers$deleteWholeSite(con=OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilProjects)$Connection, verbose=F, agencyCode='994', projCode='SLAM', siteID='5' )
 
 
+conNSMPNat <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilDev )
+
+OS$DB$Helpers$deleteWholeSite(con=conNSMPNat$Connection, verbose=F, agencyCode='994', projCode='NSMP', siteID='N2056' )
+
 
 
 
