@@ -176,7 +176,7 @@ get_ValidateMorphologyData <- function(){
       r$dbFld = ''
       r$recNum = ''
       r$recSubNum = ''
-      odf <- message(sid, r, odf, sid,'Error', paste0('There are no sites in the spreadsheet that are able to be imported into the DB'))
+      odf <- message('', r, odf, sid,'Error', paste0('There are no sites in the spreadsheet that are able to be imported into the DB'))
       sitesWithErrorsCnt=0
     }
     

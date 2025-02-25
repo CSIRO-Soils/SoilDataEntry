@@ -168,7 +168,7 @@ get_IngestFunctions <- function()
          ot <- paste0(ot, '<p>Well done, you have successfully loaded your soil site data into the Database.
                               You can now use the Tabs above to explore and review your data.</p><BR>')
          
-        ot <- paste0(ot, '<p><b>Database Name : </b>', con$Name , '</p>')
+       # ot <- paste0(ot, '<p><b>Database Name : </b>', con$Name , '</p>')
         ot <- paste0(ot, '<p><b>Agency Code : </b>', keys$AgencyCode, '</p>' )
         ot <- paste0(ot, '<p><b>Project Code : </b>', keys$ProjectCode, '</p>')
         ot <- paste0(ot, '<p><b>Number of Sites : </b>', length(siteSheets), '</p>')

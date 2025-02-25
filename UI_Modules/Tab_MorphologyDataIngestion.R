@@ -20,7 +20,7 @@ Tab_DataIngestion_UI<- function() {
                           
                         #  radioButtons("wgtIngestType", "Data type:", choices=c('Morphology Data', 'Lab Data', 'Photos')),
                           
-                          withBusyIndicatorUI(  shinyjs::hidden( actionButton('wgtIngestButton', 'Import Site Data to DB', class = "btn-success"))),
+                          withBusyIndicatorUI(  shinyjs::hidden( actionButton('wgtIngestButton', 'Import Site Data to Staging DB', class = "btn-success"))),
                          
                           HTML('<BR><BR>'),
                           htmlOutput('wgtIngestFileInfo'),
