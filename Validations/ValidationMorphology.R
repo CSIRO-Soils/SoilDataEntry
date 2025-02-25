@@ -89,7 +89,7 @@ get_ValidateMorphologyData <- function(){
     for (s in 1:length(siteSheets)) {
       
       itCnt <- itCnt + 1
-      print(paste0('Validating site data', s))
+      print(paste0('Validating site data ', s))
       sn <- siteSheets[s]
       dataSheet <- openxlsx::readWorkbook(xlsxFile = fname, sheet=sn, skipEmptyRows = F, skipEmptyCols = F)
       
@@ -109,7 +109,7 @@ get_ValidateMorphologyData <- function(){
       }
       
       if(siteAlreadyPublished){
-       
+        
       }else{
       
       if(SheetHasData(dataSheet, excelInfo)){
@@ -127,16 +127,20 @@ get_ValidateMorphologyData <- function(){
           
           for (k in 1:nrow(flds)) {
             r <- flds[k,]
+            
               odf <- validateCell(row=r$row, col=r$col, dataSheet, r, odf, sn, config)
           }
         }
         
+       
         
         ###  Add sites to a SF dataframe
         rlat <- excelInfo[excelInfo$dbFld=='o_latitude_GDA94',]
         y <- dataSheet[rlat$row, rlat$col]
         rlng <- excelInfo[excelInfo$dbFld=='o_longitude_GDA94',]
         x <- dataSheet[rlng$row, rlng$col]
+        
+        
         if(check.numeric(x) & check.numeric(y)){
           sloc <- c(x, y, sn)
           sitesDF[nrow(sitesDF) + 1,] <- sloc
@@ -147,25 +151,34 @@ get_ValidateMorphologyData <- function(){
       }
     }
       
-    #  setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
+#  setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
     }
     
     
-    sitesDF$ErrorCnt <- 0
+    if(nrow(sitesDF)>0){
+        sitesDF$ErrorCnt <- 0
     
-    
-    #### Put the number of errors for each site into the spatial DF
-    sitesWithErrorsCnt=0
-    for (i in 1:nrow(sitesDF)) {
-      s <- sitesDF$sitename[i]
-      idxs <- which(odf$Site==s & odf$Result=='Error')
+        #### Put the number of errors for each site into the spatial DF
+        sitesWithErrorsCnt=0
+        for (i in 1:nrow(sitesDF)) {
+          s <- sitesDF$sitename[i]
+          idxs <- which(odf$Site==s & odf$Result=='Error')
+          
+          if(length(idxs)>0){
+            sitesDF[i,]$ErrorCnt <- length(idxs)
+            sitesWithErrorsCnt=sitesWithErrorsCnt+1
+          }
+        }
+    }else{
       
-      if(length(idxs)>0){
-        sitesDF[i,]$ErrorCnt <- length(idxs)
-        sitesWithErrorsCnt=sitesWithErrorsCnt+1
-      }
+      r <- list()
+      r$tableName = ''
+      r$dbFld = ''
+      r$recNum = ''
+      r$recSubNum = ''
+      odf <- message(sid, r, odf, sid,'Error', paste0('There are no sites in the spreadsheet that are able to be imported into the DB'))
+      sitesWithErrorsCnt=0
     }
-    
     
 
     if(nrow(odf)==0)

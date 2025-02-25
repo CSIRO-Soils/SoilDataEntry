@@ -6,6 +6,32 @@
 #####       Comments :                                          ###
 ################################################################# #
 
+library(shiny)
+library(shinyjs)
+library(shinyalert)
+library(shinybusy)
+library(rhandsontable)
+library(DT)
+library(munsell)
+library(shinycssloaders)
+library(sf)
+library(leaflet)
+library(leaflet.extras)
+library(leafem)
+library(RColorBrewer)
+library(officer)
+library(flextable)
+library(jsonlite)
+library(reactable)
+library(shinyBS)
+library(lubridate)
+library(stringr)
+library(httr)
+
+
+library(jpeg)
+library(png)
+library(exifr)
 
 
 # setwd('C:/Users/sea084/OneDrive - CSIRO/RossRCode/Git/Shiny/Apps/SoilDataEntry')

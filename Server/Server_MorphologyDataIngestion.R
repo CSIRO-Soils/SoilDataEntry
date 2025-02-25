@@ -77,48 +77,52 @@ renderDataValidationOutcomes <- function(outcomes){
 
 
 renderDataValidationOutcomesSiteMap<- function(outcomes){
-  
-  sfdf <- st_as_sf( outcomes$Sites, coords = c("x", "y"), crs = 4326)
-  b <- st_bbox(sfdf)
  
-   expand = 1
-  b$xmin <-  b$xmin - expand
-  b$xymin <-  b$ymin - expand
-  b$ymax <-  b$ymax + expand
-  b$xmax <-  b$xmax + expand
+  if(nrow(outcomes$Sites) > 0){
   
-  getColor <- function(sfdf) {
-    sapply(sfdf$ErrorCnt, function(ErrorCnt) {
-      if(ErrorCnt > 0) {
-        "red"
-      } else {
-        "green"
-      } })
+        sfdf <- st_as_sf( outcomes$Sites, coords = c("x", "y"), crs = 4326)
+        b <- st_bbox(sfdf)
+       
+         expand = 1
+        b$xmin <-  b$xmin - expand
+        b$xymin <-  b$ymin - expand
+        b$ymax <-  b$ymax + expand
+        b$xmax <-  b$xmax + expand
+        
+        getColor <- function(sfdf) {
+          sapply(sfdf$ErrorCnt, function(ErrorCnt) {
+            if(ErrorCnt > 0) {
+              "red"
+            } else {
+              "green"
+            } })
+        }
+        
+        icons <- awesomeIcons(
+          icon = 'ios-close',
+          iconColor = 'black',
+          library = 'ion',
+          markerColor = getColor(sfdf)
+        )
+        
+        leaflet() %>%
+          clearMarkers() %>%
+          addTiles(group = "Map") %>%
+          addProviderTiles("Esri.WorldImagery", options = providerTileOptions(noWrap = F), group = "Satellite") %>%
+          addMouseCoordinates()  %>%
+          addEasyButton(easyButton(
+            icon="fa-globe", title="Zoom to full extent",
+            onClick=JS("function(btn, map){ map.setView({lon: 135, lat: -28}, 3); }"))) %>%
+          addLayersControl(
+            baseGroups = c("Map", "Satellite"),
+            options = layersControlOptions(collapsed = FALSE)   
+          ) %>%
+          
+          fitBounds(lng1 = as.numeric(b$xmin), lng2 = as.numeric(b$xmax), lat1 = as.numeric(b$ymin), lat2 = as.numeric(b$ymax)) %>%
+          
+         # addCircleMarkers( data=sfdf, radius=6, color = ~pal(Result)), stroke=FALSE, fillOpacity=1, group="locations")
+          addAwesomeMarkers(data=sfdf, icon=icons, label=~as.character(sitename), layerId = ~as.character(sitename))
+        
   }
-  
-  icons <- awesomeIcons(
-    icon = 'ios-close',
-    iconColor = 'black',
-    library = 'ion',
-    markerColor = getColor(sfdf)
-  )
-  
-  leaflet() %>%
-    clearMarkers() %>%
-    addTiles(group = "Map") %>%
-    addProviderTiles("Esri.WorldImagery", options = providerTileOptions(noWrap = F), group = "Satellite") %>%
-    addMouseCoordinates()  %>%
-    addEasyButton(easyButton(
-      icon="fa-globe", title="Zoom to full extent",
-      onClick=JS("function(btn, map){ map.setView({lon: 135, lat: -28}, 3); }"))) %>%
-    addLayersControl(
-      baseGroups = c("Map", "Satellite"),
-      options = layersControlOptions(collapsed = FALSE)   
-    ) %>%
-    
-    fitBounds(lng1 = as.numeric(b$xmin), lng2 = as.numeric(b$xmax), lat1 = as.numeric(b$ymin), lat2 = as.numeric(b$ymax)) %>%
-    
-   # addCircleMarkers( data=sfdf, radius=6, color = ~pal(Result)), stroke=FALSE, fillOpacity=1, group="locations")
-    addAwesomeMarkers(data=sfdf, icon=icons, label=~as.character(sitename), layerId = ~as.character(sitename))
 }
 
