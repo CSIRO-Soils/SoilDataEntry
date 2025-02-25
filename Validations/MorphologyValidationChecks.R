@@ -49,6 +49,8 @@ CheckFieldTests <- function(dataSheet, sheetName, excelInfo, odf){
   }
   pH <- data.frame(Depth=unlist(phd), pH=unlist(phv))
   
+  
+  
   odf <- processFieldChecks(ft='h_ec', df=EC, odf, sn)
   odf <- processFieldChecks(ft='h_dispersion', df=Disp, odf, sn)
   odf <- processFieldChecks(ft='ph_value', df=pH, odf, sn)
@@ -65,6 +67,11 @@ processFieldChecks <- function(ft, df, odf, sn){
   r$dbFld = ''
   r$recNum = ''
   r$recSubNum = ''
+  
+  idxs <- which(complete.cases(df))
+  if(length(idxs)==0){
+    return(odf)
+  }else{}
   
   numericCheckPassed=T
   for (i in 1:nrow(df)) {

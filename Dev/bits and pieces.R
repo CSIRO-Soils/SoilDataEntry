@@ -48,7 +48,7 @@ OS$DB$Helpers$deleteWholeSite(con=OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSo
 
 conNSMPNat <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilDev )
 
-OS$DB$Helpers$deleteWholeSite(con=conNSMPNat$Connection, verbose=F, agencyCode='994', projCode='NSMP', siteID='N2056' )
+OS$DB$Helpers$deleteWholeSite(con=conNSMPNat$Connection, verbose=F, agencyCode='994', projCode='NSMP', siteID='N2051' )
 
 
 

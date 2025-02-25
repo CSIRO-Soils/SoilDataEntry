@@ -6,11 +6,13 @@
 # config='NSMP'
 # fname <- 'C:/Projects/SiteDataEntryTool/bbb Data Entry Template - NSMP_Capital.xlsx'
 # fname <- 'C:/Projects/SiteDataEntryTool/bbb No Errors Data Entry Template - NSMP_Capital.xlsx'
+# fname <- 'C:/Temp/a/Data Entry Template - NSMP_NSMP_Capital.xlsx'
 
 # keys <- list()
 # keys$AgencyCode <- '994'
 # keys$ProjectCode <- 'SLAM'
 # keys$Token = 'Capital'
+
 
 get_ValidateMorphologyData <- function(){
   
@@ -145,7 +147,7 @@ get_ValidateMorphologyData <- function(){
       }
     }
       
-      setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
+    #  setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
     }
     
     
