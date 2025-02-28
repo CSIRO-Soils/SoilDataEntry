@@ -71,6 +71,13 @@ server <- function(input, output,session) {
   RV$IngestPhotosCount <- 1
   RV$PhotoUpdateCount <- 1
   
+  
+  autoInvalidate <- reactiveTimer(10000)
+  observe({
+    autoInvalidate()
+    cat(".")
+  })
+  
   observe({
      cd <-reactiveValuesToList(session$clientData)
      RV$SiteURL <- paste0(cd$url_protocol, '//', cd$url_hostname, cd$url_pathname)
