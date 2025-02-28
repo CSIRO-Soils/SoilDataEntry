@@ -351,7 +351,6 @@ server <- function(input, output,session) {
   
   observeEvent(input$wgtDownloadDataEntrySheet, {
 
-    print('GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG')
     req(RV$ConfigName)
 
     xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
@@ -376,7 +375,7 @@ server <- function(input, output,session) {
   output$wgtDL <- downloadHandler(
    
     filename = function() {
-      RV$DataEntryTemplatePath
+      basename(RV$DataEntryTemplatePath)
     },
     content = function(file) {
 
