@@ -9,8 +9,12 @@ Tab_DataIngestion_UI<- function() {
                           fluidRow(
                             HTML(paste0('<font color="#425df5"><H4><b>Ingest Site Description Sheets</b></H4></font>')),
                             HTML('<BR>'),
-                            downloadLink('wgtDownloadDataEntrySheet', label = 'Download Site Data Entry Sheet'),
+                            #downloadLink('wgtDownloadDataEntrySheet', label = 'Download Site Data Entry Sheet'),
+                            actionLink('wgtDownloadDataEntrySheet', label = 'Download Site Data Entry Sheet'),
                             HTML('<BR><BR>'),
+                            
+                            #downloadButton("wgtDL", "DownloadDES"),
+                            downloadButton("wgtDL", "DownloadTS", style = "visibility: hidden;"),
                             #uiOutput("uiIngestTokenText"),
                             
                            ###  import morphology widgets

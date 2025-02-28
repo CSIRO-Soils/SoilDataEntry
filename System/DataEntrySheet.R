@@ -21,9 +21,6 @@ get_DataEntryFunctions <- function()
   de <- list()
 
       de$generateNSMPSiteSheet <- function(fname, token){
-
-       
-        
         tmpD <- tempdir()
         
         if(!dir.exists(tmpD)){dir.create(tmpD, recursive = T)}

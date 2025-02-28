@@ -72,11 +72,11 @@ server <- function(input, output,session) {
   RV$PhotoUpdateCount <- 1
   
   
-  autoInvalidate <- reactiveTimer(10000)
-  observe({
-    autoInvalidate()
-    cat(".")
-  })
+  # autoInvalidate <- reactiveTimer(10000)
+  # observe({
+  #   autoInvalidate()
+  #   cat(".")
+  # })
   
   observe({
      cd <-reactiveValuesToList(session$clientData)
@@ -224,8 +224,10 @@ server <- function(input, output,session) {
   output$uiHtmlHeader <- renderUI({
     
     req(RV$ConfigValues$BrowserTabName)
-    t1 <- tags$head(tags$style(".shiny-notification {position: fixed; top: 20% ;left: 50%"),
-                    tags$link(rel="shortcut icon", href="./images/dirt-48.png"), tags$title(RV$ConfigValues$BrowserTabName))
+    t1 <- tags$head(
+                      shinyjs::useShinyjs(),
+                      tags$style(".shiny-notification {position: fixed; top: 20% ;left: 50%"),  
+                                    tags$link(rel="shortcut icon", href="./images/dirt-48.png"), tags$title(RV$ConfigValues$BrowserTabName))
     t1
   })
   
@@ -346,33 +348,45 @@ server <- function(input, output,session) {
     }
   })
   
+  
+  observeEvent(input$wgtDownloadDataEntrySheet, {
+
+    print('GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG')
+    req(RV$ConfigName)
+
+    xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
+    
+   
+     if(RV$ConfigName =='NSMP'){
+       downloadPath <- OS$DataEntry$generateNSMPSiteSheet(fname=xlPathName,  token=RV$Keys$Token)
+       RV$DataEntryTemplatePath <- downloadPath
+     }else{
+       RV$DataEntryTemplatePath <- xlPathName
+     }
+    
+    print(RV$DataEntryTemplatePath)
+    shinyjs::runjs("document.getElementById('wgtDL').click();")
+   
+  })
 
   
   ####.####
   ###  ***** Morphology Data Ingestion ****  ####
   #### ^ Download Data Entry Template ####
-  output$wgtDownloadDataEntrySheet <- downloadHandler(
+  output$wgtDL <- downloadHandler(
+   
     filename = function() {
-      req(RV$ConfigName)
-      if(RV$ConfigName =='NSMP'){
-      tof <- str_replace(RV$DataEntryFileName, '.xlsx', paste0('_', RV$Keys$ProjectCode, '_', RV$Keys$Token, '.xlsx'))
-      }else{
-        tof <- RV$DataEntryFileName
-      }
+      RV$DataEntryTemplatePath
     },
     content = function(file) {
 
       xlPathName <- paste0(getwd(), '/www/Configs/',RV$ConfigName, '/', RV$DataEntryFileName)
-      shinyBS::createAlert(session, "alert", "waitalert", title = "", content = paste0("<div id='zs1'><img src=wait.gif>&nbsp;&nbsp;Downloading data", " .....</div>"), append = FALSE, dismiss = F)
-      
+      downloadPath <- RV$DataEntryTemplatePath
+      print(downloadPath)
       if(RV$ConfigName =='NSMP'){
-        downloadPath <- OS$DataEntry$generateNSMPSiteSheet(fname=xlPathName,  token= RV$Keys$Token)
         on.exit(unlink(downloadPath))
-      }else{
-        downloadPath <- xlPathName
       }
       file.copy(downloadPath, file, overwrite = T)
-
     }
   )
   
