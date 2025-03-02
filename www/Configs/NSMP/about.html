@@ -14,17 +14,19 @@ For more information about the National Soil Monitoring Program, please have a r
 <h3>The Process</h3>  
 
 <ul>
-  <li>Download the MS Excel Site Data Entry Template from the "Data Ingestion" tab on this web site.</li>
-  <li>Once downloaded copy the file to somewhere safe for entering your data. This will be you point of truth for all the NSMP data you collect. We recomend storing it somewhere with access to cloud backup.</li>
-  <li>There will be one blank worksheet for every NSMP site you need to collect.</li>
-  <li>Enter the data from your site sheet into the relevant site sheet in the spreadsheet.</li>
-  <li>Do this for every site you wish to ingest into the database.	</li>
+  <li>You have opened this web tool with a sampling team token argument. While using the tool, only sites relevant to this token, will be available for processing. Update the token argument to access a different set of sites.</li>
+  <li>Download the MS Excel Site Data Entry Template from the "Data Ingestion" tab on this web site, for the sites related to your token.</li>
+  <li>Once you have downloaded copy the file, keep it somewhere safe for entering site data for this token. The MS Excel Site Data Entry workbook will be you point of truth for all the NSMP data you collect for these sites. We recommend storing it somewhere with access to cloud backup.</li>
+  <li>There will be one blank worksheet for every NSMP site you need to collect in the workbook.</li>
+  <li>Enter the data from your site sheet into the relevant site sheet in the workbook.</li>
+  <li>Do this for every site you wish to ingest into the database.</li>
   <li>Where appropriate code lists will dop down for a given cell along with code descriptions.</li>
-  <li>When you have finished entering your data save the MS Excel file and drag the file onto this website.</li>
-  <li>You will then need to click the "Validate Site Data" button to run some checks on the data integrity.</li>
-  <li>Once there are no errors in the dataset you can click the "Import Site Data Into DB" button to upload the data to the NSMP Staging Database. Your site data will be ingested into a NatSoil schema DB and displayed on this website.	</li>
-  <li>Once you have loaded your sites into the Staging Database, you can review them in the various viewing tabs of this website to check you are happy with the data that has been uploaded.</li>
-  <li>If you are happy with a site/s you can then publish these sites to the NSMP Site database via the "Publish Sites" tab.</li>
+  <li>When you have finished entering your data save the MS Excel file and drag the file into this the file entry box on the first tab (Morphology Data Ingestion) of the website. Or browse to the file to open.</li>
+  <li>Once upload is complete, you will then see a button "Validate Site Data". Click on this to do initial spreadsheet validation of all sites in your workbook. Sites in your workbook, that are already published, will be ignored.</li>
+  <li>If there are any data validation errors, these will be described so that you can fix them in the spreadsheet and reload.</li>
+  <li>Once there are no errors in the dataset you can click the "Import Site Data into holding DB" button to upload the data to the NSMP intermediate Database. This will test the data further and provide you with visualisation for you to review the data.</li>
+  <li>Review your site data in the various viewing tabs of this website to check you are happy with the data that has been uploaded. Ensure the data aligns data that has already been collected for the site. Check the location on the maps.</li>
+  <li>Once review is complete and the team is confident that the data is correct and valid, then publish these sites to the production database via the "Publish Sites" tab. Select the site(s) from the draft set, and click on the “Publish Selected Sites” button.</li>
   <li>Once a site is published it can no longer be edited via this tool.</li>
 </ul>  
 
