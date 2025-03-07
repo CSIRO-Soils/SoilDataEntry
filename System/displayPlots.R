@@ -21,6 +21,8 @@ plotLabResults <- function(df, att){
 
 getSoilProfileDiagram <- function(sid, p){
   
+  #p <- readRDS('C:/Temp/profile.rds')
+  
   hue <- str_sub(p$col_hue_val_chrom, start = 1, end = nchar(p$col_hue_val_chrom) - 2)
   value <- str_sub(p$col_hue_val_chrom, start = nchar(hue)+1, end = nchar(hue)+1)
   chroma <- str_sub(p$col_hue_val_chrom, start = nchar(hue)+2, end = nchar(hue)+2)
@@ -66,6 +68,7 @@ getSoilProfileDiagram <- function(sid, p){
 
 saveSoilProfileDiagram <- function(sid, p, outpath){
   
+  #p <- readRDS('C:/Temp/profile.rds')
   
   hue <- str_sub(p$col_hue_val_chrom, start = 1, end = nchar(p$col_hue_val_chrom) - 2)
   value <- str_sub(p$col_hue_val_chrom, start = nchar(hue)+1, end = nchar(hue)+1)

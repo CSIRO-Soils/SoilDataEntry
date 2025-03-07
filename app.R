@@ -355,6 +355,7 @@ server <- function(input, output,session) {
         RV$SiteDesc <- getSiteDescription(con=con, agencyCode=RV$Keys$AgencyCode, projectCode=RV$Keys$ProjectCode, siteID=input$vwgtSiteID, obsID=1)
         
         RV$ProfPlotData <- RV$SiteDesc$ProfPlotData
+        saveRDS(RV$ProfPlotData , 'c:/temp/profile.rds')
         if(nrow(RV$SiteDesc$LabData)>0){
           shinyjs::show('UI_SiteDescription_LabResults')
           RV$LabData <- RV$SiteDesc$LabData
@@ -389,7 +390,7 @@ server <- function(input, output,session) {
       of <-  tempfile(pattern = 'SitesDesc_', fileext = '.docx') 
       #ProfPlotPath <- 'C:/Temp/profile.PNG'
       if(nrow( RV$ProfPlotData) > 0){
-        saveSoilProfileDiagram('sid', p= RV$SiteDesc$ProfPlotData,  RV$SiteDesc$ProfilePlotPath)
+       # saveSoilProfileDiagram('sid', p= RV$SiteDesc$ProfPlotData,  RV$SiteDesc$ProfilePlotPath)
         ProfPlotPath <- RV$SiteDesc$ProfilePlotPath
       }else{
         ProfPlotPath <- NULL
@@ -1151,12 +1152,42 @@ server <- function(input, output,session) {
   
   observe({
     req(RV$PublishedAndDraftSiteInfo)
+    
+    tokenMatch=F
     selectedSitesRows <- reactable::getReactableState("wgtHoldingSitesTable", "selected")
+    
+    if(is.null(input$wgtAuthorisedToken)){
+      tokenMatch=F
+    }else if(input$wgtAuthorisedToken==''){
+      tokenMatch=F
+    }else{
+      sql <- paste0("SELECT DISTINCT project.PROPOSED_SITES.ps_token, project.PROJECT_TEAMS.team_key
+                    FROM   project.PROJECT_TEAMS INNER JOIN
+                    project.PROPOSED_SITES ON project.PROJECT_TEAMS.agency_code = project.PROPOSED_SITES.agency_code AND project.PROJECT_TEAMS.proj_code = project.PROPOSED_SITES.proj_code AND 
+                    project.PROJECT_TEAMS.team_code = project.PROPOSED_SITES.team_code
+                    WHERE (project.PROPOSED_SITES.ps_token = N'Burnie')")
+      
+      con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
+      adf <- OS$DB$Helpers$doQuery(con, sql)
+      DBI::dbDisconnect(con)
+      
+      if(nrow(adf)>0){
+        if(input$wgtAuthorisedToken==adf$team_key){
+          tokenMatch=T
+        }
+      }
+    }
+    
+    
+   
+    
+    print('GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG')
+   
 
     if(is.null(selectedSitesRows)){
       disable('wgtPublishSitesBtn')
     }else{
-        if(length(selectedSitesRows) > 0 & input$wgtAuthorised){
+        if(length(selectedSitesRows) > 0 & tokenMatch){
           enable('wgtPublishSitesBtn')
         }else{
           disable('wgtPublishSitesBtn')
@@ -1169,7 +1200,7 @@ server <- function(input, output,session) {
     req(RV$DBCon)
     selectedSitesRows <- reactable::getReactableState("wgtHoldingSitesTable", "selected")
     selRowsDF <- RV$PublishedAndDraftSiteInfo$Draft[selectedSitesRows,]
-    publishSitesToNatsoil(selectedDraftRows=selRowsDF, authPerson = input$wgtAuthoriser)
+    publishSitesToNatsoil(selectedDraftRows=selRowsDF, authPerson = '')
     RV$SiteUpdateCount =  RV$SiteUpdateCount + 1
     
   })

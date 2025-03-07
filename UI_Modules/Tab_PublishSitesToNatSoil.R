@@ -13,7 +13,8 @@ Tab_PublishSitesToNatSoil <- function() {
         #HTML('<H1 style="font-size:40px;color:darkblue;font-weight:700">Publish Data</H1>'),
              HTML('<BR>'),
             fluidRow( #column(width = 3, selectInput('wgtAuthoriser', "Person Authorising Site Data Publication", choices=c('Ross', 'Linda'))),
-                      column(width = 3, checkboxInput('wgtAuthorised', 'I am authorised to publish these sites on behalf of "Some Agency Somewhere"')),
+                      #column(width = 3, checkboxInput('wgtAuthorised', 'I am authorised to publish these sites on behalf of "Some Agency Somewhere"')),
+                      column(width = 2, textInput('wgtAuthorisedToken', 'Publishing Authorisation Token')),
                       column(width = 6, HTML("<BR>"), shinyjs::disabled(actionButton('wgtPublishSitesBtn', 'Publish Selected Sites', class = "btn-success")))),
             HTML('<BR>
                            <p> The sites in the table below are currently in Draft form. 

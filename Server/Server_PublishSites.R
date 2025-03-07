@@ -117,11 +117,11 @@ PublishSites_formatToDoTable <- function(con, keys){
 
 publishSitesToNatsoil <- function(selectedDraftRows, authPerson){
   
-  con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
-  sql <- paste0("select * from Officers where offr_name ='", authPerson, "'")
-  df <- OS$DB$Helpers$doQuery(con, sql)
-  officerCode <- df$offr_code[1]
-  dbDisconnect(con)
+  # con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
+  # sql <- paste0("select * from Officers where offr_name ='", authPerson, "'")
+  # df <- OS$DB$Helpers$doQuery(con, sql)
+  # officerCode <- df$offr_code[1]
+  # dbDisconnect(con)
   
   selRowsDF <- selectedDraftRows
   
@@ -179,7 +179,7 @@ publishSitesToNatsoil <- function(selectedDraftRows, authPerson){
     # }
     
     dt <- str_remove_all(Sys.Date(), '-')
-    sql <- paste0("Insert Into PublishedSites values('", ac, "', '", pc, "', '", sid, "', '", dt, "', '", officerCode ,"' )")
+    sql <- paste0("Insert Into PublishedSites values('", ac, "', '", pc, "', '", sid, "', '", dt, "', '", authPerson ,"' )")
     OS$DB$Helpers$doInsertUsingRawSQL(holdCon, sql)
     
   }
