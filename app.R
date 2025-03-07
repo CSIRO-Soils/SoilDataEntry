@@ -56,9 +56,9 @@ server <- function(input, output,session) {
   
   options(shiny.maxRequestSize=200*1024^2)
   
-  iv <- InputValidator$new()
-  iv$add_rule('wgtNSMPToken', sv_required())
-  iv$enable()
+  # iv <- InputValidator$new()
+  # iv$add_rule('wgtNSMPToken', sv_required())
+  # iv$enable()
 
   ####.   ======  App Configuration  ============== ###### 
 
