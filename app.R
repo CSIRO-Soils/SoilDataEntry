@@ -353,6 +353,7 @@ server <- function(input, output,session) {
       
         RV$CurrentSiteLocation <- OS$DB$NatSoilQueries$getLocationInfo(con, RV$Keys$AgencyCode, RV$Keys$ProjectCode, input$vwgtSiteID, input$vwgtObsID)
         RV$SiteDesc <- getSiteDescription(con=con, agencyCode=RV$Keys$AgencyCode, projectCode=RV$Keys$ProjectCode, siteID=input$vwgtSiteID, obsID=1)
+        
         RV$ProfPlotData <- RV$SiteDesc$ProfPlotData
         if(nrow(RV$SiteDesc$LabData)>0){
           shinyjs::show('UI_SiteDescription_LabResults')
@@ -369,6 +370,12 @@ server <- function(input, output,session) {
   output$wgtSiteDescription = renderText({ 
     req(RV$SiteDesc)
     RV$SiteDesc$HTML
+  })
+  
+  output$UI_SiteViewerMap = renderLeaflet ({ 
+    req(RV$SiteDesc)
+    renderSiteViewMap(sid = RV$SiteDesc$SiteData$SiteID, loc = RV$SiteDesc$CurrentSiteLocation, configName = RV$ConfigName, keys=RV$Keys)
+    
   })
   
   

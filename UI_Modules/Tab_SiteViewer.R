@@ -39,7 +39,9 @@ tabPanel("Site Viewer", icon = icon("file-lines"),
                           withBusyIndicatorUI(downloadButton('wgtDownloadSiteSheetBtn', 'Download Site Document')),
                           HTML("<BR>"),
                           
-                          leafletOutput("UI_Map", width = 350, height = 350)
+                          leafletOutput("UI_SiteViewerMap", width = 350, height = 350),HTML('<BR>')
+                          
+                          #leafletOutput("UI_Map", width = 350, height = 350)
                           , align = "center"
                           , style = "margin-bottom: 10px;"
                           , style = "margin-top: -10px;"

@@ -426,3 +426,81 @@ populateTable <- function(blankTable, dfDenorm, field, decode=F){
   }
   return(bt)
 }
+
+
+
+
+
+renderSiteViewMap<- function(sid, loc, configName, keys){
+  
+ df <- loc
+  
+  if(nrow(df)>0){
+    
+    sfdf <- st_as_sf( df, coords = c("o_longitude_GDA94", "o_latitude_GDA94"), crs = 4326)
+    
+    if(configName=='NSMP'){
+      
+      con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
+      sql <- paste0("SELECT [agency_code],[proj_code],[s_id],[s_geom_GDA94].STAsText() as geom FROM [NatSoil].[dbo].[SITES] 
+                  where  agency_code = '", keys$AgencyCode, "' and proj_code = '", keys$ProjectCode, "' and s_id = '", sid, "'")
+      
+      print(sql)
+      envelope <- OS$DB$Helpers$doQuery(con, sql)
+      DBI::dbDisconnect(con)
+      if(nrow(envelope)>0){
+        polys <- st_as_sf(envelope, wkt = 'geom', crs=4326)
+      }else{
+        polys=NULL
+      }
+    }
+    
+    
+    b <- st_bbox(sfdf)
+    
+    expand = 0.0005
+    b$xmin <-  b$xmin - expand
+    b$xymin <-  b$ymin - expand
+    b$ymax <-  b$ymax + expand
+    b$xmax <-  b$xmax + expand
+    
+    icons <- awesomeIcons(
+      icon = 'ios-close',
+      iconColor = 'blue',
+      library = 'ion'
+      #markerColor = getColor(sfdf)
+    )
+    
+    lm <- leaflet() %>%
+      clearMarkers() %>%
+      addTiles(group = "Map") %>%
+      addProviderTiles("Esri.WorldImagery", options = providerTileOptions(noWrap = F), group = "Satellite") %>%
+      addMouseCoordinates()  %>%
+      addEasyButton(easyButton(
+        icon="fa-globe", title="Zoom to full extent",
+        onClick=JS("function(btn, map){ map.setView({lon: 135, lat: -28}, 3); }"))) %>%
+      addLayersControl(
+        baseGroups = c("Satellite", "Map" ),
+        options = layersControlOptions(collapsed = FALSE)   
+      ) %>%
+      
+      fitBounds(lng1 = as.numeric(b$xmin), lng2 = as.numeric(b$xmax), lat1 = as.numeric(b$ymin), lat2 = as.numeric(b$ymax)) %>%
+      
+      # addCircleMarkers( data=sfdf, radius=6, color = ~pal(Result)), stroke=FALSE, fillOpacity=1, group="locations")
+      addAwesomeMarkers(data=sfdf, icon=icons, label=~as.character(sid), layerId = ~as.character(sid))
+    
+    if(!is.null(polys)){
+
+      lm <- lm %>% addPolygons(data=polys)
+    }
+    lm
+    
+  }
+}
+
+
+
+
+
+
+
