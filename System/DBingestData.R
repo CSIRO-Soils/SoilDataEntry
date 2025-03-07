@@ -25,6 +25,13 @@ get_IngestFunctions <- function()
 ##########   Dev Only   ###########################################################        
         # con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NSMP_HoldingRW)
         # XLFile <- 'C:/Projects/SiteDataEntryTool/bbb No Errors Data Entry Template - NSMP_Capital.xlsx'
+        # XLFile <- 'C:/Projects/SiteDataEntryTool/temp.xlsx'
+        
+        # keys<-list()
+        # keys$AgencyCode='994'
+        # keys$ProjectCode='NSMP'
+        # keys$Token='Capital'
+        # config='NSMP'
 
         #####################################################################################  
        #conInfo <- OS$DB$Config$getCon(conName$Name)
@@ -68,7 +75,7 @@ get_IngestFunctions <- function()
 
         
         sql <- paste0("select * from projects where agency_code='",keys$AgencyCode, "' and proj_code='", keys$ProjectCode, "'")
-        print(sql)
+
         pdf <- OS$DB$Helpers$doQuery(ingestCon, sql)
        
         if(nrow(pdf)==0){
@@ -88,7 +95,7 @@ get_IngestFunctions <- function()
           hcnt=0
           for (s in 1:length(siteSheets)) {
             
-            setProgress(s, detail = paste("Site ", s, ' of ', length(siteSheets)))
+#            setProgress(s, detail = paste("Site ", s, ' of ', length(siteSheets)))
             
             print(paste0('Ingesting ', s))
             sn <- siteSheets[s]
@@ -136,11 +143,19 @@ get_IngestFunctions <- function()
             sql <- OS$IngestHelpers$makeSQLFromForm(sheet=dataSheet, formRegion='S',tableName = 'OBSERVATIONS')
             OS$DB$Helpers$doInsert(ingestCon,sql)
             
+            #### This inserts land use. If we get more instances of tables at this level I will have to implement something better
+            r <- excelInfo[excelInfo$dbFld == 'luse_use_code',]
+            luse=dataSheet[r$row, r$col]
+            if(!is.na(luse)){
+              sql <- paste0("INSERT into LAND_USES (agency_code, proj_code, s_id, luse_no, luse_tech_ref', luse_use_code) 
+              VALUES ('", keys$AgencyCode, "', '", keys$ProjectCode, "', '", sid, "', 1, 'ALUM v6', '", luse, "')")
+              OS$DB$Helpers$doInsert(ingestCon,sql)
+            }
+            
+            
             hif <- excelInfo[excelInfo$formRegion=='H', ]
             htabs <- unique(hif$tableName)
-            
-            
- 
+
             for (h in 1:8) {
               hcnt=hcnt+1
               for (hsub in 1:2) {
@@ -148,7 +163,6 @@ get_IngestFunctions <- function()
                 for (tn in 1:length(htabs)) {
                   tabname <- htabs[tn]
                    sql <- OS$IngestHelpers$makeHorizonsSQLFromForm(sheet=dataSheet, formRegion='H', tableName=tabname, horizonNum=h, subrecNum=hsub)
-                   print(sql)
                    OS$DB$Helpers$doInsert(ingestCon,sql)
                 }
               }

@@ -7,6 +7,8 @@ Tab_DataIngestion_UI<- function() {
              sidebarPanel(width = 3,
                           
                           fluidRow(
+                            
+                           
                             HTML(paste0('<font color="#425df5"><H4><b>Ingest Site Description Sheets</b></H4></font>')),
                             HTML('<BR>'),
                             #downloadLink('wgtDownloadDataEntrySheet', label = 'Download Site Data Entry Sheet'),
@@ -30,7 +32,7 @@ Tab_DataIngestion_UI<- function() {
                           htmlOutput('wgtIngestFileInfo'),
 
                           HTML('<BR><BR>'),
-                        # shinyjs::hidden( downloadLink('wgtDownDB', label = 'DownloadYYYYYYY')),
+                         shinyjs::hidden( downloadLink('wgtDownloadPortableDB', label = 'Download Database')),
                         #  downloadLink('wgtDownDB', label = 'Download Database File'),
                           HTML('<BR><BR>'),
                          
@@ -40,7 +42,10 @@ Tab_DataIngestion_UI<- function() {
                                     HTML('<h4>Resources</h4>'),
                                     
                                     uiOutput("uiIngestDownloads"),
-                          )
+                          ),
+                        
+                        shinyjs::hidden( textInput('wgtNSMPToken', label = 'NSMP Token')),
+                        shinyjs::hidden( actionButton('wgtApplyNSPMToken', label = 'Apply Token'))
                           )
              ),
              mainPanel(

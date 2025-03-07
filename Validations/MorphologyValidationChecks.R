@@ -323,17 +323,19 @@ CheckDepths <- function(dataSheet, sheetName, excelInfo, odf){
                 }
                 
                 for (i in 1:(nrow(depths)-1)) {
-                  ud <- depths$ud[i+1]
-                  ld <- depths$ld[i]
-                  if(!identical(ud, ld)){
-                    r$recNum=i
-                    odf <- message(ld, r, odf, sn, type='Error', msg="The lower depth and the upper depth of the horizon below are not the same.")
-                  }
-                  
-                  udh <-depths$ud[i]
-                  if(identical(udh, ld)){
-                    r$recNum=i
-                    odf <- message(ld, r, odf, sn, type='Error', msg="The upper depth and lower depth of a horizon can not be the same.")
+                  if(i>1){
+                      ud <- depths$ud[i+1]
+                      ld <- depths$ld[i]
+                      if(!identical(ud, ld)){
+                        r$recNum=i
+                        odf <- message(ld, r, odf, sn, type='Error', msg="The lower depth and the upper depth of the horizon below are not the same.")
+                      }
+                      
+                      udh <-depths$ud[i]
+                      if(identical(udh, ld)){
+                        r$recNum=i
+                        odf <- message(ld, r, odf, sn, type='Error', msg="The upper depth and lower depth of a horizon can not be the same.")
+                      }
                   }
                 
             }#general checks

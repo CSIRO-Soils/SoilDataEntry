@@ -55,6 +55,10 @@ ui <- fluidPage(
 server <- function(input, output,session) {
   
   options(shiny.maxRequestSize=200*1024^2)
+  
+  iv <- InputValidator$new()
+  iv$add_rule('wgtNSMPToken', sv_required())
+  iv$enable()
 
   ####.   ======  App Configuration  ============== ###### 
 
@@ -71,12 +75,8 @@ server <- function(input, output,session) {
   RV$IngestPhotosCount <- 1
   RV$PhotoUpdateCount <- 1
   
+  RV$Redrawing=F
   
-  # autoInvalidate <- reactiveTimer(10000)
-  # observe({
-  #   autoInvalidate()
-  #   cat(".")
-  # })
   
   observe({
      cd <-reactiveValuesToList(session$clientData)
@@ -86,6 +86,9 @@ server <- function(input, output,session) {
   #### ^ Read in the DB config paramaters ####  
   output$appUI <- renderUI({
 
+    RV$Redrawing <- T
+    
+    isolate({
     query <- parseQueryString(session$clientData$url_search)
     
     if (!is.null(query$config)) {
@@ -109,6 +112,9 @@ server <- function(input, output,session) {
       }
     }
 
+    session$userData[['ConfigName']] <- RV$ConfigName 
+    updateTextInput(session, inputId = 'wgtNSMPToken', value = RV$Keys$Token )
+    
     if(!is.null(RV$ConfigName) & !is.null(RV$Keys$AgencyCode)  & !is.null(RV$Keys$ProjectCode)) 
     {
       RV$RequiredParams = T
@@ -118,8 +124,77 @@ server <- function(input, output,session) {
       html <- setupUIBasedOnConfigs(config=NULL, url=RV$SiteURL)
     }
     html
+    
+    })
+  })
+
+  
+  #### ^ NSMP Token Changing  ####
+  observe({
+    req(RV$ConfigName)
+    if(RV$ConfigName == 'NSMP'){
+       con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)
+       tokes <- OS$DB$Helpers$doQuery(con$Connection, paste0("select * from project.PROPOSED_SITES where ps_token='", RV$Keys$Token, "'"))
+       DBI::dbDisconnect(con$Connection)
+        if(nrow(tokes)==0){
+          str1 = tags$span(
+            paste('Oops....'),
+            style = "font-size: 25px; color: #1a168a; font-weight: bold;"
+          )
+          str2 = tags$span(
+            paste("The token you supplied is not valid. No data will be displayed."),
+            style = "font-size: 15px; color: #425df5"
+          )
+          showModal(modalDialog(title = tagList(str1), str2, size = 's', fade=F ))
+        }
+    }
   })
   
+  
+## Because we generate ui with renderUI we have to wait until it is finished rendering to be able to make dynamic changes to it - this does that  
+  session$onFlushed(function() {
+    if (isolate(RV$Redrawing)) {
+
+      if(session$userData[['ConfigName']] =='NSMP'){
+        shinyjs::show('wgtNSMPToken')
+        shinyjs::show('wgtApplyNSPMToken')
+        
+      }else{
+        shinyjs::show('wgtDownloadPortableDB')
+      }
+      RV$Redrawing<- FALSE
+    }
+  }, once = FALSE)
+  
+  
+##### this is only relevant if NSMP - Otherwise hidden
+  observeEvent(input$wgtApplyNSPMToken, {
+  
+    
+    con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)
+    tokes <- OS$DB$Helpers$doQuery(con$Connection, paste0("select * from project.PROPOSED_SITES where ps_token='", input$wgtNSMPToken, "'"))
+    DBI::dbDisconnect(con$Connection)
+    if(nrow(tokes)==0){
+      updateTextAreaInput(session, 'wgtNSMPToken', value = RV$Keys$Token)
+      str1 = tags$span(
+        paste('Oops....'),
+        style = "font-size: 25px; color: #1a168a; font-weight: bold;"
+      )
+      str2 = tags$span(
+        paste("The token you supplied is not valid."),
+        style = "font-size: 15px; color: #425df5"
+      )
+      
+      showModal(modalDialog(title = tagList(str1), str2, size = 's', fade=F ))
+    }else{
+      isolate(RV$Keys$Token <- input$wgtNSMPToken)
+      sites <- getListOfAvailableSites(con=RV$DBCon$Connection, keys=RV$Keys)
+      RV$AvailableSitesIDs <- sites
+
+      RV$PublishedAndDraftSiteInfo$Draft <- OS$PublishSitesToNatSoil$getDraftOrPublishedSites(type='Draft', keys=RV$Keys)
+      RV$PublishedAndDraftSiteInfo$Published<- OS$PublishSitesToNatSoil$getDraftOrPublishedSites(type='Published', keys=RV$Keys)
+    }
+  })
   
   observe({
     req(RV$ConfigName, RV$Keys)
@@ -133,12 +208,6 @@ server <- function(input, output,session) {
       con <- OS$DB$Config$getCon(RV$DBName, fname=RV$Keys$ProjectCode)
       print(paste0('Connecting to DB - ', RV$DBName))
       RV$DBCon <- con
-     
-     # updateTabsetPanel(session, "MainTabsetPanel", selected = "Laboratory Data Ingestion")
-     # updateTabsetPanel(session, "MainTabsetPanel", selected = "Publish Sites")
-     # updateTabsetPanel(session, "IngestTabsetPanel", selected = "Photo Ingestion")
-     # updateTabsetPanel(session, "IngestTabsetPanel", selected = "Laboratory Data Ingestion")
-      
   })
 
   
@@ -179,6 +248,8 @@ server <- function(input, output,session) {
         RV$DBName <- rec$DefaultDB
         RV$DataEntryFileName <- rec$DataEntryFileName
      }
+     
+    
   })
 
 
@@ -201,6 +272,8 @@ server <- function(input, output,session) {
     updateSelectInput(inputId = "vwgtSiteID", choices = RV$AvailableSitesIDs)
     updateSelectInput(inputId = "vwgtSiteIDFlatView", choices = RV$AvailableSitesIDs)
     updateSelectInput(inputId = "vwgtSiteIDPhotoView", choices = RV$AvailableSitesIDs)
+    
+
   })
   
   
@@ -224,7 +297,7 @@ server <- function(input, output,session) {
   output$uiHtmlHeader <- renderUI({
     
     req(RV$ConfigValues$BrowserTabName)
-    t1 <- tags$head(
+    t1 <- tags$head(  
                       shinyjs::useShinyjs(),
                       tags$style(".shiny-notification {position: fixed; top: 20% ;left: 50%"),  
                                     tags$link(rel="shortcut icon", href="./images/dirt-48.png"), tags$title(RV$ConfigValues$BrowserTabName))
@@ -633,10 +706,7 @@ server <- function(input, output,session) {
     req(file)
     fname <- file$datapath
     r <- OS$IngestHelpers$checkXLFileFormat(fname, OS$Constants$UploadTypes$Lab_Data)
-
-    print(r)
     if(!r$OK){
-
     }else{
       shinyjs::show('wgtValidateButtonLabResults')
     }
@@ -1043,18 +1113,18 @@ server <- function(input, output,session) {
   ###.####
   #### ***** Publish Sites to NatSoil ***** #####
   
-  
-  observe({
-    req(RV$DBCon, RV$ConfigName)
-      
-    if(RV$ConfigName=='NSMP'){
-      con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
-      sql <- 'select * from Officers order by offr_code'
-      df <- OS$DB$Helpers$doQuery(con, sql)
-      updateSelectInput(session, 'wgtAuthoriser', choices=c('None', df$offr_name), selected = 'None')
-      dbDisconnect(con)
-    }
-  })
+#### ^ Person authorised to publish sites - Not used ####  
+  # observe({
+  #   req(RV$DBCon, RV$ConfigName)
+  #     
+  #   if(RV$ConfigName=='NSMP'){
+  #     con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
+  #     sql <- 'select * from Officers order by offr_code'
+  #     df <- OS$DB$Helpers$doQuery(con, sql)
+  #     updateSelectInput(session, 'wgtAuthoriser', choices=c('None', df$offr_name), selected = 'None')
+  #     dbDisconnect(con)
+  #   }
+  # })
   
   output$wgtHoldingSitesTable <- renderReactable({
     req(RV$PublishedAndDraftSiteInfo)
@@ -1079,7 +1149,7 @@ server <- function(input, output,session) {
     if(is.null(selectedSitesRows)){
       disable('wgtPublishSitesBtn')
     }else{
-        if(length(selectedSitesRows) > 0 & input$wgtAuthoriser != 'None'){
+        if(length(selectedSitesRows) > 0 & input$wgtAuthorised){
           enable('wgtPublishSitesBtn')
         }else{
           disable('wgtPublishSitesBtn')

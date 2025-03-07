@@ -141,7 +141,7 @@ renderSiteSummaryMap<- function(si){
                 icon="fa-globe", title="Zoom to full extent",
                 onClick=JS("function(btn, map){ map.setView({lon: 135, lat: -28}, 3); }"))) %>%
               addLayersControl(
-                baseGroups = c("Map", "Satellite"),
+                baseGroups = c("Satellite", "Map" ),
                 options = layersControlOptions(collapsed = FALSE)   
               ) %>%
               

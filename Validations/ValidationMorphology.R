@@ -7,6 +7,7 @@
 # fname <- 'C:/Projects/SiteDataEntryTool/bbb Data Entry Template - NSMP_Capital.xlsx'
 # fname <- 'C:/Projects/SiteDataEntryTool/bbb No Errors Data Entry Template - NSMP_Capital.xlsx'
 # fname <- 'C:/Temp/a/Data Entry Template - NSMP_NSMP_Capital.xlsx'
+# fname <- 'C:/Projects/SiteDataEntryTool/temp.xlsx'
 
 # keys <- list()
 # keys$AgencyCode <- '994'
@@ -151,7 +152,7 @@ get_ValidateMorphologyData <- function(){
       }
     }
       
-#  setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
+  setProgress(itCnt, detail = paste("Site ", s, ' of ', length(siteSheets)))
     }
     
     
