@@ -1165,7 +1165,7 @@ server <- function(input, output,session) {
                     FROM   project.PROJECT_TEAMS INNER JOIN
                     project.PROPOSED_SITES ON project.PROJECT_TEAMS.agency_code = project.PROPOSED_SITES.agency_code AND project.PROJECT_TEAMS.proj_code = project.PROPOSED_SITES.proj_code AND 
                     project.PROJECT_TEAMS.team_code = project.PROPOSED_SITES.team_code
-                    WHERE (project.PROPOSED_SITES.ps_token = N'Burnie')")
+                    WHERE (project.PROPOSED_SITES.ps_token = N'", RV$Keys$Token , "')")
       
       con <- OS$DB$Config$getCon(OS$DB$Config$DBNames$NatSoilStageRO)$Connection
       adf <- OS$DB$Helpers$doQuery(con, sql)
@@ -1177,12 +1177,6 @@ server <- function(input, output,session) {
         }
       }
     }
-    
-    
-   
-    
-    print('GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG')
-   
 
     if(is.null(selectedSitesRows)){
       disable('wgtPublishSitesBtn')
